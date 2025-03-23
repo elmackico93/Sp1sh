@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Script } from '../../mocks/scripts';
 
@@ -7,6 +8,8 @@ type ScriptDetailHeaderProps = {
 };
 
 export const ScriptDetailHeader = ({ script }: ScriptDetailHeaderProps) => {
+  const router = useRouter();
+  
   const getOSBadgeClass = () => {
     switch (script.os) {
       case 'linux':
@@ -22,26 +25,43 @@ export const ScriptDetailHeader = ({ script }: ScriptDetailHeaderProps) => {
     }
   };
 
+  const goToCategory = (e: React.MouseEvent, category: string) => {
+    e.preventDefault();
+    router.push(`/categories/${category}`);
+  };
+
+  const goToOS = (e: React.MouseEvent, os: string) => {
+    e.preventDefault();
+    router.push(`/os/${os}`);
+  };
+
+  const goToHome = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push('/');
+  };
+
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-2 text-sm text-gray-500 dark:text-gray-400">
-        <Link href="/" className="hover:text-primary dark:hover:text-primary-light">
+        <a href="/" onClick={goToHome} className="hover:text-primary dark:hover:text-primary-light">
           Home
-        </Link>
+        </a>
         <span>/</span>
-        <Link 
+        <a 
           href={`/os/${script.os}`} 
+          onClick={(e) => goToOS(e, script.os)}
           className="hover:text-primary dark:hover:text-primary-light"
         >
           {script.os.charAt(0).toUpperCase() + script.os.slice(1)}
-        </Link>
+        </a>
         <span>/</span>
-        <Link 
+        <a 
           href={`/categories/${script.category}`} 
+          onClick={(e) => goToCategory(e, script.category)}
           className="hover:text-primary dark:hover:text-primary-light"
         >
           {script.category.charAt(0).toUpperCase() + script.category.slice(1).replace('-', ' ')}
-        </Link>
+        </a>
       </div>
       
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">

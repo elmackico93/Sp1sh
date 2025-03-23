@@ -10,6 +10,7 @@ class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-tomorrow.min.css" />
           <meta name="application-name" content="Sp1sh" />
           <meta name="description" content="Find and use expert-curated shell scripts for Linux, Windows, and macOS. Emergency solutions, automation tools, and system administration scripts with verified security." />
           <meta name="keywords" content="shell scripts, PowerShell, bash, Linux scripts, Windows scripts, macOS scripts, system administration, emergency scripts, server management" />

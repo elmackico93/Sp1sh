@@ -12,12 +12,7 @@ module.exports = {
           DEFAULT: '#0070e0',
           light: '#4d94ff',
           dark: '#0054a6',
-                terminal: {
-          bg: "#1e1e1e",
-          text: "#f8f8f8",
-          green: "#4af626",
         },
-      },
         secondary: '#6c757d',
         macos: {
           gray: '#f5f5f7',

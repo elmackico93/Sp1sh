@@ -124,3 +124,47 @@
     padding: 0 !important;
   }
 }
+
+/* Terminal styles from t.html */
+:root {
+  --primary: #0070e0;
+  --primary-light: #4d94ff;
+  --primary-dark: #0054a6;
+  --emergency-red: #ff3b30;
+  --emergency-orange: #ff9500;
+  --emergency-yellow: #ffcc00;
+  --linux-green: #26a269;
+  --windows-blue: #0078d7;
+  --terminal-bg: #1e1e1e;
+  --terminal-text: #f8f8f8;
+  --terminal-green: #4af626;
+}
+.terminal-header {
+  background-color: #333;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+.terminal-body {
+  background-color: var(--terminal-bg);
+  color: var(--terminal-text);
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+.tab-active {
+  border-bottom: 2px solid var(--primary);
+  color: var(--primary);
+}
+.version-active {
+  background-color: var(--primary);
+  color: white;
+}
+.code-line {
+  display: flex;
+}
+.line-number {
+  color: rgba(255,255,255,0.3);
+  text-align: right;
+  padding-right: 1rem;
+  user-select: none;
+  min-width: 3rem;
+}
