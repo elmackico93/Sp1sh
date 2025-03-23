@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprehensive System Health Monitor | Sp1sh</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-tomorrow.min.css">
+  <style>
+    :root {
+      --primary: #0070e0;
+      --primary-light: #4d94ff;
+      --primary-dark: #0054a6;
+      --emergency-red: #ff3b30;
+      --emergency-orange: #ff9500;
+      --emergency-yellow: #ffcc00;
+      --linux-green: #26a269;
+      --windows-blue: #0078d7;
+      --terminal-bg: #1e1e1e;
+      --terminal-text: #f8f8f8;
+      --terminal-green: #4af626;
+    }
+    .terminal-header {
+      background-color: #333;
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
+    }
+    .terminal-body {
+      background-color: var(--terminal-bg);
+      color: var(--terminal-text);
+      border-bottom-left-radius: 0.5rem;
+      border-bottom-right-radius: 0.5rem;
+    }
+    .tab-active {
+      border-bottom: 2px solid var(--primary);
+      color: var(--primary);
+    }
+    .version-active {
+      background-color: var(--primary);
+      color: white;
+    }
+    .code-line {
+      display: flex;
+    }
+    .line-number {
+      color: rgba(255,255,255,0.3);
+      text-align: right;
+      padding-right: 1rem;
+      user-select: none;
+      min-width: 3rem;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <!-- Navigation & Header omitted for brevity -->
+
+  <main class="container mx-auto px-4 py-8">
+    <!-- Breadcrumb -->
+    <div class="flex items-center text-sm text-gray-500 mb-4">
+      <a href="/" class="hover:text-primary">Home</a>
+      <span class="mx-2">/</span>
+      <a href="/os/linux" class="hover:text-primary">Linux</a>
+      <span class="mx-2">/</span>
+      <a href="/categories/monitoring" class="hover:text-primary">Monitoring</a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Content (2/3 width) -->
+      <div class="lg:col-span-2">
+        <!-- Script Header -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <h1 class="text-3xl font-bold text-gray-900">Comprehensive System Health Monitor</h1>
+            <span class="px-3 py-1 rounded-full text-xs font-medium bg-linux-green/10 text-linux-green">
+              🐧 Linux
+            </span>
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            <div class="flex items-center gap-1 text-yellow-500">
+              <span>⭐</span>
+              <span>4.9</span>
+            </div>
+            
+            <div class="flex items-center gap-1 text-gray-500">
+              <span>⬇️</span>
+              <span>1,243 downloads</span>
+            </div>
+            
+            <span class="px-3 py-1 rounded-full text-xs font-medium bg-emergency-red/10 text-emergency-red">
+              🔥 Critical
+            </span>
+          </div>
+          
+          <p class="text-gray-600">
+            This multi-platform script provides real-time monitoring of critical system metrics including CPU, memory, disk usage, running processes, and network statistics. Configurable alerts when thresholds are exceeded.
+          </p>
+        </div>
+        
+       
+        
+        <!-- Script Details Tabs -->
+        <div class="mb-8">
+          <div class="flex border-b border-gray-200">
+            <button class="px-4 py-2 text-sm font-medium tab-active">Script Code</button>
+            <button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Documentation</button>
+            <button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Usage Examples</button>
+            <button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Versions</button>
+          </div>
+          
+          <!-- Code Display with Version Selection -->
+          <div class="rounded-lg overflow-hidden shadow-sm border border-gray-200 mt-4">
+            <!-- Terminal Header -->
+            <div class="terminal-header flex items-center justify-between p-2">
+              <div class="flex gap-1.5 ml-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              
+              <div class="flex space-x-2">
+                <!-- Version Selector -->
+                <div class="flex text-xs text-white">
+                  <button class="px-2 py-1 version-active rounded-l-md">v2.1.0</button>
+                  <button class="px-2 py-1 bg-gray-700 text-gray-300 hover:bg-gray-600">v2.0.0</button>
+                  <button class="px-2 py-1 bg-gray-700 text-gray-300 hover:bg-gray-600 rounded-r-md">v1.9.0</button>
+                </div>
+              </div>
+              
+              <div class="flex gap-2">
+                <button class="text-white hover:text-gray-300 px-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                </button>
+                <button class="text-white hover:text-gray-300 px-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Code Display with Line Numbers -->
+            <div class="terminal-body p-0">
+              <!-- Code Grid Layout -->
+              <div class="grid grid-cols-12 p-4 font-mono text-sm overflow-x-auto">
+                <!-- Line Numbers Column -->
+                <div class="col-span-1 text-right pr-4 text-gray-500 select-none border-r border-gray-700">
+                  <div>1</div>
+                  <div>2</div>
+                  <div>3</div>
+                  <div>4</div>
+                  <div>5</div>
+                  <div>6</div>
+                  <div>7</div>
+                  <div>8</div>
+                  <div>9</div>
+                  <div>10</div>
+                  <div>11</div>
+                  <div>12</div>
+                  <div>13</div>
+                  <div>14</div>
+                  <div>15</div>
+                  <div>16</div>
+                  <div>17</div>
+                  <div>18</div>
+                  <div>19</div>
+                  <div>20</div>
+                </div>
+                
+                <!-- Code Content Column -->
+                <div class="col-span-11 pl-4">
+                  <div class="text-gray-500">#!/bin/bash</div>
+                  <div class="text-gray-500"># Comprehensive System Health Monitor</div>
+                  <div class="text-gray-500"># Version: 2.1.0</div>
+                  <div><br></div>
+                  <div>set -e</div>
+                  <div><br></div>
+                  <div class="text-gray-500"># Configuration</div>
+                  <div><span class="text-blue-400">CPU_THRESHOLD</span>=<span class="text-green-400">"80"</span></div>
+                  <div><span class="text-blue-400">MEM_THRESHOLD</span>=<span class="text-green-400">"90"</span></div>
+                  <div><span class="text-blue-400">DISK_THRESHOLD</span>=<span class="text-green-400">"85"</span></div>
+                  <div><br></div>
+                  <div><span class="text-purple-400">check_cpu</span>() {</div>
+                  <div>&nbsp;&nbsp;<span class="text-blue-400">cpu_usage</span>=$(top -bn1 | grep <span class="text-green-400">"Cpu(s)"</span> | sed <span class="text-green-400">"s/.*, *\([0-9.]*\)%* id.*/\1/"</span> | awk <span class="text-green-400">'{print 100 - $1}'</span>)</div>
+                  <div>&nbsp;&nbsp;printf <span class="text-green-400">"CPU Usage: %.1f%%\n"</span> <span class="text-green-400">"$cpu_usage"</span></div>
+                  <div>&nbsp;&nbsp;</div>
+                  <div>&nbsp;&nbsp;<span class="text-yellow-400">if</span> [ $(echo <span class="text-green-400">"$cpu_usage > $CPU_THRESHOLD"</span> | bc -l) -eq 1 ]; <span class="text-yellow-400">then</span></div>
+                  <div>&nbsp;&nbsp;&nbsp;&nbsp;send_alert <span class="text-green-400">"CPU Usage"</span> <span class="text-green-400">"CPU usage is at $cpu_usage%"</span></div>
+                  <div>&nbsp;&nbsp;<span class="text-yellow-400">fi</span></div>
+                  <div>}</div>
+                  <div><br></div>
+                  <div><span class="text-purple-400">check_memory</span>() {</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Usage Instructions -->
+        <div class="mb-8 bg-white rounded-lg shadow p-6 border border-gray-200">
+          <h2 class="text-xl font-semibold mb-4">How to Use This Script</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="text-lg font-medium mb-2">Prerequisites</h3>
+              <ul class="list-disc list-inside text-gray-700 space-y-1">
+                <li>Linux system (tested on Ubuntu 20.04+, CentOS 7+)</li>
+                <li>Basic command-line utilities (<code class="bg-gray-100 px-1 rounded">bc</code>, <code class="bg-gray-100 px-1 rounded">top</code>)</li>
+                <li>Root access for some features</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 class="text-lg font-medium mb-2">Installation</h3>
+              <div class="bg-gray-100 p-3 rounded-md text-sm font-mono">
+                <div>chmod +x system_health_monitor.sh</div>
+                <div>sudo ./system_health_monitor.sh</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-6">
+            <h3 class="text-lg font-medium mb-2">Command-line Options</h3>
+            <table class="min-w-full border border-gray-200 rounded-lg">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="py-2 px-4 text-left text-sm font-medium text-gray-500">Option</th>
+                  <th class="py-2 px-4 text-left text-sm font-medium text-gray-500">Description</th>
+                  <th class="py-2 px-4 text-left text-sm font-medium text-gray-500">Default</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr>
+                  <td class="py-2 px-4 text-sm font-medium"><code>--interval=N</code></td>
+                  <td class="py-2 px-4 text-sm text-gray-600">Set checking interval in seconds</td>
+                  <td class="py-2 px-4 text-sm text-gray-600">60</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-4 text-sm font-medium"><code>--cpu-threshold=N</code></td>
+                  <td class="py-2 px-4 text-sm text-gray-600">CPU usage percentage threshold</td>
+                  <td class="py-2 px-4 text-sm text-gray-600">80</td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-4 text-sm font-medium"><code>--mem-threshold=N</code></td>
+                  <td class="py-2 px-4 text-sm text-gray-600">Memory usage percentage threshold</td>
+                  <td class="py-2 px-4 text-sm text-gray-600">90</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Tags Section -->
+        <div class="mb-8">
+          <h2 class="text-lg font-semibold mb-3">Tags</h2>
+          <div class="flex flex-wrap gap-2">
+            <a href="/tags/monitoring" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors">monitoring</a>
+            <a href="/tags/performance" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors">performance</a>
+            <a href="/tags/alerts" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors">alerts</a>
+            <a href="/tags/cpu" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors">cpu</a>
+            <a href="/tags/memory" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors">memory</a>
+            <a href="/tags/disk" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors">disk</a>
+            <a href="/tags/network" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors">network</a>
+          </div>
+        </div>
+        
+        <!-- Comments Section -->
+        <div class="mb-8">
+          <h2 class="text-xl font-semibold mb-4">Comments (12)</h2>
+          
+          <!-- Comment Form -->
+          <div class="bg-white rounded-lg shadow p-4 mb-6 border border-gray-200">
+            <textarea 
+              placeholder="Share your experience with this script..."
+              class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              rows="3"
+            ></textarea>
+            <div class="flex justify-end mt-3">
+              <button class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary-dark transition-colors">
+                Post Comment
+              </button>
+            </div>
+          </div>
+          
+          <!-- Comment List -->
+          <div class="space-y-4">
+            <!-- Comment 1 -->
+            <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
+              <div class="flex justify-between mb-2">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-medium">JD</div>
+                  <div class="ml-2">
+                    <div class="text-sm font-medium">John Doe</div>
+                    <div class="text-xs text-gray-500">2 days ago</div>
+                  </div>
+                </div>
+                <div class="flex items-center text-yellow-500">
+                  <span>⭐⭐⭐⭐⭐</span>
+                </div>
+              </div>
+              <p class="text-sm text-gray-700">
+                This script saved my servers during a recent CPU spike incident. Highly recommended for any sysadmin managing multiple systems.
+              </p>
+            </div>
+            
+            <!-- Comment 2 -->
+            <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
+              <div class="flex justify-between mb-2">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-medium">JS</div>
+                  <div class="ml-2">
+                    <div class="text-sm font-medium">Jane Smith</div>
+                    <div class="text-xs text-gray-500">1 week ago</div>
+                  </div>
+                </div>
+                <div class="flex items-center text-yellow-500">
+                  <span>⭐⭐⭐⭐</span>
+                </div>
+              </div>
+              <p class="text-sm text-gray-700">
+                Works great! I modified it to send alerts to our Slack channel and it's been incredibly helpful.
+              </p>
+            </div>
+          </div>
+          
+          <div class="text-center mt-6">
+            <button class="text-sm text-primary hover:underline">Load More Comments</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sidebar (1/3 width) -->
+      <div class="lg:col-span-1">
+        <!-- Script Metadata -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6 border border-gray-200">
+          <h2 class="text-lg font-semibold mb-4">Script Metadata</h2>
+          
+          <div class="space-y-4">
+            <div>
+              <div class="text-sm font-medium text-gray-500">Author</div>
+              <div class="flex items-center mt-1">
+                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-medium">SA</div>
+                <div class="ml-2">
+                  <div class="text-sm font-medium">System Admin</div>
+                  <div class="text-xs text-gray-500">@sys_admin</div>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="text-sm font-medium text-gray-500">Version</div>
+              <div class="text-sm">2.1.0 (Latest)</div>
+            </div>
+            
+            <div>
+              <div class="text-sm font-medium text-gray-500">Last Updated</div>
+              <div class="text-sm">June 10, 2023</div>
+            </div>
+            
+            <div>
+              <div class="text-sm font-medium text-gray-500">Compatibility</div>
+              <div class="text-sm">Linux (Ubuntu, Debian, CentOS, Fedora)</div>
+            </div>
+            
+            <div>
+              <div class="text-sm font-medium text-gray-500">License</div>
+              <div class="text-sm">MIT</div>
+            </div>
+            
+            <div>
+              <div class="text-sm font-medium text-gray-500">File Size</div>
+              <div class="text-sm">4.2 KB</div>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-200 mt-4 pt-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-500">Downloads</div>
+                <div class="text-xl font-bold text-primary">1,243</div>
+              </div>
+              
+              <div>
+                <div class="text-sm font-medium text-gray-500">Rating</div>
+                <div class="flex items-center">
+                  <div class="text-xl font-bold text-primary mr-2">4.9</div>
+                  <div class="text-yellow-500">⭐⭐⭐⭐⭐</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Related Scripts -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6 border border-gray-200">
+          <h2 class="text-lg font-semibold mb-4">Related Scripts</h2>
+          
+          <div class="space-y-4">
+            <!-- Related Script 1 -->
+            <div class="flex border-b border-gray-100 pb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-gray-500 text-xl">
+                📊
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium hover:text-primary">
+                  <a href="#">Advanced Log Analysis Tool</a>
+                </h3>
+                <div class="text-xs text-gray-500 mt-1">
+                  <span class="inline-flex items-center bg-linux-green/10 text-linux-green rounded-full px-2 py-0.5">
+                    🐧 Linux
+                  </span>
+                  <span class="ml-2">4.7 ⭐</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Related Script 2 -->
+            <div class="flex border-b border-gray-100 pb-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-gray-500 text-xl">
+                💾
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium hover:text-primary">
+                  <a href="#">Backup & Recovery Utility</a>
+                </h3>
+                <div class="text-xs text-gray-500 mt-1">
+                  <span class="inline-flex items-center bg-linux-green/10 text-linux-green rounded-full px-2 py-0.5">
+                    🐧 Linux
+                  </span>
+                  <span class="ml-2">4.8 ⭐</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Related Script 3 -->
+            <div class="flex">
+              <div class="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-gray-500 text-xl">
+                🔄
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium hover:text-primary">
+                  <a href="#">Process Monitor & Restart</a>
+                </h3>
+                <div class="text-xs text-gray-500 mt-1">
+                  <span class="inline-flex items-center bg-purple-100 text-purple-700 rounded-full px-2 py-0.5">
+                    🔄 Cross-platform
+                  </span>
+                  <span class="ml-2">4.6 ⭐</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-4 text-center">
+            <a href="#" class="text-sm text-primary hover:underline">
+              View More Related Scripts
+            </a>
+          </div>
+        </div>
+        
+        <!-- Save & Share Options -->
+        <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+          <h2 class="text-lg font-semibold mb-4">Save & Share</h2>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <button class="flex items-center justify-center py-2 bg-gray-100 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+              Copy URL
+            </button>
+            
+            <button class="flex items-center justify-center py-2 bg-gray-100 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"></path>
+              </svg>
+              Like
+            </button>
+            
+            <button class="flex items-center justify-center py-2 bg-gray-100 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+              </svg>
+              Comment
+            </button>
+            
+            <button class="flex items-center justify-center py-2 bg-gray-100 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+              </svg>
+              Share
+            </button>
+          </div>
+          
+          <div class="mt-4 flex justify-center">
+            <button class="flex items-center justify-center py-2 px-4 bg-red-100 text-red-700 rounded-md text-sm font-medium hover:bg-red-200 transition-colors w-full">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+              Report Issue
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer omitted for brevity -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-bash.min.js"></script>
+</body>
+</html>
