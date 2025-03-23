@@ -68,3 +68,5 @@ export const EmergencyScripts = () => {
     </section>
   );
 };
+
+export default EmergencyScripts;

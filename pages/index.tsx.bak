@@ -8,13 +8,13 @@ import { dynamicImport } from '../utils/dynamicImports';
 import { LoadingPlaceholder } from '../components/ui/LoadingPlaceholder';
 
 // Dynamically import heavy components
-const EmergencyScripts = dynamicImport('EmergencyScripts');
-const FeaturedScript = dynamicImport('FeaturedScript');
-const OSTabs = dynamicImport('OSTabs');
-const TrendingTable = dynamicImport('TrendingTable');
-const CategoriesSection = dynamicImport('CategoriesSection');
-const QuickActions = dynamicImport('QuickActions');
-// const Community = dynamicImport('Community');
+const EmergencyScripts = dynamicImport('../components/home/EmergencyScripts');
+const FeaturedScript = dynamicImport('../components/home/FeaturedScript');
+const OSTabs = dynamicImport('../components/home/OSTabs');
+const TrendingTable = dynamicImport('../components/home/TrendingTable');
+const CategoriesSection = dynamicImport('../components/home/CategoriesSection');
+const QuickActions = dynamicImport('../components/home/QuickActions');
+// const Community = dynamicImport('../components/home/Community');
 
 export default function Home() {
   const { setSearchTerm, isLoading } = useScripts();
@@ -57,6 +57,7 @@ export default function Home() {
         <QuickActions />
       </div>
       
+//       <Community />
       </>
   );
 }

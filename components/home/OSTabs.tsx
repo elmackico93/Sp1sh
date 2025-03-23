@@ -67,3 +67,5 @@ export const OSTabs = () => {
     </section>
   );
 };
+
+export default OSTabs;

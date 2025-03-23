@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-powershell';
-import Head from 'next/head';
 import { useScripts } from '../../context/ScriptsContext';
+import { Layout } from '../../components/layout/Layout';
 import { ScriptDetailHeader } from '../../components/scripts/ScriptDetailHeader';
 import { ScriptActions } from '../../components/scripts/ScriptActions';
 import { ScriptCode } from '../../components/scripts/ScriptCode';
@@ -13,15 +13,33 @@ import { ScriptMetadata } from '../../components/scripts/ScriptMetadata';
 import { RelatedScripts } from '../../components/scripts/RelatedScripts';
 import { ScriptComments } from '../../components/scripts/ScriptComments';
 import { LoadingPlaceholder } from '../../components/ui/LoadingPlaceholder';
+import { withStaticRendering } from '../../utils/renderStrategy';
+import { getScriptById as getScriptByIdUtil, mockScripts } from '../../mocks/scripts';
 
-export default function ScriptDetail() {
+// Props interface for the page
+interface ScriptDetailProps {
+  initialScript: any;
+  renderedAt: string;
+}
+
+export default function ScriptDetail({ initialScript, renderedAt }: ScriptDetailProps) {
   const router = useRouter();
   const { id } = router.query;
   const { getScriptById, allScripts, isLoading } = useScripts();
   const codeRef = useRef<HTMLPreElement>(null);
-  const [copyFeedback, setCopyFeedback] = useState(false);
+  const [script, setScript] = useState(initialScript);
   
-  const script = typeof id === 'string' ? getScriptById(id) : undefined;
+  // If we get initial script from static props, use it
+  // Otherwise fall back to client-side loading
+  useEffect(() => {
+    // If we have id but no script, try to load it client-side
+    if (id && typeof id === 'string' && !script) {
+      const scriptData = getScriptById(id);
+      if (scriptData) {
+        setScript(scriptData);
+      }
+    }
+  }, [id, getScriptById, script]);
   
   // Get related scripts based on tags and category
   const relatedScripts = script
@@ -41,19 +59,6 @@ export default function ScriptDetail() {
     }
   }, [script]);
 
-  // Handle copying script to clipboard
-  const handleCopyScript = async () => {
-    if (script) {
-      try {
-        await navigator.clipboard.writeText(script.code);
-        setCopyFeedback(true);
-        setTimeout(() => setCopyFeedback(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy text: ', err);
-      }
-    }
-  };
-
   // Handle back button
   const handleBack = () => {
     if (window.history.length > 2) {
@@ -64,7 +69,10 @@ export default function ScriptDetail() {
     }
   };
 
-  if (isLoading) {
+  // Determine loading state by combining SSR data and client state
+  const isPageLoading = isLoading || (typeof id === 'string' && !script);
+
+  if (isPageLoading) {
     return <LoadingPlaceholder />;
   }
 
@@ -84,18 +92,13 @@ export default function ScriptDetail() {
   }
 
   return (
-    <>
-      <Head>
-        <title>{script.title} | Sp1sh</title>
-        <meta name="description" content={script.description} />
-      </Head>
-
+    <Layout title={`${script.title} | Sp1sh`} description={script.description}>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <ScriptDetailHeader script={script} />
-            <ScriptActions script={script} onCopy={handleCopyScript} showCopyFeedback={copyFeedback} />
-            <ScriptCode script={script} codeRef={codeRef} onCopy={handleCopyScript} showCopyFeedback={copyFeedback} />
+            <ScriptActions script={script} />
+            <ScriptCode script={script} codeRef={codeRef} />
             <ScriptTags tags={script.tags} />
             <ScriptComments />
           </div>
@@ -103,9 +106,48 @@ export default function ScriptDetail() {
           <div className="lg:col-span-1">
             <ScriptMetadata script={script} />
             <RelatedScripts scripts={relatedScripts} />
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 p-2 bg-gray-100 text-xs text-gray-500 rounded">
+                Rendered at: {new Date(renderedAt).toLocaleString()}
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </>
+    </Layout>
   );
 }
+
+// Get static paths for commonly accessed scripts
+export async function getStaticPaths() {
+  // Identify the top scripts (e.g., most popular, critical ones)
+  const topScriptIds = mockScripts
+    .sort((a, b) => b.downloads - a.downloads)
+    .slice(0, 5)
+    .map(script => script.id);
+  
+  const paths = topScriptIds.map(id => ({
+    params: { id },
+  }));
+  
+  return {
+    paths,
+    fallback: 'blocking', // Show a loading state for paths not pre-rendered
+  };
+}
+
+// Use static props with revalidation for script details
+export const getStaticProps = withStaticRendering(async (context) => {
+  const { id } = context.params as { id: string };
+  const script = getScriptByIdUtil(id);
+  
+  if (!script) {
+    return {
+      notFound: true, // Will show 404 page
+    };
+  }
+  
+  return {
+    initialScript: script,
+  };
+}, 60 * 60); // Revalidate every hour

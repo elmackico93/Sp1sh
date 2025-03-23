@@ -84,3 +84,5 @@ export const TrendingTable = () => {
     </section>
   );
 };
+
+export default TrendingTable;

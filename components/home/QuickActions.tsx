@@ -39,3 +39,5 @@ export const QuickActions = () => {
     </section>
   );
 };
+
+export default QuickActions;

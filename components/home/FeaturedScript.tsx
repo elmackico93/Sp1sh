@@ -93,3 +93,5 @@ export const FeaturedScript = () => {
     </section>
   );
 };
+
+export default FeaturedScript;
