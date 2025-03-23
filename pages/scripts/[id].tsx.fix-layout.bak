@@ -28,7 +28,6 @@ export default function ScriptDetail({ initialScript, renderedAt }: ScriptDetail
   const { getScriptById, allScripts, isLoading } = useScripts();
   const codeRef = useRef<HTMLPreElement>(null);
   const [script, setScript] = useState(initialScript);
-  const [copyFeedback, setCopyFeedback] = useState(false);
   
   // If we get initial script from static props, use it
   // Otherwise fall back to client-side loading
@@ -60,19 +59,6 @@ export default function ScriptDetail({ initialScript, renderedAt }: ScriptDetail
     }
   }, [script]);
 
-  // Handle copying script to clipboard
-  const handleCopyScript = async () => {
-    if (script) {
-      try {
-        await navigator.clipboard.writeText(script.code);
-        setCopyFeedback(true);
-        setTimeout(() => setCopyFeedback(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy text: ', err);
-      }
-    }
-  };
-
   // Handle back button
   const handleBack = () => {
     if (window.history.length > 2) {
@@ -92,18 +78,16 @@ export default function ScriptDetail({ initialScript, renderedAt }: ScriptDetail
 
   if (!script) {
     return (
-      <Layout title="Script Not Found | Sp1sh" description="The script you're looking for doesn't exist or has been removed.">
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="text-2xl font-bold mb-4">Script not found</h1>
-          <p className="mb-6">The script you're looking for doesn't exist or has been removed.</p>
-          <button 
-            onClick={handleBack}
-            className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-full"
-          >
-            Go Back
-          </button>
-        </div>
-      </Layout>
+      <div className="container mx-auto px-4 py-12 text-center">
+        <h1 className="text-2xl font-bold mb-4">Script not found</h1>
+        <p className="mb-6">The script you're looking for doesn't exist or has been removed.</p>
+        <button 
+          onClick={handleBack}
+          className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-full"
+        >
+          Go Back
+        </button>
+      </div>
     );
   }
 
@@ -113,8 +97,8 @@ export default function ScriptDetail({ initialScript, renderedAt }: ScriptDetail
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <ScriptDetailHeader script={script} />
-            <ScriptActions script={script} onCopy={handleCopyScript} showCopyFeedback={copyFeedback} />
-            <ScriptCode script={script} codeRef={codeRef} onCopy={handleCopyScript} showCopyFeedback={copyFeedback} />
+            <ScriptActions script={script} />
+            <ScriptCode script={script} codeRef={codeRef} />
             <ScriptTags tags={script.tags} />
             <ScriptComments />
           </div>
@@ -164,9 +148,6 @@ export const getStaticProps = withStaticRendering(async (context) => {
   }
   
   return {
-    props: {
-      initialScript: script,
-      renderedAt: new Date().toISOString(),
-    },
+    initialScript: script,
   };
 }, 60 * 60); // Revalidate every hour
