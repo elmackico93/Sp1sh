@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-powershell';
-import Head from 'next/head';
 import { useScripts } from '../../context/ScriptsContext';
+import { Layout } from '../../components/layout/Layout';
 import { ScriptDetailHeader } from '../../components/scripts/ScriptDetailHeader';
 import { ScriptActions } from '../../components/scripts/ScriptActions';
 import { ScriptCode } from '../../components/scripts/ScriptCode';
@@ -19,7 +19,6 @@ export default function ScriptDetail() {
   const { id } = router.query;
   const { getScriptById, allScripts, isLoading } = useScripts();
   const codeRef = useRef<HTMLPreElement>(null);
-  const [copyFeedback, setCopyFeedback] = useState(false);
   
   const script = typeof id === 'string' ? getScriptById(id) : undefined;
   
@@ -40,19 +39,6 @@ export default function ScriptDetail() {
       Prism.highlightElement(codeRef.current);
     }
   }, [script]);
-
-  // Handle copying script to clipboard
-  const handleCopyScript = async () => {
-    if (script) {
-      try {
-        await navigator.clipboard.writeText(script.code);
-        setCopyFeedback(true);
-        setTimeout(() => setCopyFeedback(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy text: ', err);
-      }
-    }
-  };
 
   // Handle back button
   const handleBack = () => {
@@ -84,18 +70,13 @@ export default function ScriptDetail() {
   }
 
   return (
-    <>
-      <Head>
-        <title>{script.title} | Sp1sh</title>
-        <meta name="description" content={script.description} />
-      </Head>
-
+    <Layout title={`${script.title} | Sp1sh`} description={script.description}>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <ScriptDetailHeader script={script} />
-            <ScriptActions script={script} onCopy={handleCopyScript} showCopyFeedback={copyFeedback} />
-            <ScriptCode script={script} codeRef={codeRef} onCopy={handleCopyScript} showCopyFeedback={copyFeedback} />
+            <ScriptActions script={script} />
+            <ScriptCode script={script} codeRef={codeRef} />
             <ScriptTags tags={script.tags} />
             <ScriptComments />
           </div>
@@ -106,6 +87,6 @@ export default function ScriptDetail() {
           </div>
         </div>
       </div>
-    </>
+    </Layout>
   );
 }
