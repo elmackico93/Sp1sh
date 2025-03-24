@@ -18,12 +18,14 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
 }) => {
   const [showAnimation, setShowAnimation] = useState(false);
   const [typedLines, setTypedLines] = useState<string[]>([]);
+  const [typingComplete, setTypingComplete] = useState(false);
   
   // Reset states when modal closes
   useEffect(() => {
     if (!isOpen) {
       setShowAnimation(false);
       setTypedLines([]);
+      setTypingComplete(false);
     } else if (!showAnimation && typedLines.length === 0) {
       // Initialize typing effect for initial terminal preview
       typeInitialLines();
@@ -61,6 +63,9 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
           150 + Math.random() * 100;
           
         setTimeout(addNextLine, delay);
+      } else {
+        // Mark typing as complete to trigger button animation
+        setTypingComplete(true);
       }
     };
     
@@ -212,8 +217,7 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                   <TerminalAnimation script={script} onComplete={handleAnimationComplete} />
                 ) : (
                   <div 
-                    className="bg-terminal-bg text-terminal-text rounded-lg h-64 mb-6 border border-gray-700 overflow-hidden flex flex-col cursor-pointer"
-                    onClick={handleStartAnimation}
+                    className="bg-terminal-bg text-terminal-text rounded-lg h-64 mb-6 border border-gray-700 overflow-hidden flex flex-col"
                   >
                     {/* Terminal statusbar */}
                     <div className="bg-gray-800 px-3 py-1 border-b border-gray-700 flex items-center justify-between">
@@ -235,29 +239,32 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                         transition={{ duration: 1, repeat: Infinity }}
                       />
                     </div>
-                    
-                    {/* Download hint overlay - fades in after typing is done */}
-                    {typedLines.length >= 11 && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-terminal-bg bg-opacity-80 opacity-0 hover:opacity-100 transition-opacity duration-200">
-                        <div className="bg-terminal-bg border-2 border-terminal-green px-6 py-3 rounded-md text-terminal-green">
-                          Click to start download process
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
                 
                 <div className="flex flex-col space-y-3">
                   {!showAnimation && (
-                    <button
-                      onClick={handleStartAnimation}
-                      className="flex items-center justify-center gap-2 py-3 px-6 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                      </svg>
-                      Download {script.title.toLowerCase().replace(/\s+/g, '-')}.{script.os === 'windows' ? 'ps1' : 'sh'}
-                    </button>
+                    <AnimatePresence>
+                      {typingComplete && (
+                        <motion.button
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ 
+                            type: "spring", 
+                            stiffness: 300, 
+                            damping: 20,
+                            delay: 0.5
+                          }}
+                          onClick={handleStartAnimation}
+                          className="flex items-center justify-center gap-2 py-3 px-6 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                          </svg>
+                          Download {script.title.toLowerCase().replace(/\s+/g, '-')}.{script.os === 'windows' ? 'ps1' : 'sh'}
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
                   )}
                   
                   <div className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
