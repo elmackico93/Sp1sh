@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useScripts } from '../../context/ScriptsContext';
+import { TrendingTableRow } from './components/TrendingTableRow';
 
 export const TrendingTable = () => {
   const { allScripts } = useScripts();
+  const [openPreviewIndex, setOpenPreviewIndex] = useState<number | null>(null);
   
   // Sort scripts by downloads to get trending ones
   const trendingScripts = [...allScripts]
     .sort((a, b) => b.downloads - a.downloads)
     .slice(0, 5);
+
+  // Handle preview toggling
+  const handlePreviewToggle = (index: number, isOpen: boolean) => {
+    setOpenPreviewIndex(isOpen ? index : null);
+  };
 
   return (
     <section className="mb-10">
@@ -50,32 +57,14 @@ export const TrendingTable = () => {
               </tr>
             </thead>
             <tbody>
-              {trendingScripts.map((script) => (
-                <tr key={script.id} className="border-t border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                  <td className="p-4 text-sm font-medium text-gray-900 dark:text-white">
-                    {script.title}
-                  </td>
-                  <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
-                    {script.os === 'cross-platform' ? 'Cross' : script.os}
-                  </td>
-                  <td className="p-4 text-sm text-gray-600 dark:text-gray-300 hidden md:table-cell">
-                    {script.category.charAt(0).toUpperCase() + script.category.slice(1).replace('-', ' ')}
-                  </td>
-                  <td className="p-4 text-sm text-gray-600 dark:text-gray-300 text-right hidden sm:table-cell">
-                    {script.downloads.toLocaleString()}
-                  </td>
-                  <td className="p-4 text-sm text-gray-600 dark:text-gray-300 text-center">
-                    {script.rating.toFixed(1)}
-                  </td>
-                  <td className="p-4 text-center">
-                    <Link
-                      href={`/scripts/${script.id}`}
-                      className="inline-flex items-center justify-center px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full text-xs font-medium transition-colors"
-                    >
-                      View
-                    </Link>
-                  </td>
-                </tr>
+              {trendingScripts.map((script, index) => (
+                <TrendingTableRow 
+                  key={script.id}
+                  script={script}
+                  index={index}
+                  onPreviewToggle={handlePreviewToggle}
+                  isPreviewOpen={openPreviewIndex === index}
+                />
               ))}
             </tbody>
           </table>
