@@ -17,13 +17,56 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
   onDownload,
 }) => {
   const [showAnimation, setShowAnimation] = useState(false);
+  const [typedLines, setTypedLines] = useState<string[]>([]);
   
-  // Reset animation state when modal closes
+  // Reset states when modal closes
   useEffect(() => {
     if (!isOpen) {
       setShowAnimation(false);
+      setTypedLines([]);
+    } else if (!showAnimation && typedLines.length === 0) {
+      // Initialize typing effect for initial terminal preview
+      typeInitialLines();
     }
   }, [isOpen]);
+
+  // Type initial terminal lines with a realistic effect
+  const typeInitialLines = () => {
+    const filename = `${script.title.toLowerCase().replace(/\s+/g, '-')}.${script.os === 'windows' ? 'ps1' : 'sh'}`;
+    const lines = [
+      `user@sp1sh:~$ ls -la ${script.category}`,
+      `total 16`,
+      `drwxr-xr-x  2 user group  4096 ${new Date(script.updatedAt).toLocaleDateString()} .`,
+      `drwxr-xr-x 24 user group  4096 Mar 24 2025 ..`,
+      `-rwxr--r--  1 user group  4.2K ${new Date(script.updatedAt).toLocaleDateString()} ${filename}`,
+      `user@sp1sh:~$ file ${filename}`,
+      `${filename}: Bourne-Again shell script, ASCII text executable`,
+      `user@sp1sh:~$ cat ${filename} | head -n 3`,
+      `#!/bin/bash`,
+      `# ${script.title}`,
+      `# Author: ${script.authorUsername}`,
+      `user@sp1sh:~$ _`
+    ];
+
+    let currentIndex = 0;
+    const addNextLine = () => {
+      if (currentIndex < lines.length) {
+        const line = lines[currentIndex];
+        setTypedLines(prev => [...prev, line]);
+        currentIndex++;
+        
+        // Variable typing speed based on line content
+        const delay = line.startsWith('user@sp1sh') ? 
+          300 + Math.random() * 200 : 
+          150 + Math.random() * 100;
+          
+        setTimeout(addNextLine, delay);
+      }
+    };
+    
+    // Start typing effect
+    setTimeout(addNextLine, 300);
+  };
 
   // Close modal when Escape is pressed
   useEffect(() => {
@@ -57,6 +100,29 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
 
   const handleAnimationComplete = () => {
     onDownload();
+  };
+
+  // Generate colorized output for ls command
+  const colorizeOutput = (line: string) => {
+    if (line.startsWith('drwx')) {
+      return <span className="text-blue-400">{line}</span>;
+    } else if (line.startsWith('-rwx')) {
+      return <span className="text-green-400">{line}</span>;
+    } else if (line.startsWith('user@sp1sh')) {
+      return (
+        <>
+          <span className="text-terminal-green">user@sp1sh:~$</span>
+          <span className="text-terminal-text">{line.substring(12)}</span>
+        </>
+      );
+    } else if (line.includes('shell script')) {
+      return <span className="text-yellow-400">{line}</span>;
+    } else if (line.startsWith('#!/bin/bash')) {
+      return <span className="text-purple-400">{line}</span>;
+    } else if (line.startsWith('#')) {
+      return <span className="text-gray-400">{line}</span>;
+    }
+    return <span>{line}</span>;
   };
 
   return (
@@ -110,14 +176,19 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                     Download Script
                   </h3>
                 </div>
-                <button
-                  onClick={onClose}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                </button>
+                <div className="flex items-center">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mr-4 hidden sm:block">
+                    {script.os === 'linux' ? 'bash' : script.os === 'windows' ? 'powershell' : 'shell'}@sp1sh
+                  </span>
+                  <button
+                    onClick={onClose}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
               
               {/* Content */}
@@ -136,16 +207,43 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                   </div>
                 </div>
                 
-                {/* Terminal Animation or Placeholder */}
+                {/* Terminal Animation or Enhanced Terminal Preview */}
                 {showAnimation ? (
                   <TerminalAnimation script={script} onComplete={handleAnimationComplete} />
                 ) : (
-                  <div className="bg-terminal-bg rounded-lg h-64 flex items-center justify-center mb-6 border border-gray-700">
-                    <div className="text-center">
-                      <div className="text-5xl mb-3">💾</div>
-                      <p className="text-terminal-text text-lg">Your script is ready to download</p>
-                      <p className="text-gray-500 text-sm mt-2">Click below to start the download process</p>
+                  <div 
+                    className="bg-terminal-bg text-terminal-text rounded-lg h-64 mb-6 border border-gray-700 overflow-hidden flex flex-col cursor-pointer"
+                    onClick={handleStartAnimation}
+                  >
+                    {/* Terminal statusbar */}
+                    <div className="bg-gray-800 px-3 py-1 border-b border-gray-700 flex items-center justify-between">
+                      <div className="text-xs text-gray-400">Terminal</div>
+                      <div className="text-xs text-gray-400">{new Date().toLocaleTimeString()}</div>
                     </div>
+                    
+                    {/* Terminal content */}
+                    <div className="p-3 flex-1 font-mono text-sm overflow-auto">
+                      {typedLines.map((line, index) => (
+                        <div key={index} className="terminal-line">
+                          {colorizeOutput(line)}
+                        </div>
+                      ))}
+                      {/* Blinking cursor */}
+                      <motion.span 
+                        className="inline-block w-2 h-4 bg-terminal-text ml-1"
+                        animate={{ opacity: [1, 0, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      />
+                    </div>
+                    
+                    {/* Download hint overlay - fades in after typing is done */}
+                    {typedLines.length >= 11 && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-terminal-bg bg-opacity-80 opacity-0 hover:opacity-100 transition-opacity duration-200">
+                        <div className="bg-terminal-bg border-2 border-terminal-green px-6 py-3 rounded-md text-terminal-green">
+                          Click to start download process
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 
