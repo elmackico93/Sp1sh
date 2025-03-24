@@ -605,3 +605,116 @@
 .terminal-container {
   animation: terminalBlurIn 0.2s ease forwards;
 }
+
+/* Download Modal Styles */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.modal-enter {
+  animation: modalFadeIn 0.3s ease forwards;
+}
+
+.modal-exit {
+  animation: modalFadeOut 0.2s ease forwards;
+}
+
+/* Modal backdrop blur effect */
+.modal-backdrop {
+  backdrop-filter: blur(5px);
+  transition: backdrop-filter 0.3s ease;
+}
+
+/* Terminal in modal styling */
+.download-terminal {
+  background-color: var(--terminal-bg);
+  color: var(--terminal-text);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+}
+
+/* Modal animation dot pulse effect */
+@keyframes modalDotPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.modal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  animation: modalDotPulse 2s infinite;
+}
+
+.modal-dot-red {
+  background-color: #FF5F56;
+  animation-delay: 0s;
+}
+
+.modal-dot-yellow {
+  background-color: #FFBD2E;
+  animation-delay: 0.3s;
+}
+
+.modal-dot-green {
+  background-color: #27C93F;
+  animation-delay: 0.6s;
+}
+/* Add these styles to your globals.css file */
+
+/* Modal backdrop */
+.fixed.inset-0.bg-black.z-50 {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Animation for the terminal dots */
+@keyframes pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.w-3.h-3.rounded-full.bg-red-500,
+.w-3.h-3.rounded-full.bg-yellow-500,
+.w-3.h-3.rounded-full.bg-green-500 {
+  animation: pulse 1.5s infinite;
+}
+
+.w-3.h-3.rounded-full.bg-red-500 {
+  animation-delay: 0s;
+}
+
+.w-3.h-3.rounded-full.bg-yellow-500 {
+  animation-delay: 0.2s;
+}
+
+.w-3.h-3.rounded-full.bg-green-500 {
+  animation-delay: 0.4s;
+}
+
+/* Ensure proper modal positioning */
+.fixed.inset-0.flex.items-center.justify-center.z-50 {
+  pointer-events: none;
+}
+
+.fixed.inset-0.flex.items-center.justify-center.z-50 > div {
+  pointer-events: auto;
+}
