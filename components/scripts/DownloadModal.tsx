@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Script } from '../../mocks/scripts';
+import { TerminalAnimation } from './TerminalAnimation';
 
 interface DownloadModalProps {
   script: Script;
@@ -15,6 +16,15 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
   onClose,
   onDownload,
 }) => {
+  const [showAnimation, setShowAnimation] = useState(false);
+  
+  // Reset animation state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setShowAnimation(false);
+    }
+  }, [isOpen]);
+
   // Close modal when Escape is pressed
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -41,7 +51,13 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  const handleStartAnimation = () => {
+    setShowAnimation(true);
+  };
+
+  const handleAnimationComplete = () => {
+    onDownload();
+  };
 
   return (
     <AnimatePresence>
@@ -57,21 +73,38 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
           />
           
           {/* Modal */}
-          <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
+          <motion.div 
+            className="fixed inset-0 flex items-center justify-center z-50 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
             <motion.div
               className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-auto overflow-hidden border border-gray-200 dark:border-gray-700"
-              initial={{ scale: 0.9, y: 20, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="terminal-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center">
                   <div className="flex gap-1.5 mr-3">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <motion.div 
+                      className="w-3 h-3 rounded-full bg-red-500"
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+                    />
+                    <motion.div 
+                      className="w-3 h-3 rounded-full bg-yellow-500"
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+                    />
+                    <motion.div 
+                      className="w-3 h-3 rounded-full bg-green-500"
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
+                    />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                     Download Script
@@ -103,25 +136,31 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                   </div>
                 </div>
                 
-                {/* Terminal placeholder */}
-                <div className="bg-gray-900 rounded-lg h-64 flex items-center justify-center mb-6 border border-gray-700">
-                  <div className="text-center">
-                    <div className="text-5xl mb-3">💾</div>
-                    <p className="text-white text-lg">Your script is ready to download</p>
-                    <p className="text-gray-500 text-sm mt-2">Terminal preview coming soon</p>
+                {/* Terminal Animation or Placeholder */}
+                {showAnimation ? (
+                  <TerminalAnimation script={script} onComplete={handleAnimationComplete} />
+                ) : (
+                  <div className="bg-terminal-bg rounded-lg h-64 flex items-center justify-center mb-6 border border-gray-700">
+                    <div className="text-center">
+                      <div className="text-5xl mb-3">💾</div>
+                      <p className="text-terminal-text text-lg">Your script is ready to download</p>
+                      <p className="text-gray-500 text-sm mt-2">Click below to start the download process</p>
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <div className="flex flex-col space-y-3">
-                  <button
-                    onClick={onDownload}
-                    className="flex items-center justify-center gap-2 py-3 px-6 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                    Download {script.title.toLowerCase().replace(/\s+/g, '-')}.{script.os === 'windows' ? 'ps1' : 'sh'}
-                  </button>
+                  {!showAnimation && (
+                    <button
+                      onClick={handleStartAnimation}
+                      className="flex items-center justify-center gap-2 py-3 px-6 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                      </svg>
+                      Download {script.title.toLowerCase().replace(/\s+/g, '-')}.{script.os === 'windows' ? 'ps1' : 'sh'}
+                    </button>
+                  )}
                   
                   <div className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
                     By downloading, you agree to our <a href="/terms" className="text-primary hover:underline">terms of service</a> and <a href="/security" className="text-primary hover:underline">security guidelines</a>.
@@ -129,7 +168,7 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                 </div>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         </>
       )}
     </AnimatePresence>

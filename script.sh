@@ -1,15 +1,15 @@
 #!/bin/bash
 # =============================================================================
-# Sp1sh Download Modal Enhancement Script
+# Sp1sh Terminal Animation Integration Script
 # =============================================================================
 # Author: System Administrator
 # Version: 1.0.0
 # Created: March 2025
 # 
-# This script enhances the Sp1sh application by adding a beautiful download
-# modal that appears when users click the download button on script detail pages.
-# The modal is designed to match the site's existing style and is prepared to 
-# potentially host a terminal in the future.
+# This script enhances the Sp1sh download modal by adding a realistic terminal
+# animation that simulates a Linux-like download process. The animation shows
+# command execution, progress bars, and verification steps before triggering
+# the actual download.
 # =============================================================================
 
 # Text formatting colors
@@ -40,12 +40,12 @@ show_banner() {
     echo -e "${BLUE}${BOLD}"
     echo "╔═════════════════════════════════════════════════════════════╗"
     echo "║                                                             ║"
-    echo "║           Sp1sh Download Modal Enhancement Script           ║"
+    echo "║         Terminal Animation Download Modal Integration       ║"
     echo "║                                                             ║"
     echo "╚═════════════════════════════════════════════════════════════╝"
     echo -e "${RESET}"
-    echo "This script will enhance the Sp1sh application with a beautiful"
-    echo "download modal for script detail pages."
+    echo "This script will enhance the Sp1sh download modal with a terminal animation"
+    echo "that simulates a Linux-like download process."
     echo
     echo -e "${YELLOW}Project: ${RESET}${PROJECT_ROOT}"
     echo
@@ -56,9 +56,12 @@ create_backups() {
     echo -e "${YELLOW}Creating backups before making changes...${RESET}"
     mkdir -p "$BACKUP_DIR"
     
-    if [ -f "${SCRIPTS_COMPONENTS_DIR}/ScriptActions.tsx" ]; then
-        cp "${SCRIPTS_COMPONENTS_DIR}/ScriptActions.tsx" "${BACKUP_DIR}/ScriptActions.tsx.bak"
-        echo -e "${GREEN}✓ Backed up ScriptActions.tsx${RESET}"
+    if [ -f "${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx" ]; then
+        cp "${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx" "${BACKUP_DIR}/DownloadModal.tsx.bak"
+        echo -e "${GREEN}✓ Backed up DownloadModal.tsx${RESET}"
+    else
+        echo -e "${RED}Error: DownloadModal.tsx not found. Please ensure the download modal component exists.${RESET}"
+        exit 1
     fi
     
     cp "${STYLES_DIR}/globals.css" "${BACKUP_DIR}/globals.css.bak"
@@ -80,7 +83,7 @@ check_dependencies() {
     # Check for framer-motion dependency
     if ! grep -q '"framer-motion"' "${PROJECT_ROOT}/package.json"; then
         echo -e "${YELLOW}Warning: framer-motion not found in package.json${RESET}"
-        echo -e "${BLUE}The download modal requires framer-motion for animations.${RESET}"
+        echo -e "${BLUE}The animation requires framer-motion for smooth animations.${RESET}"
         
         read -p "Would you like to install framer-motion? (y/n): " -n 1 -r
         echo
@@ -89,7 +92,7 @@ check_dependencies() {
             npm install framer-motion --save
             echo -e "${GREEN}✓ framer-motion installed${RESET}"
         else
-            echo -e "${YELLOW}Continuing without installing framer-motion. The modal may not work correctly.${RESET}"
+            echo -e "${YELLOW}Continuing without installing framer-motion. The animation may not work correctly.${RESET}"
         fi
     else
         echo -e "${GREEN}✓ framer-motion is already installed${RESET}"
@@ -98,15 +101,128 @@ check_dependencies() {
     echo
 }
 
-# Create the DownloadModal component
-create_download_modal() {
-    echo -e "${YELLOW}Creating DownloadModal component...${RESET}"
+# Create TerminalAnimation component
+create_terminal_animation() {
+    echo -e "${YELLOW}Creating TerminalAnimation component...${RESET}"
     
     # Create the component file
+    cat > "${SCRIPTS_COMPONENTS_DIR}/TerminalAnimation.tsx" << 'EOF'
+import React, { useState, useEffect, useRef } from 'react';
+import { Script } from '../../mocks/scripts';
+
+interface TerminalAnimationProps {
+  script: Script;
+  onComplete: () => void;
+}
+
+export const TerminalAnimation: React.FC<TerminalAnimationProps> = ({ script, onComplete }) => {
+  const [lines, setLines] = useState<string[]>([]);
+  const [isComplete, setIsComplete] = useState(false);
+  const terminalRef = useRef<HTMLDivElement>(null);
+
+  // Animation sequence
+  useEffect(() => {
+    const filename = `${script.title.toLowerCase().replace(/\s+/g, '-')}.${script.os === 'windows' ? 'ps1' : 'sh'}`;
+    const commandSequence = [
+      { text: `user@sp1sh:~$ sudo sp1sh-get download ${filename}`, delay: 50 },
+      { text: `[sudo] password for user: `, delay: 500 },
+      { text: `******`, delay: 400 },
+      { text: `Searching for ${filename}...`, delay: 1000 },
+      { text: `Found ${filename} in repository: sp1sh-main`, delay: 800 },
+      { text: `Repository: https://repo.sp1sh.io/${script.category}`, delay: 600 },
+      { text: `Author: ${script.authorUsername}`, delay: 400 },
+      { text: `Version: ${new Date(script.updatedAt).toLocaleDateString()}`, delay: 400 },
+      { text: `Rating: ${script.rating.toFixed(1)}/5.0 (${script.downloads} downloads)`, delay: 400 },
+      { text: `Starting download...`, delay: 800 },
+      { text: `Connecting to sp1sh servers...`, delay: 1200 },
+      { text: `Downloading [                    ] 0%`, delay: 200 },
+      { text: `Downloading [==                  ] 10%`, delay: 200 },
+      { text: `Downloading [====                ] 20%`, delay: 200 },
+      { text: `Downloading [======              ] 30%`, delay: 200 },
+      { text: `Downloading [========            ] 40%`, delay: 200 },
+      { text: `Downloading [==========          ] 50%`, delay: 200 },
+      { text: `Downloading [============        ] 60%`, delay: 200 },
+      { text: `Downloading [==============      ] 70%`, delay: 200 },
+      { text: `Downloading [================    ] 80%`, delay: 200 },
+      { text: `Downloading [==================  ] 90%`, delay: 200 },
+      { text: `Downloading [====================] 100%`, delay: 300 },
+      { text: `Verifying integrity of ${filename}...`, delay: 800 },
+      { text: `Checksum verification: OK`, delay: 400 },
+      { text: `Granting execution permissions: chmod +x ${filename}`, delay: 600 },
+      { text: `Download complete! ${filename} ready to use.`, delay: 400 },
+      { text: `user@sp1sh:~$ _`, delay: 300 },
+    ];
+
+    let currentLines: string[] = [];
+    let currentIndex = 0;
+
+    const typeNextLine = () => {
+      if (currentIndex < commandSequence.length) {
+        const { text, delay } = commandSequence[currentIndex];
+        currentLines = [...currentLines, text];
+        setLines([...currentLines]);
+        
+        // Scroll to bottom when new line is added
+        if (terminalRef.current) {
+          terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+        }
+
+        currentIndex++;
+        setTimeout(typeNextLine, delay);
+      } else {
+        setIsComplete(true);
+        // Wait a moment before triggering the download
+        setTimeout(onComplete, 800);
+      }
+    };
+
+    // Start the animation
+    typeNextLine();
+
+    // Cleanup
+    return () => {
+      currentLines = [];
+      currentIndex = 0;
+    };
+  }, [script, onComplete]);
+
+  return (
+    <div 
+      ref={terminalRef}
+      className="bg-terminal-bg text-terminal-text rounded-lg h-64 overflow-auto p-4 font-mono text-sm border border-gray-700"
+    >
+      {lines.map((line, index) => (
+        <div key={index} className="terminal-line">
+          {line}
+        </div>
+      ))}
+      {isComplete && <div className="text-green-400 mt-2">Download ready - File saved to your computer</div>}
+    </div>
+  );
+};
+
+export default TerminalAnimation;
+EOF
+
+    echo -e "${GREEN}✓ Created TerminalAnimation.tsx${RESET}"
+    echo
+}
+
+# Update DownloadModal component
+update_download_modal() {
+    echo -e "${YELLOW}Updating DownloadModal component to use the terminal animation...${RESET}"
+    
+    if [ ! -f "${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx" ]; then
+        echo -e "${RED}Error: DownloadModal.tsx not found.${RESET}"
+        exit 1
+    }
+    
+    # Create the updated file
     cat > "${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx" << 'EOF'
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Script } from '../../mocks/scripts';
+import { TerminalAnimation } from './TerminalAnimation';
 
 interface DownloadModalProps {
   script: Script;
@@ -121,6 +237,15 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
   onClose,
   onDownload,
 }) => {
+  const [showAnimation, setShowAnimation] = useState(false);
+  
+  // Reset animation state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setShowAnimation(false);
+    }
+  }, [isOpen]);
+
   // Close modal when Escape is pressed
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -146,6 +271,14 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+  const handleStartAnimation = () => {
+    setShowAnimation(true);
+  };
+
+  const handleAnimationComplete = () => {
+    onDownload();
+  };
 
   return (
     <AnimatePresence>
@@ -224,25 +357,31 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                   </div>
                 </div>
                 
-                {/* Terminal placeholder (for future implementation) */}
-                <div className="bg-terminal-bg rounded-lg h-64 flex items-center justify-center mb-6 border border-gray-700">
-                  <div className="text-center">
-                    <div className="text-5xl mb-3">💾</div>
-                    <p className="text-terminal-text text-lg">Your script is ready to download</p>
-                    <p className="text-gray-500 text-sm mt-2">Terminal preview coming soon</p>
+                {/* Terminal Animation or Placeholder */}
+                {showAnimation ? (
+                  <TerminalAnimation script={script} onComplete={handleAnimationComplete} />
+                ) : (
+                  <div className="bg-terminal-bg rounded-lg h-64 flex items-center justify-center mb-6 border border-gray-700">
+                    <div className="text-center">
+                      <div className="text-5xl mb-3">💾</div>
+                      <p className="text-terminal-text text-lg">Your script is ready to download</p>
+                      <p className="text-gray-500 text-sm mt-2">Click below to start the download process</p>
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <div className="flex flex-col space-y-3">
-                  <button
-                    onClick={onDownload}
-                    className="flex items-center justify-center gap-2 py-3 px-6 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                    Download {script.title.toLowerCase().replace(/\s+/g, '-')}.{script.os === 'windows' ? 'ps1' : 'sh'}
-                  </button>
+                  {!showAnimation && (
+                    <button
+                      onClick={handleStartAnimation}
+                      className="flex items-center justify-center gap-2 py-3 px-6 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                      </svg>
+                      Download {script.title.toLowerCase().replace(/\s+/g, '-')}.{script.os === 'windows' ? 'ps1' : 'sh'}
+                    </button>
+                  )}
                   
                   <div className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
                     By downloading, you agree to our <a href="/terms" className="text-primary hover:underline">terms of service</a> and <a href="/security" className="text-primary hover:underline">security guidelines</a>.
@@ -260,273 +399,148 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
 export default DownloadModal;
 EOF
 
-    echo -e "${GREEN}✓ Created DownloadModal.tsx${RESET}"
+    echo -e "${GREEN}✓ Updated DownloadModal.tsx${RESET}"
     echo
 }
 
-# Update the ScriptActions component
-update_script_actions() {
-    echo -e "${YELLOW}Updating ScriptActions component...${RESET}"
-    
-    # Check if the file exists
-    if [ ! -f "${SCRIPTS_COMPONENTS_DIR}/ScriptActions.tsx" ]; then
-        echo -e "${RED}Error: ScriptActions.tsx not found in ${SCRIPTS_COMPONENTS_DIR}${RESET}"
-        exit 1
-    fi
-    
-    # Create the updated file
-    cat > "${SCRIPTS_COMPONENTS_DIR}/ScriptActions.tsx" << 'EOF'
-import React, { useState } from 'react';
-import { Script } from '../../mocks/scripts';
-import { DownloadModal } from './DownloadModal';
-
-type ScriptActionsProps = {
-  script: Script;
-  onCopy?: () => void;
-  showCopyFeedback?: boolean;
-};
-
-export const ScriptActions = ({ script, onCopy, showCopyFeedback = false }: ScriptActionsProps) => {
-  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
-  
-  const handleDownload = () => {
-    const blob = new Blob([script.code], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${script.title.toLowerCase().replace(/\s+/g, '-')}.${script.os === 'windows' ? 'ps1' : 'sh'}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    // Close modal after download starts
-    setIsDownloadModalOpen(false);
-  };
-  
-  const handleCopy = async () => {
-    if (onCopy) {
-      onCopy();
-    } else {
-      try {
-        await navigator.clipboard.writeText(script.code);
-      } catch (err) {
-        console.error('Failed to copy text: ', err);
-      }
-    }
-  };
-  
-  return (
-    <>
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <button 
-          onClick={() => setIsDownloadModalOpen(true)}
-          className="flex items-center justify-center gap-2 py-2 px-4 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary-dark transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-          </svg>
-          Download Script
-        </button>
-        
-        <button 
-          onClick={handleCopy}
-          className={`flex items-center justify-center gap-2 py-2 px-4 ${
-            showCopyFeedback 
-              ? 'bg-green-500 text-white' 
-              : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
-          } rounded-md text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors relative overflow-hidden`}
-        >
-          {showCopyFeedback ? (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Copied!
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-              </svg>
-              Copy Script
-            </>
-          )}
-          
-          {/* Animation for copy feedback */}
-          {showCopyFeedback && (
-            <span className="absolute inset-0 bg-green-500 animate-pulse opacity-20"></span>
-          )}
-        </button>
-        
-        <button className="flex items-center justify-center gap-2 py-2 px-4 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
-          </svg>
-          Share Script
-        </button>
-        
-        <button className="flex items-center justify-center gap-2 py-2 px-4 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors md:ml-auto">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-          </svg>
-          Save
-        </button>
-      </div>
-      
-      {/* Download Modal */}
-      <DownloadModal
-        script={script}
-        isOpen={isDownloadModalOpen}
-        onClose={() => setIsDownloadModalOpen(false)}
-        onDownload={handleDownload}
-      />
-    </>
-  );
-};
-EOF
-
-    echo -e "${GREEN}✓ Updated ScriptActions.tsx${RESET}"
-    echo
-}
-
-# Update the global styles
+# Add terminal animation styles
 update_styles() {
-    echo -e "${YELLOW}Updating global styles...${RESET}"
+    echo -e "${YELLOW}Adding terminal animation styles...${RESET}"
     
-    # Check if the file exists
-    if [ ! -f "${STYLES_DIR}/globals.css" ]; then
-        echo -e "${RED}Error: globals.css not found in ${STYLES_DIR}${RESET}"
-        exit 1
-    fi
-    
-    # Add styles for the download modal
-    cat >> "${STYLES_DIR}/globals.css" << 'EOF'
+    # Check if we need to add terminal animation specific styles
+    if ! grep -q "Terminal Animation Styles" "${STYLES_DIR}/globals.css"; then
+        cat << 'EOF' >> "${STYLES_DIR}/globals.css"
 
-/* Download Modal Styles */
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Terminal Animation Styles */
+.terminal-line {
+  line-height: 1.5;
+  white-space: pre-wrap;
+  margin-bottom: 2px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 }
 
-@keyframes modalFadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(10px);
-  }
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-.modal-enter {
-  animation: modalFadeIn 0.3s ease forwards;
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background-color: var(--terminal-text);
+  margin-left: 2px;
+  animation: cursor-blink 1s step-end infinite;
+  vertical-align: middle;
 }
 
-.modal-exit {
-  animation: modalFadeOut 0.2s ease forwards;
+/* Progress Bar Animation */
+@keyframes progress-glow {
+  0% { text-shadow: 0 0 2px rgba(74, 222, 128, 0.5); }
+  50% { text-shadow: 0 0 8px rgba(74, 222, 128, 0.8); }
+  100% { text-shadow: 0 0 2px rgba(74, 222, 128, 0.5); }
 }
 
-/* Modal backdrop blur effect */
-.modal-backdrop {
-  backdrop-filter: blur(5px);
-  transition: backdrop-filter 0.3s ease;
+.terminal-line:nth-last-child(-n+16):nth-child(n+12) {
+  animation: progress-glow 1.5s infinite;
+  color: #4ade80;
 }
 
-/* Terminal in modal styling */
-.download-terminal {
-  background-color: var(--terminal-bg);
-  color: var(--terminal-text);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+/* Terminal theme colors */
+.text-green-400 {
+  color: #4ade80;
 }
 
-/* Modal animation dot pulse effect */
-@keyframes modalDotPulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+.text-terminal-green {
+  color: var(--terminal-green);
 }
 
-.modal-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  animation: modalDotPulse 2s infinite;
+/* Terminal scrollbar styling */
+.bg-terminal-bg {
+  scrollbar-width: thin;
+  scrollbar-color: #4a5568 #1e1e1e;
 }
 
-.modal-dot-red {
-  background-color: #FF5F56;
-  animation-delay: 0s;
+.bg-terminal-bg::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.modal-dot-yellow {
-  background-color: #FFBD2E;
-  animation-delay: 0.3s;
+.bg-terminal-bg::-webkit-scrollbar-track {
+  background: #1e1e1e;
 }
 
-.modal-dot-green {
-  background-color: #27C93F;
-  animation-delay: 0.6s;
+.bg-terminal-bg::-webkit-scrollbar-thumb {
+  background-color: #4a5568;
+  border-radius: 4px;
+}
+
+.bg-terminal-bg::-webkit-scrollbar-thumb:hover {
+  background-color: #718096;
 }
 EOF
-
-    echo -e "${GREEN}✓ Added download modal styles to globals.css${RESET}"
+        echo -e "${GREEN}✓ Added terminal animation styles to globals.css${RESET}"
+    else
+        echo -e "${YELLOW}Terminal animation styles already exist in globals.css${RESET}"
+    fi
+    
     echo
 }
 
-# Run tests to verify the enhancement
+# Run tests to verify the integration
 run_tests() {
     echo -e "${YELLOW}Verifying changes...${RESET}"
     
     # Check that files exist
+    if [ ! -f "${SCRIPTS_COMPONENTS_DIR}/TerminalAnimation.tsx" ]; then
+        echo -e "${RED}Error: TerminalAnimation.tsx was not created properly.${RESET}"
+        echo -e "${YELLOW}Please check for errors above.${RESET}"
+        return 1
+    fi
+    
     if [ ! -f "${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx" ]; then
-        echo -e "${RED}Error: DownloadModal.tsx was not created properly.${RESET}"
+        echo -e "${RED}Error: DownloadModal.tsx is missing.${RESET}"
         echo -e "${YELLOW}Please check for errors above.${RESET}"
         return 1
     fi
     
-    if [ ! -f "${SCRIPTS_COMPONENTS_DIR}/ScriptActions.tsx" ]; then
-        echo -e "${RED}Error: ScriptActions.tsx is missing.${RESET}"
-        echo -e "${YELLOW}Please check for errors above.${RESET}"
-        return 1
+    # Check that styles were added
+    if ! grep -q "Terminal Animation Styles" "${STYLES_DIR}/globals.css"; then
+        echo -e "${YELLOW}Warning: Terminal animation styles may not have been added correctly.${RESET}"
     fi
     
-    echo -e "${GREEN}✓ All files created successfully${RESET}"
+    echo -e "${GREEN}✓ All files created and modified successfully${RESET}"
     echo
     
-    # Verify framer-motion dependency
-    if ! grep -q '"framer-motion"' "${PROJECT_ROOT}/package.json"; then
-        echo -e "${YELLOW}Warning: framer-motion dependency might be missing.${RESET}"
-        echo -e "${BLUE}The download modal requires framer-motion for animations.${RESET}"
-        echo -e "${BLUE}Please run 'npm install framer-motion --save' if you haven't already.${RESET}"
-    else
-        echo -e "${GREEN}✓ framer-motion dependency is present${RESET}"
+    # Verify TypeScript syntax (if tsc is available)
+    if command -v tsc &> /dev/null; then
+        echo -e "${YELLOW}Checking TypeScript syntax...${RESET}"
+        tsc --noEmit "${SCRIPTS_COMPONENTS_DIR}/TerminalAnimation.tsx" 2>/dev/null
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ TypeScript syntax is valid${RESET}"
+        else
+            echo -e "${YELLOW}Warning: TypeScript syntax might have issues. Please review the files manually.${RESET}"
+        fi
+        echo
     fi
     
-    echo
     return 0
 }
 
 # Summary of changes
 show_summary() {
-    echo -e "${BLUE}${BOLD}Enhancement Summary:${RESET}"
-    echo -e "${GREEN}1. Created ${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx${RESET}"
-    echo -e "${GREEN}2. Updated ${SCRIPTS_COMPONENTS_DIR}/ScriptActions.tsx${RESET}"
-    echo -e "${GREEN}3. Added download modal styles to ${STYLES_DIR}/globals.css${RESET}"
+    echo -e "${BLUE}${BOLD}Integration Summary:${RESET}"
+    echo -e "${GREEN}1. Created ${SCRIPTS_COMPONENTS_DIR}/TerminalAnimation.tsx${RESET}"
+    echo -e "${GREEN}2. Updated ${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx${RESET}"
+    echo -e "${GREEN}3. Added terminal animation styles to ${STYLES_DIR}/globals.css${RESET}"
     echo
     echo -e "${YELLOW}Next Steps:${RESET}"
-    echo -e "1. Build and run the application to verify the changes: ${CYAN}npm run dev${RESET}"
-    echo -e "2. Navigate to a script detail page and test the download button"
-    echo -e "3. Check that the modal opens with proper animations"
-    echo -e "4. Verify that the download functionality works correctly"
+    echo -e "1. Build and run the application: ${CYAN}npm run dev${RESET}"
+    echo -e "2. Navigate to a script detail page and click the download button"
+    echo -e "3. In the download modal, click the download button again to start the animation"
+    echo -e "4. Verify that the terminal animation displays correctly"
+    echo -e "5. Confirm that the download starts automatically after the animation completes"
     echo
     echo -e "${BLUE}If you need to revert the changes, restore from the backup directory:${RESET}"
     echo -e "${CYAN}${BACKUP_DIR}${RESET}"
@@ -538,15 +552,16 @@ main() {
     show_banner
     create_backups
     check_dependencies
-    create_download_modal
-    update_script_actions
+    create_terminal_animation
+    update_download_modal
     update_styles
     
     if run_tests; then
         show_summary
-        echo -e "${GREEN}${BOLD}Enhancement completed successfully!${RESET}"
+        echo -e "${GREEN}${BOLD}Terminal Animation Integration Complete!${RESET}"
+        echo -e "${GREEN}The download modal now features an engaging Linux-style terminal animation.${RESET}"
     else
-        echo -e "${RED}${BOLD}Enhancement failed. Please check the errors above.${RESET}"
+        echo -e "${RED}${BOLD}Integration failed. Please check the errors above.${RESET}"
         exit 1
     fi
 }
