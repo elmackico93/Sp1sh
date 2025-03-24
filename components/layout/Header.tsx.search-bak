@@ -4,12 +4,12 @@ import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
 import { FiSun, FiMoon, FiMenu, FiX } from 'react-icons/fi';
 import { useScripts } from '../../context/ScriptsContext';
-import { EnhancedSearch } from '../search/EnhancedSearch';
 
 export const Header = () => {
   const { setSearchTerm } = useScripts();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
@@ -17,6 +17,19 @@ export const Header = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchTerm(searchValue);
+    
+    // If not on homepage, redirect to homepage with search
+    if (router.pathname !== '/') {
+      router.push({
+        pathname: '/',
+        query: { search: searchValue }
+      });
+    }
+  };
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -35,7 +48,19 @@ export const Header = () => {
         </Link>
         
         <div className="hidden md:flex flex-1 max-w-md mx-8 relative">
-          <EnhancedSearch />
+          <form onSubmit={handleSearch} className="w-full">
+            <input
+              type="text"
+              placeholder="Search for scripts, commands, or solutions..."
+              className="w-full py-2 pl-10 pr-4 text-sm rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-primary dark:focus:ring-primary-dark dark:focus:border-primary-dark"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              aria-label="Search"
+            />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+              🔍
+            </span>
+          </form>
         </div>
         
         <div className="flex items-center gap-2">
@@ -69,9 +94,15 @@ export const Header = () => {
       {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 p-4 shadow-md">
-          <div className="mb-4">
-            <EnhancedSearch placeholder="Search scripts..." />
-          </div>
+          <form onSubmit={handleSearch} className="mb-4">
+            <input
+              type="text"
+              placeholder="Search scripts..."
+              className="w-full py-2 px-4 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </form>
           
           <div className="flex flex-col space-y-2">
             <Link
