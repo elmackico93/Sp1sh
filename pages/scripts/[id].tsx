@@ -1,10 +1,12 @@
+import Head from "next/head";
+
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-powershell';
 import { useScripts } from '../../context/ScriptsContext';
-import { Layout } from '../../components/layout/Layout';
+
 import { ScriptDetailHeader } from '../../components/scripts/ScriptDetailHeader';
 import { ScriptActions } from '../../components/scripts/ScriptActions';
 import { ScriptCode } from '../../components/scripts/ScriptCode';
@@ -92,7 +94,11 @@ export default function ScriptDetail({ initialScript, renderedAt }: ScriptDetail
 
   if (!script) {
     return (
-      <Layout title="Script Not Found | Sp1sh" description="The script you're looking for doesn't exist or has been removed.">
+<>
+<Head>
+  <title>{script?.title || "Script Detail"} | Sp1sh</title>
+  <meta name="description" content={script?.description || "Script details"} />
+</Head>
         <div className="container mx-auto px-4 py-12 text-center">
           <h1 className="text-2xl font-bold mb-4">Script not found</h1>
           <p className="mb-6">The script you're looking for doesn't exist or has been removed.</p>
@@ -103,12 +109,16 @@ export default function ScriptDetail({ initialScript, renderedAt }: ScriptDetail
             Go Back
           </button>
         </div>
-      </Layout>
+</>
     );
   }
 
   return (
-    <Layout title={`${script.title} | Sp1sh`} description={script.description}>
+<>
+<Head>
+  <title>{script.title || "Script Detail"}</title>
+  <meta name="description" content={script.description} />
+</Head>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
@@ -130,7 +140,7 @@ export default function ScriptDetail({ initialScript, renderedAt }: ScriptDetail
           </div>
         </div>
       </div>
-    </Layout>
+</>
   );
 }
 

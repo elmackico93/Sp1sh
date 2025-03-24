@@ -1,11 +1,11 @@
-import Head from "next/head";
+
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-powershell';
 import { useScripts } from '../../context/ScriptsContext';
-import Head from "next/head";
+
 import { ScriptDetailHeader } from '../../components/scripts/ScriptDetailHeader';
 import { ScriptActions } from '../../components/scripts/ScriptActions';
 import { ScriptCode } from '../../components/scripts/ScriptCode';
@@ -115,8 +115,8 @@ export default function ScriptDetail({ initialScript, renderedAt }: ScriptDetail
   return (
 <>
 <Head>
-  <title>tion={script.description</title>
-  <meta name="description" content=script.description />
+  <title>{script.title || "Script Detail"}</title>
+  <meta name="description" content={script.description} />
 </Head>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
