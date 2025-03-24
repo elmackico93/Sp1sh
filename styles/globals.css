@@ -786,3 +786,143 @@
 .bg-terminal-bg::-webkit-scrollbar-thumb:hover {
   background-color: #718096;
 }
+
+/* Enhanced Search Styles - Add these to your globals.css file */
+
+/* Input and container styling */
+.search-input {
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  box-shadow: 0 0 0 2px rgba(0, 112, 224, 0.2);
+}
+
+.search-icon {
+  transition: transform 0.2s ease;
+}
+
+.search-input:focus ~ .search-icon {
+  transform: scale(1.1);
+}
+
+.clear-search-icon {
+  transition: all 0.15s ease;
+}
+
+.clear-search-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Search results container */
+.search-results-container {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transform-origin: top center;
+}
+
+/* Loading indicator */
+.search-loading-indicator {
+  width: 24px;
+  height: 24px;
+  margin: 0 auto 8px;
+  border: 2px solid rgba(0, 112, 224, 0.2);
+  border-top-color: var(--primary, #0070e0);
+  border-radius: 50%;
+  animation: search-loading-spin 0.8s linear infinite;
+}
+
+@keyframes search-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Highlighted result styling */
+.search-result-highlighted {
+  background-color: rgba(0, 112, 224, 0.1);
+}
+
+.dark .search-result-highlighted {
+  background-color: rgba(0, 112, 224, 0.2);
+}
+
+/* Highlighted text styling */
+.bg-primary\/20 {
+  background-color: rgba(0, 112, 224, 0.2);
+}
+
+.dark .bg-primary-dark\/30 {
+  background-color: rgba(0, 84, 166, 0.3);
+}
+
+/* Recent search items */
+.recent-search-item {
+  transition: background-color 0.15s ease;
+}
+
+.recent-search-item:hover {
+  background-color: rgba(0, 112, 224, 0.05);
+}
+
+.dark .recent-search-item:hover {
+  background-color: rgba(77, 148, 255, 0.1);
+}
+
+/* "See all results" button hover effect */
+.group:hover .group-hover\:translate-x-0\.5 {
+  transform: translateX(0.125rem);
+}
+
+/* Filter options scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Dropdown animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+}
+
+/* Line clamp for truncating text */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Transition effects */
+.transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-colors {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}

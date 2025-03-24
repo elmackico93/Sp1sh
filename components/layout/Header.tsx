@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
 import { FiSun, FiMoon, FiMenu, FiX } from 'react-icons/fi';
 import { useScripts } from '../../context/ScriptsContext';
-import { EnhancedSearch } from '../search/EnhancedSearch';
+import { HeaderSearch } from '../search/HeaderSearch';
 
 export const Header = () => {
   const { setSearchTerm } = useScripts();
@@ -35,7 +35,7 @@ export const Header = () => {
         </Link>
         
         <div className="hidden md:flex flex-1 max-w-md mx-8 relative">
-          <EnhancedSearch />
+          <HeaderSearch />
         </div>
         
         <div className="flex items-center gap-2">
@@ -70,7 +70,7 @@ export const Header = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 p-4 shadow-md">
           <div className="mb-4">
-            <EnhancedSearch placeholder="Search scripts..." />
+            <HeaderSearch />
           </div>
           
           <div className="flex flex-col space-y-2">
@@ -92,3 +92,5 @@ export const Header = () => {
     </header>
   );
 };
+
+export default Header;
