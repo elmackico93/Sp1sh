@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import Head from 'next/head';
 import { Header } from './Header';
+import { EnhancedNavbar } from './EnhancedNavbar';
 import { OSNavbar } from './OSNavbar';
 import { Footer } from './Footer';
 
@@ -27,7 +28,7 @@ export const Layout = ({
       </a>
       
       <Header />
-      <OSNavbar />
+      <EnhancedNavbar />
       
       <main id="main-content" className="min-h-screen pb-12">
         {children}

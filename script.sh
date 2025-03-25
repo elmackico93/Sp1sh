@@ -1,570 +1,499 @@
 #!/bin/bash
-# =============================================================================
-# Sp1sh Terminal Animation Integration Script
-# =============================================================================
-# Author: System Administrator
-# Version: 1.0.0
-# Created: March 2025
-# 
-# This script enhances the Sp1sh download modal by adding a realistic terminal
-# animation that simulates a Linux-like download process. The animation shows
-# command execution, progress bars, and verification steps before triggering
-# the actual download.
-# =============================================================================
+# ==========================================================
+# Sp1sh Navigation System Integration Script
+# ==========================================================
+# This script automates the integration of the enhanced 
+# navigation system into the Sp1sh application.
+#
+# What this script does:
+# 1. Updates the Layout component to use EnhancedNavbar
+# 2. Adds NavigationProvider to _app.tsx
+# 3. Creates common subcategory pages
+# 4. Updates imports to ensure menu data accessibility
+# 5. Performs necessary file backups before modifications
+# ==========================================================
 
-# Text formatting colors
-CYAN="\033[0;36m"
-GREEN="\033[0;32m"
-YELLOW="\033[0;33m"
-RED="\033[0;31m"
-BLUE="\033[0;34m"
-BOLD="\033[1m"
-RESET="\033[0m"
+# Text styling
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
 
-# Define paths
-PROJECT_ROOT="$(pwd)"
-COMPONENTS_DIR="${PROJECT_ROOT}/components"
-SCRIPTS_COMPONENTS_DIR="${COMPONENTS_DIR}/scripts"
-STYLES_DIR="${PROJECT_ROOT}/styles"
-BACKUP_DIR="${PROJECT_ROOT}/.backup_$(date +%Y%m%d_%H%M%S)"
+# Project paths
+PROJECT_ROOT="."
+COMPONENTS_DIR="$PROJECT_ROOT/components"
+PAGES_DIR="$PROJECT_ROOT/pages"
+CONTEXT_DIR="$PROJECT_ROOT/context"
+BACKUPS_DIR="$PROJECT_ROOT/backup-$(date +%Y%m%d%H%M%S)"
 
-# Check if we're in the correct directory
-if [ ! -d "$COMPONENTS_DIR" ] || [ ! -d "$STYLES_DIR" ]; then
-    echo -e "${RED}Error: This script must be run from the project root directory.${RESET}"
-    echo "Please navigate to the directory containing the 'components' and 'styles' folders."
-    exit 1
-fi
-
-# Display banner
-show_banner() {
-    echo -e "${BLUE}${BOLD}"
-    echo "╔═════════════════════════════════════════════════════════════╗"
-    echo "║                                                             ║"
-    echo "║         Terminal Animation Download Modal Integration       ║"
-    echo "║                                                             ║"
-    echo "╚═════════════════════════════════════════════════════════════╝"
-    echo -e "${RESET}"
-    echo "This script will enhance the Sp1sh download modal with a terminal animation"
-    echo "that simulates a Linux-like download process."
-    echo
-    echo -e "${YELLOW}Project: ${RESET}${PROJECT_ROOT}"
-    echo
+# Function to print a section header
+print_header() {
+    echo -e "\n${BLUE}===========================================================${NC}"
+    echo -e "${BLUE}$1${NC}"
+    echo -e "${BLUE}===========================================================${NC}"
 }
 
-# Create backups
-create_backups() {
-    echo -e "${YELLOW}Creating backups before making changes...${RESET}"
-    mkdir -p "$BACKUP_DIR"
-    
-    if [ -f "${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx" ]; then
-        cp "${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx" "${BACKUP_DIR}/DownloadModal.tsx.bak"
-        echo -e "${GREEN}✓ Backed up DownloadModal.tsx${RESET}"
-    else
-        echo -e "${RED}Error: DownloadModal.tsx not found. Please ensure the download modal component exists.${RESET}"
-        exit 1
-    fi
-    
-    cp "${STYLES_DIR}/globals.css" "${BACKUP_DIR}/globals.css.bak"
-    echo -e "${GREEN}✓ Backed up globals.css${RESET}"
-    
-    echo
+# Function to print a success message
+print_success() {
+    echo -e "${GREEN}✓ $1${NC}"
 }
 
-# Check dependencies
-check_dependencies() {
-    echo -e "${YELLOW}Checking dependencies...${RESET}"
-    
-    # Check if package.json exists
-    if [ ! -f "${PROJECT_ROOT}/package.json" ]; then
-        echo -e "${RED}Error: package.json not found. Are you in the project root?${RESET}"
-        exit 1
-    fi
-    
-    # Check for framer-motion dependency
-    if ! grep -q '"framer-motion"' "${PROJECT_ROOT}/package.json"; then
-        echo -e "${YELLOW}Warning: framer-motion not found in package.json${RESET}"
-        echo -e "${BLUE}The animation requires framer-motion for smooth animations.${RESET}"
+# Function to print an error message
+print_error() {
+    echo -e "${RED}✗ $1${NC}"
+}
+
+# Function to print a warning message
+print_warning() {
+    echo -e "${YELLOW}! $1${NC}"
+}
+
+# Function to print an info message
+print_info() {
+    echo -e "${CYAN}i $1${NC}"
+}
+
+# Function to back up a file before modifying it
+backup_file() {
+    local file=$1
+    if [ -f "$file" ]; then
+        # Create backup directory if it doesn't exist
+        mkdir -p "$BACKUPS_DIR"
         
-        read -p "Would you like to install framer-motion? (y/n): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            echo -e "${YELLOW}Installing framer-motion...${RESET}"
-            npm install framer-motion --save
-            echo -e "${GREEN}✓ framer-motion installed${RESET}"
-        else
-            echo -e "${YELLOW}Continuing without installing framer-motion. The animation may not work correctly.${RESET}"
-        fi
+        # Get directory structure relative to project root
+        local rel_dir=$(dirname "$file" | sed "s|$PROJECT_ROOT/||")
+        mkdir -p "$BACKUPS_DIR/$rel_dir"
+        
+        # Copy file to backup
+        cp "$file" "$BACKUPS_DIR/$rel_dir/$(basename "$file")"
+        print_info "Backed up $file to $BACKUPS_DIR/$rel_dir/$(basename "$file")"
+        return 0
     else
-        echo -e "${GREEN}✓ framer-motion is already installed${RESET}"
+        print_error "File $file does not exist, nothing to back up"
+        return 1
+    fi
+}
+
+# Function to check if the project structure is valid
+validate_project_structure() {
+    print_header "Validating project structure"
+    
+    local valid=true
+    
+    # Check for key directories and files
+    if [ ! -d "$COMPONENTS_DIR" ]; then
+        print_error "Components directory not found at $COMPONENTS_DIR"
+        valid=false
     fi
     
-    echo
-}
-
-# Create TerminalAnimation component
-create_terminal_animation() {
-    echo -e "${YELLOW}Creating TerminalAnimation component...${RESET}"
+    if [ ! -d "$PAGES_DIR" ]; then
+        print_error "Pages directory not found at $PAGES_DIR"
+        valid=false
+    fi
     
-    # Create the component file
-    cat > "${SCRIPTS_COMPONENTS_DIR}/TerminalAnimation.tsx" << 'EOF'
-import React, { useState, useEffect, useRef } from 'react';
-import { Script } from '../../mocks/scripts';
-
-interface TerminalAnimationProps {
-  script: Script;
-  onComplete: () => void;
-}
-
-export const TerminalAnimation: React.FC<TerminalAnimationProps> = ({ script, onComplete }) => {
-  const [lines, setLines] = useState<string[]>([]);
-  const [isComplete, setIsComplete] = useState(false);
-  const terminalRef = useRef<HTMLDivElement>(null);
-
-  // Animation sequence
-  useEffect(() => {
-    const filename = `${script.title.toLowerCase().replace(/\s+/g, '-')}.${script.os === 'windows' ? 'ps1' : 'sh'}`;
-    const commandSequence = [
-      { text: `user@sp1sh:~$ sudo sp1sh-get download ${filename}`, delay: 50 },
-      { text: `[sudo] password for user: `, delay: 500 },
-      { text: `******`, delay: 400 },
-      { text: `Searching for ${filename}...`, delay: 1000 },
-      { text: `Found ${filename} in repository: sp1sh-main`, delay: 800 },
-      { text: `Repository: https://repo.sp1sh.io/${script.category}`, delay: 600 },
-      { text: `Author: ${script.authorUsername}`, delay: 400 },
-      { text: `Version: ${new Date(script.updatedAt).toLocaleDateString()}`, delay: 400 },
-      { text: `Rating: ${script.rating.toFixed(1)}/5.0 (${script.downloads} downloads)`, delay: 400 },
-      { text: `Starting download...`, delay: 800 },
-      { text: `Connecting to sp1sh servers...`, delay: 1200 },
-      { text: `Downloading [                    ] 0%`, delay: 200 },
-      { text: `Downloading [==                  ] 10%`, delay: 200 },
-      { text: `Downloading [====                ] 20%`, delay: 200 },
-      { text: `Downloading [======              ] 30%`, delay: 200 },
-      { text: `Downloading [========            ] 40%`, delay: 200 },
-      { text: `Downloading [==========          ] 50%`, delay: 200 },
-      { text: `Downloading [============        ] 60%`, delay: 200 },
-      { text: `Downloading [==============      ] 70%`, delay: 200 },
-      { text: `Downloading [================    ] 80%`, delay: 200 },
-      { text: `Downloading [==================  ] 90%`, delay: 200 },
-      { text: `Downloading [====================] 100%`, delay: 300 },
-      { text: `Verifying integrity of ${filename}...`, delay: 800 },
-      { text: `Checksum verification: OK`, delay: 400 },
-      { text: `Granting execution permissions: chmod +x ${filename}`, delay: 600 },
-      { text: `Download complete! ${filename} ready to use.`, delay: 400 },
-      { text: `user@sp1sh:~$ _`, delay: 300 },
-    ];
-
-    let currentLines: string[] = [];
-    let currentIndex = 0;
-
-    const typeNextLine = () => {
-      if (currentIndex < commandSequence.length) {
-        const { text, delay } = commandSequence[currentIndex];
-        currentLines = [...currentLines, text];
-        setLines([...currentLines]);
-        
-        // Scroll to bottom when new line is added
-        if (terminalRef.current) {
-          terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
-        }
-
-        currentIndex++;
-        setTimeout(typeNextLine, delay);
-      } else {
-        setIsComplete(true);
-        // Wait a moment before triggering the download
-        setTimeout(onComplete, 800);
-      }
-    };
-
-    // Start the animation
-    typeNextLine();
-
-    // Cleanup
-    return () => {
-      currentLines = [];
-      currentIndex = 0;
-    };
-  }, [script, onComplete]);
-
-  return (
-    <div 
-      ref={terminalRef}
-      className="bg-terminal-bg text-terminal-text rounded-lg h-64 overflow-auto p-4 font-mono text-sm border border-gray-700"
-    >
-      {lines.map((line, index) => (
-        <div key={index} className="terminal-line">
-          {line}
-        </div>
-      ))}
-      {isComplete && <div className="text-green-400 mt-2">Download ready - File saved to your computer</div>}
-    </div>
-  );
-};
-
-export default TerminalAnimation;
-EOF
-
-    echo -e "${GREEN}✓ Created TerminalAnimation.tsx${RESET}"
-    echo
-}
-
-# Update DownloadModal component
-update_download_modal() {
-    echo -e "${YELLOW}Updating DownloadModal component to use the terminal animation...${RESET}"
+    if [ ! -f "$COMPONENTS_DIR/layout/Layout.tsx" ]; then
+        print_error "Layout component not found at $COMPONENTS_DIR/layout/Layout.tsx"
+        valid=false
+    fi
     
-    if [ ! -f "${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx" ]; then
-        echo -e "${RED}Error: DownloadModal.tsx not found.${RESET}"
+    if [ ! -f "$PAGES_DIR/_app.tsx" ]; then
+        print_error "_app.tsx not found at $PAGES_DIR/_app.tsx"
+        valid=false
+    fi
+    
+    if [ ! -f "$COMPONENTS_DIR/layout/EnhancedNavbar.tsx" ]; then
+        print_error "EnhancedNavbar component not found at $COMPONENTS_DIR/layout/EnhancedNavbar.tsx"
+        print_warning "The enhanced navbar component should be created before running this script"
+        valid=false
+    fi
+    
+    if [ ! -f "$CONTEXT_DIR/NavigationContext.tsx" ]; then
+        print_error "NavigationContext not found at $CONTEXT_DIR/NavigationContext.tsx"
+        print_warning "The navigation context should be created before running this script"
+        valid=false
+    fi
+    
+    if [ "$valid" = false ]; then
+        print_error "Project structure validation failed"
         exit 1
-    }
+    fi
     
-    # Create the updated file
-    cat > "${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx" << 'EOF'
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Script } from '../../mocks/scripts';
-import { TerminalAnimation } from './TerminalAnimation';
-
-interface DownloadModalProps {
-  script: Script;
-  isOpen: boolean;
-  onClose: () => void;
-  onDownload: () => void;
+    print_success "Project structure is valid"
 }
 
-export const DownloadModal: React.FC<DownloadModalProps> = ({
-  script,
-  isOpen,
-  onClose,
-  onDownload,
-}) => {
-  const [showAnimation, setShowAnimation] = useState(false);
+# Function to update the Layout component
+update_layout_component() {
+    print_header "Updating Layout component"
+    
+    local layout_file="$COMPONENTS_DIR/layout/Layout.tsx"
+    backup_file "$layout_file"
+    
+    # Check if the file already imports EnhancedNavbar
+    if grep -q "import { EnhancedNavbar } from './EnhancedNavbar'" "$layout_file"; then
+        print_info "EnhancedNavbar import already exists in Layout component"
+    else
+        # Add EnhancedNavbar import
+        sed -i "s/import { Header } from '.\/Header';/import { Header } from '.\/Header';\nimport { EnhancedNavbar } from '.\/EnhancedNavbar';/g" "$layout_file"
+        print_success "Added EnhancedNavbar import to Layout component"
+    fi
+    
+    # Replace OSNavbar with EnhancedNavbar
+    if grep -q "<OSNavbar />" "$layout_file"; then
+        sed -i "s/<OSNavbar \/>/<EnhancedNavbar \/>/g" "$layout_file"
+        print_success "Replaced OSNavbar with EnhancedNavbar in Layout component"
+    elif grep -q "<EnhancedNavbar />" "$layout_file"; then
+        print_info "EnhancedNavbar is already in use in Layout component"
+    else
+        print_warning "Could not find OSNavbar component to replace in Layout"
+        print_warning "You may need to manually update the Layout component"
+    fi
+}
+
+# Function to update _app.tsx to include NavigationProvider
+update_app_component() {
+    print_header "Updating _app.tsx to include NavigationProvider"
+    
+    local app_file="$PAGES_DIR/_app.tsx"
+    backup_file "$app_file"
+    
+    # Check if the file already imports NavigationProvider
+    if grep -q "import { NavigationProvider } from '../context/NavigationContext'" "$app_file"; then
+        print_info "NavigationProvider import already exists in _app.tsx"
+    else
+        # Add NavigationProvider import
+        sed -i "s/import { ScriptsProvider } from '..\/context\/ScriptsContext';/import { ScriptsProvider } from '..\/context\/ScriptsContext';\nimport { NavigationProvider } from '..\/context\/NavigationContext';/g" "$app_file"
+        print_success "Added NavigationProvider import to _app.tsx"
+    fi
+    
+    # Wrap content with NavigationProvider
+    if grep -q "<NavigationProvider>" "$app_file"; then
+        print_info "NavigationProvider is already in use in _app.tsx"
+    else
+        # Find ScriptsProvider opening tag and add NavigationProvider after it
+        sed -i "s/<ScriptsProvider>/<ScriptsProvider>\n          <NavigationProvider>/g" "$app_file"
+        
+        # Find ScriptsProvider closing tag and add NavigationProvider before it
+        sed -i "s/<\/ScriptsProvider>/<\/NavigationProvider>\n          <\/ScriptsProvider>/g" "$app_file"
+        
+        print_success "Added NavigationProvider wrapper to _app.tsx"
+    fi
+}
+
+# Function to create common subcategory pages
+create_subcategory_pages() {
+    print_header "Creating subcategory page templates"
+    
+    # List of main categories to create pages for
+    local categories=(
+        "system-admin"
+        "security"
+        "network"
+        "cloud-containers"
+        "emergency"
+        "devops-cicd"
+        "automation"
+        "dev-tools"
+        "beginners"
+    )
+    
+    # Create pages directory if it doesn't exist
+    mkdir -p "$PAGES_DIR/categories"
+    
+    for category in "${categories[@]}"; do
+        local category_dir="$PAGES_DIR/categories/$category"
+        mkdir -p "$category_dir"
+        
+        # Create index.tsx for each category if it doesn't exist
+        if [ ! -f "$category_dir/index.tsx" ]; then
+            cat > "$category_dir/index.tsx" << EOF
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useScripts } from '../../../context/ScriptsContext';
+import { LoadingPlaceholder } from '../../../components/ui/LoadingPlaceholder';
+
+export default function CategoryPage() {
+  const router = useRouter();
+  const { setCurrentCategory, isLoading } = useScripts();
   
-  // Reset animation state when modal closes
   useEffect(() => {
-    if (!isOpen) {
-      setShowAnimation(false);
+    // Set current category
+    setCurrentCategory('$category');
+    
+    // Push to dynamic category page
+    router.push('/categories/$category');
+  }, [setCurrentCategory, router]);
+
+  if (isLoading) {
+    return <LoadingPlaceholder />;
+  }
+
+  return null;
+}
+EOF
+            print_success "Created category page for $category"
+        else
+            print_info "Category page for $category already exists"
+        fi
+    done
+    
+    # Create emergency subcategories
+    mkdir -p "$PAGES_DIR/emergency/incident-response"
+    mkdir -p "$PAGES_DIR/emergency/forensics"
+    mkdir -p "$PAGES_DIR/emergency/disaster-recovery"
+    
+    # Create index.tsx for emergency subcategories
+    if [ ! -f "$PAGES_DIR/emergency/incident-response/index.tsx" ]; then
+        cat > "$PAGES_DIR/emergency/incident-response/index.tsx" << EOF
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import { LoadingPlaceholder } from '../../../components/ui/LoadingPlaceholder';
+
+export default function IncidentResponsePage() {
+  const router = useRouter();
+  
+  useEffect(() => {
+    // Route to the dynamic emergency category page
+    router.push('/emergency/incident-response');
+  }, [router]);
+
+  return <LoadingPlaceholder />;
+}
+EOF
+        print_success "Created emergency/incident-response page"
+    fi
+    
+    if [ ! -f "$PAGES_DIR/emergency/forensics/index.tsx" ]; then
+        cat > "$PAGES_DIR/emergency/forensics/index.tsx" << EOF
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import { LoadingPlaceholder } from '../../../components/ui/LoadingPlaceholder';
+
+export default function ForensicsPage() {
+  const router = useRouter();
+  
+  useEffect(() => {
+    // Route to the dynamic emergency category page
+    router.push('/emergency/forensics');
+  }, [router]);
+
+  return <LoadingPlaceholder />;
+}
+EOF
+        print_success "Created emergency/forensics page"
+    fi
+    
+    if [ ! -f "$PAGES_DIR/emergency/disaster-recovery/index.tsx" ]; then
+        cat > "$PAGES_DIR/emergency/disaster-recovery/index.tsx" << EOF
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import { LoadingPlaceholder } from '../../../components/ui/LoadingPlaceholder';
+
+export default function DisasterRecoveryPage() {
+  const router = useRouter();
+  
+  useEffect(() => {
+    // Route to the dynamic emergency category page
+    router.push('/emergency/disaster-recovery');
+  }, [router]);
+
+  return <LoadingPlaceholder />;
+}
+EOF
+        print_success "Created emergency/disaster-recovery page"
+    fi
+}
+
+# Function to update EnhancedNavbar to export navigationMenu
+update_navigation_exports() {
+    print_header "Updating navigation exports"
+    
+    local navbar_file="$COMPONENTS_DIR/layout/EnhancedNavbar.tsx"
+    backup_file "$navbar_file"
+    
+    # Check if navigationMenu is already exported
+    if grep -q "export const navigationMenu" "$navbar_file"; then
+        print_info "navigationMenu is already exported from EnhancedNavbar"
+    else
+        # Replace const navigationMenu with export const navigationMenu
+        sed -i "s/const navigationMenu: FirstLevelItem/export const navigationMenu: FirstLevelItem/g" "$navbar_file"
+        print_success "Exported navigationMenu from EnhancedNavbar"
+    fi
+}
+
+# Function to create a dynamic slug handler for emergency pages
+create_emergency_slug_handler() {
+    print_header "Creating dynamic slug handler for emergency pages"
+    
+    mkdir -p "$PAGES_DIR/emergency"
+    
+    local emergency_slug_file="$PAGES_DIR/emergency/[...slug].tsx"
+    
+    if [ ! -f "$emergency_slug_file" ]; then
+        cat > "$emergency_slug_file" << EOF
+import React, { useEffect, useState } from 'react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { FiChevronRight } from 'react-icons/fi';
+import { useScripts } from '../../context/ScriptsContext';
+import { useNavigation } from '../../context/NavigationContext';
+import { ScriptCard } from '../../components/scripts/ScriptCard';
+import { LoadingPlaceholder } from '../../components/ui/LoadingPlaceholder';
+
+const EmergencySlugPage: React.FC = () => {
+  const router = useRouter();
+  const { slug } = router.query;
+  const { emergencyScripts, isLoading } = useScripts();
+  const { getBreadcrumbs } = useNavigation();
+  const [pageTitle, setPageTitle] = useState('');
+  const [filteredScripts, setFilteredScripts] = useState<any[]>([]);
+  
+  useEffect(() => {
+    if (slug && Array.isArray(slug)) {
+      const fullPath = \`/emergency/\${slug.join('/')}\`;
+      
+      // Set page title based on slug
+      const categoryTitle = slug[slug.length - 1]
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      
+      setPageTitle(categoryTitle);
+      
+      // Filter scripts based on the path
+      const matchingScripts = emergencyScripts.filter(script => {
+        // Match based on title and tags
+        return (
+          script.title.toLowerCase().includes(categoryTitle.toLowerCase()) ||
+          script.tags.some(tag => 
+            slug.some(s => tag.toLowerCase().includes(s.toLowerCase()))
+          )
+        );
+      });
+      
+      setFilteredScripts(matchingScripts);
     }
-  }, [isOpen]);
-
-  // Close modal when Escape is pressed
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
-
-  // Prevent background scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  const handleStartAnimation = () => {
-    setShowAnimation(true);
-  };
-
-  const handleAnimationComplete = () => {
-    onDownload();
-  };
+  }, [slug, emergencyScripts]);
+  
+  if (isLoading || !slug) {
+    return <LoadingPlaceholder />;
+  }
+  
+  const fullPath = \`/emergency/\${Array.isArray(slug) ? slug.join('/') : slug}\`;
+  const breadcrumbs = getBreadcrumbs(fullPath);
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black z-50"
-            onClick={onClose}
-          />
+    <>
+      <Head>
+        <title>{pageTitle} Emergency Scripts | Sp1sh</title>
+        <meta name="description" content={\`Emergency scripts for \${pageTitle}. Quick solutions for critical situations.\`} />
+      </Head>
+      
+      <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumbs */}
+        <nav className="flex text-sm text-gray-500 dark:text-gray-400 mb-6">
+          {breadcrumbs.map((crumb, index) => (
+            <React.Fragment key={crumb.path}>
+              {index > 0 && <FiChevronRight className="mx-2 mt-0.5" />}
+              {index === breadcrumbs.length - 1 ? (
+                <span className="text-gray-900 dark:text-white font-medium">{crumb.name}</span>
+              ) : (
+                <Link href={crumb.path} className="hover:text-primary dark:hover:text-primary-light">
+                  {crumb.name}
+                </Link>
+              )}
+            </React.Fragment>
+          ))}
+        </nav>
+        
+        {/* Category Header */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8 border border-gray-100 dark:border-gray-700">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            {pageTitle} Scripts
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            Critical scripts for {pageTitle.toLowerCase()} scenarios. These scripts have been verified for reliability and safety.
+          </p>
+        </div>
+        
+        {/* Scripts Section */}
+        <section>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Available Scripts ({filteredScripts.length})
+          </h2>
           
-          {/* Modal */}
-          <motion.div 
-            className="fixed inset-0 flex items-center justify-center z-50 px-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-auto overflow-hidden border border-gray-200 dark:border-gray-700"
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            >
-              {/* Header */}
-              <div className="terminal-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-center">
-                  <div className="flex gap-1.5 mr-3">
-                    <motion.div 
-                      className="w-3 h-3 rounded-full bg-red-500"
-                      animate={{ opacity: [0.7, 1, 0.7] }}
-                      transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
-                    />
-                    <motion.div 
-                      className="w-3 h-3 rounded-full bg-yellow-500"
-                      animate={{ opacity: [0.7, 1, 0.7] }}
-                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-                    />
-                    <motion.div 
-                      className="w-3 h-3 rounded-full bg-green-500"
-                      animate={{ opacity: [0.7, 1, 0.7] }}
-                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
-                    />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Download Script
-                  </h3>
-                </div>
-                <button
-                  onClick={onClose}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                </button>
-              </div>
-              
-              {/* Content */}
-              <div className="p-6">
-                <div className="mb-6">
-                  <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    {script.title}
-                  </h4>
-                  <p className="text-gray-600 dark:text-gray-300 mb-2">
-                    You're downloading this script for {script.os === 'cross-platform' ? 'Cross-Platform' : script.os} systems.
-                  </p>
-                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                    <span className="mr-2">Size: 4.2KB</span>
-                    <span className="mr-2">•</span>
-                    <span>Version: {script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'Latest'}</span>
-                  </div>
-                </div>
-                
-                {/* Terminal Animation or Placeholder */}
-                {showAnimation ? (
-                  <TerminalAnimation script={script} onComplete={handleAnimationComplete} />
-                ) : (
-                  <div className="bg-terminal-bg rounded-lg h-64 flex items-center justify-center mb-6 border border-gray-700">
-                    <div className="text-center">
-                      <div className="text-5xl mb-3">💾</div>
-                      <p className="text-terminal-text text-lg">Your script is ready to download</p>
-                      <p className="text-gray-500 text-sm mt-2">Click below to start the download process</p>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="flex flex-col space-y-3">
-                  {!showAnimation && (
-                    <button
-                      onClick={handleStartAnimation}
-                      className="flex items-center justify-center gap-2 py-3 px-6 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                      </svg>
-                      Download {script.title.toLowerCase().replace(/\s+/g, '-')}.{script.os === 'windows' ? 'ps1' : 'sh'}
-                    </button>
-                  )}
-                  
-                  <div className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-                    By downloading, you agree to our <a href="/terms" className="text-primary hover:underline">terms of service</a> and <a href="/security" className="text-primary hover:underline">security guidelines</a>.
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+          {filteredScripts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredScripts.map((script) => (
+                <ScriptCard key={script.id} script={script} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
+              <div className="text-4xl mb-3">🔍</div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No scripts found</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                No emergency scripts found for this category yet.
+              </p>
+              <Link
+                href="/emergency"
+                className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-medium rounded-md transition-colors"
+              >
+                Browse All Emergency Scripts
+              </Link>
+            </div>
+          )}
+        </section>
+      </div>
+    </>
   );
 };
 
-export default DownloadModal;
+export default EmergencySlugPage;
 EOF
-
-    echo -e "${GREEN}✓ Updated DownloadModal.tsx${RESET}"
-    echo
-}
-
-# Add terminal animation styles
-update_styles() {
-    echo -e "${YELLOW}Adding terminal animation styles...${RESET}"
-    
-    # Check if we need to add terminal animation specific styles
-    if ! grep -q "Terminal Animation Styles" "${STYLES_DIR}/globals.css"; then
-        cat << 'EOF' >> "${STYLES_DIR}/globals.css"
-
-/* Terminal Animation Styles */
-.terminal-line {
-  line-height: 1.5;
-  white-space: pre-wrap;
-  margin-bottom: 2px;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-}
-
-@keyframes cursor-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.terminal-cursor {
-  display: inline-block;
-  width: 8px;
-  height: 16px;
-  background-color: var(--terminal-text);
-  margin-left: 2px;
-  animation: cursor-blink 1s step-end infinite;
-  vertical-align: middle;
-}
-
-/* Progress Bar Animation */
-@keyframes progress-glow {
-  0% { text-shadow: 0 0 2px rgba(74, 222, 128, 0.5); }
-  50% { text-shadow: 0 0 8px rgba(74, 222, 128, 0.8); }
-  100% { text-shadow: 0 0 2px rgba(74, 222, 128, 0.5); }
-}
-
-.terminal-line:nth-last-child(-n+16):nth-child(n+12) {
-  animation: progress-glow 1.5s infinite;
-  color: #4ade80;
-}
-
-/* Terminal theme colors */
-.text-green-400 {
-  color: #4ade80;
-}
-
-.text-terminal-green {
-  color: var(--terminal-green);
-}
-
-/* Terminal scrollbar styling */
-.bg-terminal-bg {
-  scrollbar-width: thin;
-  scrollbar-color: #4a5568 #1e1e1e;
-}
-
-.bg-terminal-bg::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.bg-terminal-bg::-webkit-scrollbar-track {
-  background: #1e1e1e;
-}
-
-.bg-terminal-bg::-webkit-scrollbar-thumb {
-  background-color: #4a5568;
-  border-radius: 4px;
-}
-
-.bg-terminal-bg::-webkit-scrollbar-thumb:hover {
-  background-color: #718096;
-}
-EOF
-        echo -e "${GREEN}✓ Added terminal animation styles to globals.css${RESET}"
+        print_success "Created dynamic slug handler for emergency pages"
     else
-        echo -e "${YELLOW}Terminal animation styles already exist in globals.css${RESET}"
+        print_info "Dynamic slug handler for emergency pages already exists"
     fi
-    
-    echo
 }
 
-# Run tests to verify the integration
-run_tests() {
-    echo -e "${YELLOW}Verifying changes...${RESET}"
-    
-    # Check that files exist
-    if [ ! -f "${SCRIPTS_COMPONENTS_DIR}/TerminalAnimation.tsx" ]; then
-        echo -e "${RED}Error: TerminalAnimation.tsx was not created properly.${RESET}"
-        echo -e "${YELLOW}Please check for errors above.${RESET}"
-        return 1
-    fi
-    
-    if [ ! -f "${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx" ]; then
-        echo -e "${RED}Error: DownloadModal.tsx is missing.${RESET}"
-        echo -e "${YELLOW}Please check for errors above.${RESET}"
-        return 1
-    fi
-    
-    # Check that styles were added
-    if ! grep -q "Terminal Animation Styles" "${STYLES_DIR}/globals.css"; then
-        echo -e "${YELLOW}Warning: Terminal animation styles may not have been added correctly.${RESET}"
-    fi
-    
-    echo -e "${GREEN}✓ All files created and modified successfully${RESET}"
-    echo
-    
-    # Verify TypeScript syntax (if tsc is available)
-    if command -v tsc &> /dev/null; then
-        echo -e "${YELLOW}Checking TypeScript syntax...${RESET}"
-        tsc --noEmit "${SCRIPTS_COMPONENTS_DIR}/TerminalAnimation.tsx" 2>/dev/null
-        
-        if [ $? -eq 0 ]; then
-            echo -e "${GREEN}✓ TypeScript syntax is valid${RESET}"
-        else
-            echo -e "${YELLOW}Warning: TypeScript syntax might have issues. Please review the files manually.${RESET}"
-        fi
-        echo
-    fi
-    
-    return 0
-}
-
-# Summary of changes
-show_summary() {
-    echo -e "${BLUE}${BOLD}Integration Summary:${RESET}"
-    echo -e "${GREEN}1. Created ${SCRIPTS_COMPONENTS_DIR}/TerminalAnimation.tsx${RESET}"
-    echo -e "${GREEN}2. Updated ${SCRIPTS_COMPONENTS_DIR}/DownloadModal.tsx${RESET}"
-    echo -e "${GREEN}3. Added terminal animation styles to ${STYLES_DIR}/globals.css${RESET}"
-    echo
-    echo -e "${YELLOW}Next Steps:${RESET}"
-    echo -e "1. Build and run the application: ${CYAN}npm run dev${RESET}"
-    echo -e "2. Navigate to a script detail page and click the download button"
-    echo -e "3. In the download modal, click the download button again to start the animation"
-    echo -e "4. Verify that the terminal animation displays correctly"
-    echo -e "5. Confirm that the download starts automatically after the animation completes"
-    echo
-    echo -e "${BLUE}If you need to revert the changes, restore from the backup directory:${RESET}"
-    echo -e "${CYAN}${BACKUP_DIR}${RESET}"
-    echo
-}
-
-# Main execution flow
+# Main execution function
 main() {
-    show_banner
-    create_backups
-    check_dependencies
-    create_terminal_animation
-    update_download_modal
-    update_styles
+    print_header "Starting Sp1sh Navigation Integration"
     
-    if run_tests; then
-        show_summary
-        echo -e "${GREEN}${BOLD}Terminal Animation Integration Complete!${RESET}"
-        echo -e "${GREEN}The download modal now features an engaging Linux-style terminal animation.${RESET}"
-    else
-        echo -e "${RED}${BOLD}Integration failed. Please check the errors above.${RESET}"
-        exit 1
-    fi
+    # Validate project structure
+    validate_project_structure
+    
+    # Update Layout component
+    update_layout_component
+    
+    # Update _app.tsx to include NavigationProvider
+    update_app_component
+    
+    # Update EnhancedNavbar to export navigationMenu
+    update_navigation_exports
+    
+    # Create common subcategory pages
+    create_subcategory_pages
+    
+    # Create dynamic slug handler for emergency pages
+    create_emergency_slug_handler
+    
+    print_header "Sp1sh Navigation Integration Complete"
+    print_success "The navigation system has been successfully integrated!"
+    print_info "Backup files were created in $BACKUPS_DIR"
+    print_info "Run 'npm run dev' to test the changes"
+    
+    echo -e "\n${GREEN}===========================================================${NC}"
+    echo -e "${GREEN}Next Steps:${NC}"
+    echo -e "${CYAN}1. Review the changes${NC}"
+    echo -e "${CYAN}2. Test the navigation flow${NC}"
+    echo -e "${CYAN}3. Check for any console errors${NC}"
+    echo -e "${CYAN}4. Add additional subcategory pages as needed${NC}"
+    echo -e "${GREEN}===========================================================${NC}"
 }
 
-# Execute the main function
+# Run the main function
 main
