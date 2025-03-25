@@ -159,4 +159,6 @@
   
   .auth-spinner {
     animation: authSpin 1s linear infinite;
-  }
+  }:root{--terminal-bg:#1e1e1e;--terminal-header-bg:#333;--terminal-text:#f8f8f8;--terminal-green:#4af626;--terminal-border:#444}:root.dark{--terminal-bg:#0d1117;--terminal-header-bg:#161b22;--terminal-text:#ffffff;--terminal-green:#3fb950;--terminal-border:#30363d}
+@media(max-width:640px){.terminal-window{max-height:85vh}.terminal-body{padding:0.75rem;font-size:14px}.terminal-line{line-height:1.4}.keyboard-shortcuts{padding:0.5rem;max-width:95vw}}
+.terminal-window{backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(0,0,0,0.4),0 0 15px rgba(0,255,0,0.15);transition:all 0.3s ease}.terminal-window:hover{box-shadow:0 15px 40px rgba(0,0,0,0.5),0 0 20px rgba(0,255,0,0.2)}

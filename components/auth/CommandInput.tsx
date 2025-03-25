@@ -64,7 +64,7 @@ export const CommandInput: React.FC<CommandInputProps> = ({
       onClick={handleContainerClick}
       className={`flex items-center ${disabled ? 'opacity-70' : 'cursor-text'}`}
     >
-      <span className="text-terminal-green font-mono">{prompt}</span>
+      <span className="text-terminal-green font-mono text-sm md:text-base">{prompt}</span>
       <form onSubmit={handleSubmit} className="flex-1 ml-2">
         <div className="relative flex items-center">
           <input

@@ -200,7 +200,7 @@ const TerminalLogin: React.FC<TerminalLoginProps> = ({
       {/* Terminal Content */}
       <div 
         ref={terminalRef}
-        className="terminal-body h-96 p-4 font-mono text-sm text-terminal-text overflow-y-auto"
+        className="terminal-body h-[60vh] min-h-[400px] p-4 md:p-6 font-mono text-sm text-terminal-text overflow-y-auto"
       >
         {/* Terminal Output */}
         {terminalOutput.map((line, index) => (
