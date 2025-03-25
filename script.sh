@@ -1,499 +1,639 @@
 #!/bin/bash
-# ==========================================================
-# Sp1sh Navigation System Integration Script
-# ==========================================================
-# This script automates the integration of the enhanced 
-# navigation system into the Sp1sh application.
 #
-# What this script does:
-# 1. Updates the Layout component to use EnhancedNavbar
-# 2. Adds NavigationProvider to _app.tsx
-# 3. Creates common subcategory pages
-# 4. Updates imports to ensure menu data accessibility
-# 5. Performs necessary file backups before modifications
-# ==========================================================
+# Next.js Routing Diagnostic & Fix Script
+# Version: 1.0.0
+#
+# This script analyzes and fixes common routing issues in Next.js applications
+# including internationalization problems, redirect loops, and CSP settings.
+#
+# Usage: ./nextjs-routing-fix.sh [--fix]
+# --fix: Apply recommended fixes automatically (use with caution)
 
-# Text styling
+set -e
+
+# Text formatting
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
-CYAN='\033[0;36m'
+BOLD='\033[1m'
 NC='\033[0m' # No Color
 
-# Project paths
-PROJECT_ROOT="."
-COMPONENTS_DIR="$PROJECT_ROOT/components"
-PAGES_DIR="$PROJECT_ROOT/pages"
-CONTEXT_DIR="$PROJECT_ROOT/context"
-BACKUPS_DIR="$PROJECT_ROOT/backup-$(date +%Y%m%d%H%M%S)"
+# Configuration
+NEXT_CONFIG="next.config.js"
+PAGES_DIR="pages"
+AUTO_FIX=false
 
-# Function to print a section header
-print_header() {
-    echo -e "\n${BLUE}===========================================================${NC}"
-    echo -e "${BLUE}$1${NC}"
-    echo -e "${BLUE}===========================================================${NC}"
+# Parse command line arguments
+for arg in "$@"; do
+  case $arg in
+    --fix)
+      AUTO_FIX=true
+      shift
+      ;;
+    --help)
+      echo "Usage: $0 [--fix]"
+      echo "  --fix: Apply recommended fixes automatically (use with caution)"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $arg"
+      echo "Use --help for usage information"
+      exit 1
+      ;;
+  esac
+done
+
+echo -e "${BOLD}Next.js Routing Diagnostic & Fix Script${NC}"
+echo "------------------------------------------------"
+echo -e "Analyzing your Next.js application...\n"
+
+# Function to check if a file exists
+file_exists() {
+  if [ -f "$1" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
-# Function to print a success message
-print_success() {
-    echo -e "${GREEN}✓ $1${NC}"
+# Function to check if a directory exists
+dir_exists() {
+  if [ -d "$1" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
-# Function to print an error message
-print_error() {
-    echo -e "${RED}✗ $1${NC}"
-}
-
-# Function to print a warning message
-print_warning() {
-    echo -e "${YELLOW}! $1${NC}"
-}
-
-# Function to print an info message
-print_info() {
-    echo -e "${CYAN}i $1${NC}"
-}
-
-# Function to back up a file before modifying it
-backup_file() {
-    local file=$1
-    if [ -f "$file" ]; then
-        # Create backup directory if it doesn't exist
-        mkdir -p "$BACKUPS_DIR"
-        
-        # Get directory structure relative to project root
-        local rel_dir=$(dirname "$file" | sed "s|$PROJECT_ROOT/||")
-        mkdir -p "$BACKUPS_DIR/$rel_dir"
-        
-        # Copy file to backup
-        cp "$file" "$BACKUPS_DIR/$rel_dir/$(basename "$file")"
-        print_info "Backed up $file to $BACKUPS_DIR/$rel_dir/$(basename "$file")"
-        return 0
-    else
-        print_error "File $file does not exist, nothing to back up"
-        return 1
-    fi
-}
-
-# Function to check if the project structure is valid
-validate_project_structure() {
-    print_header "Validating project structure"
-    
-    local valid=true
-    
-    # Check for key directories and files
-    if [ ! -d "$COMPONENTS_DIR" ]; then
-        print_error "Components directory not found at $COMPONENTS_DIR"
-        valid=false
-    fi
-    
-    if [ ! -d "$PAGES_DIR" ]; then
-        print_error "Pages directory not found at $PAGES_DIR"
-        valid=false
-    fi
-    
-    if [ ! -f "$COMPONENTS_DIR/layout/Layout.tsx" ]; then
-        print_error "Layout component not found at $COMPONENTS_DIR/layout/Layout.tsx"
-        valid=false
-    fi
-    
-    if [ ! -f "$PAGES_DIR/_app.tsx" ]; then
-        print_error "_app.tsx not found at $PAGES_DIR/_app.tsx"
-        valid=false
-    fi
-    
-    if [ ! -f "$COMPONENTS_DIR/layout/EnhancedNavbar.tsx" ]; then
-        print_error "EnhancedNavbar component not found at $COMPONENTS_DIR/layout/EnhancedNavbar.tsx"
-        print_warning "The enhanced navbar component should be created before running this script"
-        valid=false
-    fi
-    
-    if [ ! -f "$CONTEXT_DIR/NavigationContext.tsx" ]; then
-        print_error "NavigationContext not found at $CONTEXT_DIR/NavigationContext.tsx"
-        print_warning "The navigation context should be created before running this script"
-        valid=false
-    fi
-    
-    if [ "$valid" = false ]; then
-        print_error "Project structure validation failed"
-        exit 1
-    fi
-    
-    print_success "Project structure is valid"
-}
-
-# Function to update the Layout component
-update_layout_component() {
-    print_header "Updating Layout component"
-    
-    local layout_file="$COMPONENTS_DIR/layout/Layout.tsx"
-    backup_file "$layout_file"
-    
-    # Check if the file already imports EnhancedNavbar
-    if grep -q "import { EnhancedNavbar } from './EnhancedNavbar'" "$layout_file"; then
-        print_info "EnhancedNavbar import already exists in Layout component"
-    else
-        # Add EnhancedNavbar import
-        sed -i "s/import { Header } from '.\/Header';/import { Header } from '.\/Header';\nimport { EnhancedNavbar } from '.\/EnhancedNavbar';/g" "$layout_file"
-        print_success "Added EnhancedNavbar import to Layout component"
-    fi
-    
-    # Replace OSNavbar with EnhancedNavbar
-    if grep -q "<OSNavbar />" "$layout_file"; then
-        sed -i "s/<OSNavbar \/>/<EnhancedNavbar \/>/g" "$layout_file"
-        print_success "Replaced OSNavbar with EnhancedNavbar in Layout component"
-    elif grep -q "<EnhancedNavbar />" "$layout_file"; then
-        print_info "EnhancedNavbar is already in use in Layout component"
-    else
-        print_warning "Could not find OSNavbar component to replace in Layout"
-        print_warning "You may need to manually update the Layout component"
-    fi
-}
-
-# Function to update _app.tsx to include NavigationProvider
-update_app_component() {
-    print_header "Updating _app.tsx to include NavigationProvider"
-    
-    local app_file="$PAGES_DIR/_app.tsx"
-    backup_file "$app_file"
-    
-    # Check if the file already imports NavigationProvider
-    if grep -q "import { NavigationProvider } from '../context/NavigationContext'" "$app_file"; then
-        print_info "NavigationProvider import already exists in _app.tsx"
-    else
-        # Add NavigationProvider import
-        sed -i "s/import { ScriptsProvider } from '..\/context\/ScriptsContext';/import { ScriptsProvider } from '..\/context\/ScriptsContext';\nimport { NavigationProvider } from '..\/context\/NavigationContext';/g" "$app_file"
-        print_success "Added NavigationProvider import to _app.tsx"
-    fi
-    
-    # Wrap content with NavigationProvider
-    if grep -q "<NavigationProvider>" "$app_file"; then
-        print_info "NavigationProvider is already in use in _app.tsx"
-    else
-        # Find ScriptsProvider opening tag and add NavigationProvider after it
-        sed -i "s/<ScriptsProvider>/<ScriptsProvider>\n          <NavigationProvider>/g" "$app_file"
-        
-        # Find ScriptsProvider closing tag and add NavigationProvider before it
-        sed -i "s/<\/ScriptsProvider>/<\/NavigationProvider>\n          <\/ScriptsProvider>/g" "$app_file"
-        
-        print_success "Added NavigationProvider wrapper to _app.tsx"
-    fi
-}
-
-# Function to create common subcategory pages
-create_subcategory_pages() {
-    print_header "Creating subcategory page templates"
-    
-    # List of main categories to create pages for
-    local categories=(
-        "system-admin"
-        "security"
-        "network"
-        "cloud-containers"
-        "emergency"
-        "devops-cicd"
-        "automation"
-        "dev-tools"
-        "beginners"
-    )
-    
-    # Create pages directory if it doesn't exist
-    mkdir -p "$PAGES_DIR/categories"
-    
-    for category in "${categories[@]}"; do
-        local category_dir="$PAGES_DIR/categories/$category"
-        mkdir -p "$category_dir"
-        
-        # Create index.tsx for each category if it doesn't exist
-        if [ ! -f "$category_dir/index.tsx" ]; then
-            cat > "$category_dir/index.tsx" << EOF
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useScripts } from '../../../context/ScriptsContext';
-import { LoadingPlaceholder } from '../../../components/ui/LoadingPlaceholder';
-
-export default function CategoryPage() {
-  const router = useRouter();
-  const { setCurrentCategory, isLoading } = useScripts();
+# Check if Next.js configuration files exist
+check_config_files() {
+  echo -e "${BOLD}1. Checking configuration files${NC}"
   
-  useEffect(() => {
-    // Set current category
-    setCurrentCategory('$category');
-    
-    // Push to dynamic category page
-    router.push('/categories/$category');
-  }, [setCurrentCategory, router]);
-
-  if (isLoading) {
-    return <LoadingPlaceholder />;
-  }
-
-  return null;
+  if file_exists "$NEXT_CONFIG"; then
+    echo -e "  ${GREEN}✓${NC} Found $NEXT_CONFIG"
+  else
+    echo -e "  ${RED}✗${NC} Missing $NEXT_CONFIG"
+    echo -e "    ${YELLOW}!${NC} Create a basic Next.js config file"
+    if [ "$AUTO_FIX" = true ]; then
+      echo "module.exports = {
+  reactStrictMode: true,
+};" > "$NEXT_CONFIG"
+      echo -e "    ${GREEN}✓${NC} Created basic $NEXT_CONFIG"
+    fi
+  fi
+  
+  if dir_exists "$PAGES_DIR"; then
+    echo -e "  ${GREEN}✓${NC} Found pages directory"
+  else
+    echo -e "  ${RED}✗${NC} Missing pages directory"
+    echo -e "    ${YELLOW}!${NC} Create a pages directory for your routes"
+    if [ "$AUTO_FIX" = true ]; then
+      mkdir -p "$PAGES_DIR"
+      echo -e "    ${GREEN}✓${NC} Created $PAGES_DIR directory"
+    fi
+  fi
+  
+  echo ""
 }
-EOF
-            print_success "Created category page for $category"
-        else
-            print_info "Category page for $category already exists"
-        fi
+
+# Check for internationalization (i18n) issues
+check_i18n_config() {
+  echo -e "${BOLD}2. Checking internationalization (i18n) configuration${NC}"
+  
+  if ! file_exists "$NEXT_CONFIG"; then
+    echo -e "  ${YELLOW}!${NC} Cannot check i18n config: $NEXT_CONFIG not found"
+    return
+  fi
+  
+  # Check if i18n is configured
+  if grep -q "i18n" "$NEXT_CONFIG"; then
+    echo -e "  ${GREEN}✓${NC} i18n configuration found"
+    
+    # Extract locales from config
+    LOCALES=$(grep -A10 "i18n" "$NEXT_CONFIG" | grep -E "locales.*\[" | sed -E 's/.*\[(.*)\].*/\1/' | tr -d ' ')
+    DEFAULT_LOCALE=$(grep -A10 "i18n" "$NEXT_CONFIG" | grep "defaultLocale" | sed -E "s/.*defaultLocale.*['\"](.*)['\"]/\1/" | tr -d ' ,')
+    
+    echo -e "    Detected locales: $LOCALES"
+    echo -e "    Default locale: $DEFAULT_LOCALE"
+    
+    # Look for potential issues
+    check_locale_redirects
+  else
+    echo -e "  ${YELLOW}!${NC} No i18n configuration found"
+    echo -e "    If you're using multiple languages, consider adding i18n config"
+  fi
+  
+  echo ""
+}
+
+# Check for redirect loops in locale handling
+check_locale_redirects() {
+  echo -e "  ${BOLD}Checking for potential redirect loops in locale handling${NC}"
+  
+  # Look for dynamic routes with immediate redirects
+  DYNAMIC_ROUTES=$(find "$PAGES_DIR" -name "\[*.tsx" -o -name "\[*.jsx" -o -name "\[*.js")
+  REDIRECT_COUNT=0
+  
+  for route in $DYNAMIC_ROUTES; do
+    if grep -q "router.push" "$route" && grep -q "useEffect" "$route"; then
+      REDIRECT_COUNT=$((REDIRECT_COUNT + 1))
+      echo -e "    ${YELLOW}!${NC} Potential redirect loop in $route"
+      
+      if [ "$AUTO_FIX" = true ]; then
+        # Create backup
+        cp "$route" "${route}.bak"
+        
+        # Add condition to prevent redirect loops
+        sed -i.tmp '/router.push.*useEffect/ {
+          s/useEffect\(.*\){\(.*\)router.push\(.*\)}/useEffect\1{\
+    if (router.pathname !== router.asPath) {\2router.push\3}\
+  }/
+        }' "$route"
+        rm -f "${route}.tmp"
+        echo -e "    ${GREEN}✓${NC} Added conditional check to prevent redirect loop"
+      fi
+    fi
+  done
+  
+  if [ $REDIRECT_COUNT -eq 0 ]; then
+    echo -e "    ${GREEN}✓${NC} No obvious redirect loops found"
+  fi
+}
+
+# Check for issues with dynamic routes
+check_dynamic_routes() {
+  echo -e "${BOLD}3. Checking dynamic routes${NC}"
+  
+  # Look for dynamic route files
+  DYNAMIC_ROUTES=$(find "$PAGES_DIR" -name "\[*.tsx" -o -name "\[*.jsx" -o -name "\[*.js")
+  CATCHALL_ROUTES=$(find "$PAGES_DIR" -name "\[\[\.\.\.*" -o -name "\[\.\.\.*")
+  
+  if [ -z "$DYNAMIC_ROUTES" ]; then
+    echo -e "  ${YELLOW}!${NC} No dynamic routes found"
+  else
+    echo -e "  ${GREEN}✓${NC} Found $(echo "$DYNAMIC_ROUTES" | wc -l | tr -d ' ') dynamic route files"
+    
+    # Check for potentially conflicting routes
+    check_route_conflicts
+  fi
+  
+  if [ -n "$CATCHALL_ROUTES" ]; then
+    echo -e "  ${GREEN}✓${NC} Found $(echo "$CATCHALL_ROUTES" | wc -l | tr -d ' ') catch-all routes"
+    
+    # Check for catch-all routes that might override specific routes
+    for catchall in $CATCHALL_ROUTES; do
+      DIR=$(dirname "$catchall")
+      if [ "$(find "$DIR" -name "*.tsx" -o -name "*.jsx" -o -name "*.js" | wc -l)" -gt 1 ]; then
+        echo -e "    ${YELLOW}!${NC} Catch-all route $catchall might override other routes in the same directory"
+      fi
     done
-    
-    # Create emergency subcategories
-    mkdir -p "$PAGES_DIR/emergency/incident-response"
-    mkdir -p "$PAGES_DIR/emergency/forensics"
-    mkdir -p "$PAGES_DIR/emergency/disaster-recovery"
-    
-    # Create index.tsx for emergency subcategories
-    if [ ! -f "$PAGES_DIR/emergency/incident-response/index.tsx" ]; then
-        cat > "$PAGES_DIR/emergency/incident-response/index.tsx" << EOF
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
-import { LoadingPlaceholder } from '../../../components/ui/LoadingPlaceholder';
-
-export default function IncidentResponsePage() {
-  const router = useRouter();
+  fi
   
-  useEffect(() => {
-    // Route to the dynamic emergency category page
-    router.push('/emergency/incident-response');
-  }, [router]);
-
-  return <LoadingPlaceholder />;
+  echo ""
 }
-EOF
-        print_success "Created emergency/incident-response page"
-    fi
-    
-    if [ ! -f "$PAGES_DIR/emergency/forensics/index.tsx" ]; then
-        cat > "$PAGES_DIR/emergency/forensics/index.tsx" << EOF
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
-import { LoadingPlaceholder } from '../../../components/ui/LoadingPlaceholder';
 
-export default function ForensicsPage() {
-  const router = useRouter();
+# Check for conflicting route patterns
+check_route_conflicts() {
+  # Check for potentially conflicting routes like [id].js and [slug].js in same directory
+  CONFLICTS=0
   
-  useEffect(() => {
-    // Route to the dynamic emergency category page
-    router.push('/emergency/forensics');
-  }, [router]);
-
-  return <LoadingPlaceholder />;
-}
-EOF
-        print_success "Created emergency/forensics page"
+  for dir in $(find "$PAGES_DIR" -type d); do
+    DYNAMIC_FILES=$(find "$dir" -maxdepth 1 -name "\[*.tsx" -o -name "\[*.jsx" -o -name "\[*.js" | wc -l)
+    if [ "$DYNAMIC_FILES" -gt 1 ]; then
+      echo -e "    ${YELLOW}!${NC} Potential route conflict in $dir"
+      echo -e "      Multiple dynamic route files in the same directory may cause conflicts"
+      CONFLICTS=$((CONFLICTS + 1))
     fi
-    
-    if [ ! -f "$PAGES_DIR/emergency/disaster-recovery/index.tsx" ]; then
-        cat > "$PAGES_DIR/emergency/disaster-recovery/index.tsx" << EOF
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
-import { LoadingPlaceholder } from '../../../components/ui/LoadingPlaceholder';
-
-export default function DisasterRecoveryPage() {
-  const router = useRouter();
+  done
   
-  useEffect(() => {
-    // Route to the dynamic emergency category page
-    router.push('/emergency/disaster-recovery');
-  }, [router]);
-
-  return <LoadingPlaceholder />;
+  if [ $CONFLICTS -eq 0 ]; then
+    echo -e "    ${GREEN}✓${NC} No obvious route conflicts found"
+  fi
 }
-EOF
-        print_success "Created emergency/disaster-recovery page"
+
+# Check Content Security Policy settings
+check_csp_settings() {
+  echo -e "${BOLD}4. Checking Content Security Policy settings${NC}"
+  
+  if ! file_exists "$NEXT_CONFIG"; then
+    echo -e "  ${YELLOW}!${NC} Cannot check CSP settings: $NEXT_CONFIG not found"
+    return
+  fi
+  
+  if grep -q "Content-Security-Policy" "$NEXT_CONFIG"; then
+    echo -e "  ${GREEN}✓${NC} CSP configuration found"
+    
+    # Check for overly restrictive CSP
+    if grep -q "default-src 'self'" "$NEXT_CONFIG" && ! grep -q "'unsafe-inline'" "$NEXT_CONFIG"; then
+      echo -e "    ${YELLOW}!${NC} CSP might be too restrictive for client-side navigation"
+      echo -e "      Consider allowing 'unsafe-inline' for style-src or using nonces"
+      
+      if [ "$AUTO_FIX" = true ]; then
+        cp "$NEXT_CONFIG" "${NEXT_CONFIG}.bak"
+        sed -i.tmp "s/style-src 'self'/style-src 'self' 'unsafe-inline'/" "$NEXT_CONFIG"
+        rm -f "${NEXT_CONFIG}.tmp"
+        echo -e "    ${GREEN}✓${NC} Updated CSP to allow inline styles"
+      fi
     fi
+  else
+    echo -e "  ${YELLOW}!${NC} No CSP configuration found"
+    echo -e "    This isn't necessarily an issue, but adding CSP headers is recommended for security"
+  fi
+  
+  echo ""
 }
 
-# Function to update EnhancedNavbar to export navigationMenu
-update_navigation_exports() {
-    print_header "Updating navigation exports"
+# Check the _app.js file for proper configuration
+check_app_file() {
+  echo -e "${BOLD}5. Checking _app configuration${NC}"
+  
+  APP_FILE=""
+  if file_exists "$PAGES_DIR/_app.js"; then
+    APP_FILE="$PAGES_DIR/_app.js"
+  elif file_exists "$PAGES_DIR/_app.tsx"; then
+    APP_FILE="$PAGES_DIR/_app.tsx"
+  elif file_exists "$PAGES_DIR/_app.jsx"; then
+    APP_FILE="$PAGES_DIR/_app.jsx"
+  fi
+  
+  if [ -z "$APP_FILE" ]; then
+    echo -e "  ${YELLOW}!${NC} No _app file found"
+    echo -e "    Creating a custom _app file can help with global layout and navigation"
     
-    local navbar_file="$COMPONENTS_DIR/layout/EnhancedNavbar.tsx"
-    backup_file "$navbar_file"
+    if [ "$AUTO_FIX" = true ]; then
+      echo "import '../styles/globals.css'
+
+function MyApp({ Component, pageProps }) {
+  return <Component {...pageProps} />
+}
+
+export default MyApp" > "$PAGES_DIR/_app.js"
+      echo -e "    ${GREEN}✓${NC} Created basic _app.js file"
+    fi
+  else
+    echo -e "  ${GREEN}✓${NC} Found _app file: $APP_FILE"
     
-    # Check if navigationMenu is already exported
-    if grep -q "export const navigationMenu" "$navbar_file"; then
-        print_info "navigationMenu is already exported from EnhancedNavbar"
+    # Check for router event listeners
+    if grep -q "router.events" "$APP_FILE"; then
+      echo -e "    ${GREEN}✓${NC} Router event listeners found"
     else
-        # Replace const navigationMenu with export const navigationMenu
-        sed -i "s/const navigationMenu: FirstLevelItem/export const navigationMenu: FirstLevelItem/g" "$navbar_file"
-        print_success "Exported navigationMenu from EnhancedNavbar"
-    fi
-}
-
-# Function to create a dynamic slug handler for emergency pages
-create_emergency_slug_handler() {
-    print_header "Creating dynamic slug handler for emergency pages"
-    
-    mkdir -p "$PAGES_DIR/emergency"
-    
-    local emergency_slug_file="$PAGES_DIR/emergency/[...slug].tsx"
-    
-    if [ ! -f "$emergency_slug_file" ]; then
-        cat > "$emergency_slug_file" << EOF
-import React, { useEffect, useState } from 'react';
-import Head from 'next/head';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { FiChevronRight } from 'react-icons/fi';
-import { useScripts } from '../../context/ScriptsContext';
-import { useNavigation } from '../../context/NavigationContext';
-import { ScriptCard } from '../../components/scripts/ScriptCard';
-import { LoadingPlaceholder } from '../../components/ui/LoadingPlaceholder';
-
-const EmergencySlugPage: React.FC = () => {
-  const router = useRouter();
-  const { slug } = router.query;
-  const { emergencyScripts, isLoading } = useScripts();
-  const { getBreadcrumbs } = useNavigation();
-  const [pageTitle, setPageTitle] = useState('');
-  const [filteredScripts, setFilteredScripts] = useState<any[]>([]);
-  
-  useEffect(() => {
-    if (slug && Array.isArray(slug)) {
-      const fullPath = \`/emergency/\${slug.join('/')}\`;
+      echo -e "    ${YELLOW}!${NC} No router event listeners found"
+      echo -e "      Adding router event listeners can help track and debug navigation issues"
       
-      // Set page title based on slug
-      const categoryTitle = slug[slug.length - 1]
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-      
-      setPageTitle(categoryTitle);
-      
-      // Filter scripts based on the path
-      const matchingScripts = emergencyScripts.filter(script => {
-        // Match based on title and tags
-        return (
-          script.title.toLowerCase().includes(categoryTitle.toLowerCase()) ||
-          script.tags.some(tag => 
-            slug.some(s => tag.toLowerCase().includes(s.toLowerCase()))
-          )
-        );
-      });
-      
-      setFilteredScripts(matchingScripts);
-    }
-  }, [slug, emergencyScripts]);
-  
-  if (isLoading || !slug) {
-    return <LoadingPlaceholder />;
-  }
-  
-  const fullPath = \`/emergency/\${Array.isArray(slug) ? slug.join('/') : slug}\`;
-  const breadcrumbs = getBreadcrumbs(fullPath);
-
-  return (
-    <>
-      <Head>
-        <title>{pageTitle} Emergency Scripts | Sp1sh</title>
-        <meta name="description" content={\`Emergency scripts for \${pageTitle}. Quick solutions for critical situations.\`} />
-      </Head>
-      
-      <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumbs */}
-        <nav className="flex text-sm text-gray-500 dark:text-gray-400 mb-6">
-          {breadcrumbs.map((crumb, index) => (
-            <React.Fragment key={crumb.path}>
-              {index > 0 && <FiChevronRight className="mx-2 mt-0.5" />}
-              {index === breadcrumbs.length - 1 ? (
-                <span className="text-gray-900 dark:text-white font-medium">{crumb.name}</span>
-              ) : (
-                <Link href={crumb.path} className="hover:text-primary dark:hover:text-primary-light">
-                  {crumb.name}
-                </Link>
-              )}
-            </React.Fragment>
-          ))}
-        </nav>
+      if [ "$AUTO_FIX" = true ]; then
+        cp "$APP_FILE" "${APP_FILE}.bak"
         
-        {/* Category Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8 border border-gray-100 dark:border-gray-700">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {pageTitle} Scripts
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Critical scripts for {pageTitle.toLowerCase()} scenarios. These scripts have been verified for reliability and safety.
-          </p>
-        </div>
+        if grep -q "import.*next/router" "$APP_FILE"; then
+          # Router already imported
+          :
+        else
+          # Add router import
+          sed -i.tmp "1s/^/import { useRouter } from 'next\/router'\n/" "$APP_FILE"
+        fi
         
-        {/* Scripts Section */}
-        <section>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Available Scripts ({filteredScripts.length})
-          </h2>
+        # Add router event listeners
+        if grep -q "useEffect" "$APP_FILE"; then
+          # There's already a useEffect hook, we need more complex logic
+          echo -e "    ${YELLOW}!${NC} Manual update needed for router events"
+        else
+          # Insert useEffect hook
+          sed -i.tmp "/function.*App.*{/a\\
+  const router = useRouter()\\
+  \\
+  useEffect(() => {\\
+    const handleRouteChangeStart = (url) => {\\
+      console.log(\`Route change starting to \${url}\`)\\
+    }\\
+    \\
+    const handleRouteChangeComplete = (url) => {\\
+      console.log(\`Route change completed to \${url}\`)\\
+    }\\
+    \\
+    const handleRouteChangeError = (err, url) => {\\
+      console.error(\`Route change to \${url} failed: \${err}\`)\\
+    }\\
+    \\
+    router.events.on('routeChangeStart', handleRouteChangeStart)\\
+    router.events.on('routeChangeComplete', handleRouteChangeComplete)\\
+    router.events.on('routeChangeError', handleRouteChangeError)\\
+    \\
+    return () => {\\
+      router.events.off('routeChangeStart', handleRouteChangeStart)\\
+      router.events.off('routeChangeComplete', handleRouteChangeComplete)\\
+      router.events.off('routeChangeError', handleRouteChangeError)\\
+    }\\
+  }, [])" "$APP_FILE"
           
-          {filteredScripts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredScripts.map((script) => (
-                <ScriptCard key={script.id} script={script} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-              <div className="text-4xl mb-3">🔍</div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No scripts found</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                No emergency scripts found for this category yet.
-              </p>
-              <Link
-                href="/emergency"
-                className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-medium rounded-md transition-colors"
-              >
-                Browse All Emergency Scripts
-              </Link>
-            </div>
-          )}
-        </section>
-      </div>
-    </>
-  );
-};
-
-export default EmergencySlugPage;
-EOF
-        print_success "Created dynamic slug handler for emergency pages"
-    else
-        print_info "Dynamic slug handler for emergency pages already exists"
+          # Add React import if missing
+          if ! grep -q "import React" "$APP_FILE"; then
+            sed -i.tmp "1s/^/import React, { useEffect } from 'react'\n/" "$APP_FILE"
+          elif ! grep -q "{ useEffect }" "$APP_FILE"; then
+            sed -i.tmp "s/import React/import React, { useEffect }/" "$APP_FILE"
+          fi
+          
+          echo -e "    ${GREEN}✓${NC} Added router event listeners to $APP_FILE"
+        fi
+        
+        rm -f "${APP_FILE}.tmp"
+      fi
     fi
+  fi
+  
+  echo ""
 }
 
-# Main execution function
-main() {
-    print_header "Starting Sp1sh Navigation Integration"
+# Check for issues in emergency route handling
+check_emergency_routes() {
+  echo -e "${BOLD}6. Checking emergency routes${NC}"
+  
+  EMERGENCY_DIR="$PAGES_DIR/emergency"
+  if ! dir_exists "$EMERGENCY_DIR"; then
+    echo -e "  ${YELLOW}!${NC} Emergency directory not found"
+    return
+  fi
+  
+  echo -e "  ${GREEN}✓${NC} Found emergency directory"
+  
+  # Check for incident-response route specifically
+  IR_FILE=""
+  if dir_exists "$EMERGENCY_DIR/incident-response"; then
+    IR_DIR="$EMERGENCY_DIR/incident-response"
     
-    # Validate project structure
-    validate_project_structure
+    if file_exists "$IR_DIR/index.js" || file_exists "$IR_DIR/index.tsx" || file_exists "$IR_DIR/index.jsx"; then
+      echo -e "    ${GREEN}✓${NC} Found incident-response index file"
+      
+      # Check for redirect loops
+      for f in "$IR_DIR/index.js" "$IR_DIR/index.tsx" "$IR_DIR/index.jsx"; do
+        if file_exists "$f"; then
+          IR_FILE="$f"
+          break
+        fi
+      done
+      
+      if grep -q "router.push" "$IR_FILE" && grep -q "useEffect" "$IR_FILE"; then
+        echo -e "    ${YELLOW}!${NC} Potential redirect loop in incident-response"
+        
+        if [ "$AUTO_FIX" = true ]; then
+          # Create backup
+          cp "$IR_FILE" "${IR_FILE}.bak"
+          
+          # Fix the redirect logic
+          sed -i.tmp '/useEffect/,/\}/{
+            s/useEffect\(.*\){/useEffect\1{/
+            s/router.push\((.*)\)/if (router.pathname !== "\/emergency\/incident-response") {\
+      router.push\1\
+    }/
+          }' "$IR_FILE"
+          rm -f "${IR_FILE}.tmp"
+          echo -e "    ${GREEN}✓${NC} Fixed redirect logic in incident-response"
+        fi
+      fi
+    else
+      echo -e "    ${YELLOW}!${NC} No index file found in incident-response directory"
+    fi
+  else
+    echo -e "    ${YELLOW}!${NC} incident-response directory not found"
+  fi
+  
+  # Check for catch-all route handler
+  SLUG_FILE=""
+  for f in "$EMERGENCY_DIR/[...slug].js" "$EMERGENCY_DIR/[...slug].tsx" "$EMERGENCY_DIR/[...slug].jsx"; do
+    if file_exists "$f"; then
+      SLUG_FILE="$f"
+      break
+    fi
+  done
+  
+  if [ -n "$SLUG_FILE" ]; then
+    echo -e "    ${GREEN}✓${NC} Found catch-all slug handler: $SLUG_FILE"
     
-    # Update Layout component
-    update_layout_component
-    
-    # Update _app.tsx to include NavigationProvider
-    update_app_component
-    
-    # Update EnhancedNavbar to export navigationMenu
-    update_navigation_exports
-    
-    # Create common subcategory pages
-    create_subcategory_pages
-    
-    # Create dynamic slug handler for emergency pages
-    create_emergency_slug_handler
-    
-    print_header "Sp1sh Navigation Integration Complete"
-    print_success "The navigation system has been successfully integrated!"
-    print_info "Backup files were created in $BACKUPS_DIR"
-    print_info "Run 'npm run dev' to test the changes"
-    
-    echo -e "\n${GREEN}===========================================================${NC}"
-    echo -e "${GREEN}Next Steps:${NC}"
-    echo -e "${CYAN}1. Review the changes${NC}"
-    echo -e "${CYAN}2. Test the navigation flow${NC}"
-    echo -e "${CYAN}3. Check for any console errors${NC}"
-    echo -e "${CYAN}4. Add additional subcategory pages as needed${NC}"
-    echo -e "${GREEN}===========================================================${NC}"
+    # Check for proper slug handling
+    if ! grep -q "router.query.slug" "$SLUG_FILE" && ! grep -q "params.slug" "$SLUG_FILE"; then
+      echo -e "    ${YELLOW}!${NC} Catch-all slug file may not be handling slugs correctly"
+      
+      if [ "$AUTO_FIX" = true ]; then
+        echo -e "    ${YELLOW}!${NC} Manual review recommended for slug handling logic"
+      fi
+    fi
+  else
+    echo -e "    ${YELLOW}!${NC} No catch-all slug handler found"
+    echo -e "      This might be needed for handling dynamic emergency routes"
+  fi
+  
+  echo ""
 }
 
-# Run the main function
-main
+# Generate summary and recommendations
+generate_summary() {
+  echo -e "${BOLD}Summary and Recommendations${NC}"
+  echo "--------------------------------"
+  
+  # Count issues found
+  ISSUES=$(grep -c "${YELLOW}!" "$0.log")
+  FIXES=$(grep -c "${GREEN}✓ Fixed\|${GREEN}✓ Created\|${GREEN}✓ Added\|${GREEN}✓ Updated" "$0.log")
+  
+  if [ "$ISSUES" -eq 0 ]; then
+    echo -e "${GREEN}No issues found!${NC} Your Next.js routing configuration looks good."
+  else
+    echo -e "Found ${YELLOW}$ISSUES potential issues${NC} with your Next.js routing configuration."
+    
+    if [ "$AUTO_FIX" = true ]; then
+      echo -e "Applied ${GREEN}$FIXES fixes${NC} automatically."
+      
+      if [ "$FIXES" -lt "$ISSUES" ]; then
+        echo -e "${YELLOW}Some issues require manual intervention.${NC} See the log for details."
+      fi
+    else
+      echo -e "Run with ${BOLD}--fix${NC} to apply automatic fixes for these issues."
+    fi
+  fi
+  
+  echo ""
+  echo "Review the full output log in $0.log"
+  echo ""
+  echo -e "${BOLD}Next Steps:${NC}"
+  echo "1. Verify any applied fixes"
+  echo "2. Test your application routing thoroughly"
+  echo "3. Consider implementing the best practices in the routing guide"
+  echo ""
+}
+
+# Print routing best practices guide
+print_routing_guide() {
+  echo -e "${BOLD}Next.js Routing Best Practices Guide${NC}"
+  echo "-------------------------------------"
+  echo -e "See 'routing-guide.md' for comprehensive routing guidelines"
+  
+  if [ "$AUTO_FIX" = true ]; then
+    cat > "routing-guide.md" << 'GUIDE'
+# Next.js Routing Best Practices Guide
+
+## Basic Route Structure
+
+1. **File-based routing:**
+   - `pages/index.js` → `/`
+   - `pages/about.js` → `/about`
+   - `pages/blog/index.js` → `/blog`
+   - `pages/blog/post.js` → `/blog/post`
+
+2. **Nested routes:**
+   - Create directories and files that match your route hierarchy
+   - Keep related routes grouped in directories
+
+## Dynamic Routes
+
+1. **Simple dynamic routes:**
+   - `pages/posts/[id].js` → `/posts/1`, `/posts/abc`, etc.
+   - Access parameters with `useRouter().query.id`
+
+2. **Catch-all routes:**
+   - `pages/blog/[...slug].js` → `/blog/2023/01/post`, etc.
+   - Access parameters with `useRouter().query.slug` (as array)
+
+3. **Optional catch-all routes:**
+   - `pages/[[...slug]].js` → `/`, `/about`, `/about/team`, etc.
+   - Matches even if no parameters are provided
+
+## Route Handlers
+
+1. **getStaticProps/getStaticPaths:**
+   - Use for content that can be pre-rendered at build time
+   - Define which dynamic paths to pre-render with `getStaticPaths`
+
+2. **getServerSideProps:**
+   - Use for pages that need server-side rendering on every request
+   - Avoid unnecessary server-side rendering when possible
+
+## Internationalization (i18n)
+
+1. **Configuration:**
+   ```js
+   // next.config.js
+   module.exports = {
+     i18n: {
+       locales: ['en', 'fr', 'it'],
+       defaultLocale: 'en',
+     }
+   }
+   ```
+
+2. **Automatic locale detection:**
+   - Next.js auto-detects the user's preferred locale
+   - Redirects based on the `defaultLocale` setting
+
+3. **Preventing redirect loops:**
+   - When pushing to new routes, include the locale:
+   ```js
+   router.push('/page', '/page', { locale: router.locale })
+   ```
+   - Or use locale-aware Link component:
+   ```jsx
+   <Link href="/page" locale={router.locale}>Page</Link>
+   ```
+
+## Navigation
+
+1. **Client-side navigation:**
+   - Use `<Link>` component for client-side transitions
+   - Always include `href` attribute
+
+2. **Programmatic navigation:**
+   - Import and use the router: `import { useRouter } from 'next/router'`
+   - Navigate with `router.push('/destination')`
+   - Pass options like `{ shallow: true }` for partial rendering
+
+3. **Handling route events:**
+   ```js
+   router.events.on('routeChangeStart', (url) => {
+     console.log(`Route changing to ${url}`)
+   })
+   router.events.on('routeChangeComplete', (url) => {
+     console.log(`Route changed to ${url}`)
+   })
+   router.events.on('routeChangeError', (err, url) => {
+     console.error(`Route change to ${url} failed: ${err}`)
+   })
+   ```
+
+## Common Pitfalls & Solutions
+
+1. **Redirect loops:**
+   - Always check current route before redirecting:
+   ```js
+   useEffect(() => {
+     if (router.pathname !== '/desired-path') {
+       router.push('/desired-path')
+     }
+   }, [router])
+   ```
+
+2. **Dynamic routes conflicts:**
+   - Avoid multiple dynamic route files in the same directory
+   - Order matters: more specific routes should come before catch-all routes
+
+3. **404 issues:**
+   - Create a custom `pages/404.js` for better user experience
+   - Check that your catch-all routes don't accidentally capture invalid routes
+
+4. **Content Security Policy issues:**
+   - Ensure script-src allows 'self' and other necessary sources
+   - Allow 'unsafe-inline' for style-src if needed for client navigation
+
+5. **i18n issues:**
+   - Always include the current locale when navigating:
+   ```js
+   router.push('/page', undefined, { locale: router.locale })
+   ```
+   - Test navigation paths with different locales
+
+## Performance Optimization
+
+1. **Code splitting:**
+   - Next.js automatically code-splits at the page level
+   - Use dynamic imports for additional code splitting within pages
+
+2. **Prefetching:**
+   - Links within viewport are automatically prefetched
+   - Disable with `<Link prefetch={false}>` when not needed
+
+3. **Shallow routing:**
+   - Update URL without running data fetching methods:
+   ```js
+   router.push('/path?filter=value', undefined, { shallow: true })
+   ```
+   - Good for updating query parameters without full page reload
+
+## Security Considerations
+
+1. **Input validation:**
+   - Always validate dynamic parameters before using them
+   - Prevent injection attacks in route parameters
+
+2. **Authentication routing:**
+   - Use middleware or HOCs to protect routes
+   - Redirect unauthenticated users at the page level
+
+3. **CSP Headers:**
+   - Implement strict Content-Security-Policy headers
+   - Allow only necessary sources for scripts and styles
+GUIDE
+    echo -e "${GREEN}✓${NC} Created routing-guide.md with comprehensive guidelines"
+  fi
+  
+  echo ""
+}
+
+# Main script execution
+(
+check_config_files
+check_i18n_config
+check_dynamic_routes
+check_csp_settings
+check_app_file
+check_emergency_routes
+generate_summary
+print_routing_guide
+) | tee "$0.log"
+
+echo "Diagnostic complete! See $0.log for details."
