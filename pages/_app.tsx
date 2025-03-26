@@ -1,3 +1,4 @@
+// pages/_app.tsx
 import { useEffect } from 'react';
 import { ThemeProvider } from 'next-themes';
 import { SWRConfig } from 'swr';
@@ -6,11 +7,15 @@ import { ScriptsProvider } from '../context/ScriptsContext';
 import { NavigationProvider } from '../context/NavigationContext';
 import { cachedFetcher, registerServiceWorker } from '../utils/cache';
 import { detectSlowRenders } from '../utils/performanceMonitoring';
+import useRouterPatch from '../hooks/useRouterPatch';
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import { PerformanceReport } from '../components/ui/PerformanceReport';
 
 export default function App({ Component, pageProps }: AppProps) {
+  // Apply router patch to handle SecurityErrors
+  useRouterPatch();
+
   // Register service worker for caching
   useEffect(() => {
     // Initialize performance monitoring in development

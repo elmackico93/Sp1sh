@@ -2,17 +2,39 @@ import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { FiChevronRight } from 'react-icons/fi';
 import { useScripts } from '../../context/ScriptsContext';
 import { useNavigation } from '../../context/NavigationContext';
 import { ScriptCard } from '../../components/scripts/ScriptCard';
 import { LoadingPlaceholder } from '../../components/ui/LoadingPlaceholder';
+import { filterScriptsByCategory } from '../../utils/categories/categoryUtils';
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      when: "beforeChildren",
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1
+  }
+};
 
 const EmergencySlugPage: React.FC = () => {
   const router = useRouter();
   const { slug } = router.query;
   const { emergencyScripts, isLoading } = useScripts();
-  const { getBreadcrumbs } = useNavigation();
+  const { getBreadcrumbs, findCategoryByPath } = useNavigation();
   const [pageTitle, setPageTitle] = useState('');
   const [filteredScripts, setFilteredScripts] = useState<any[]>([]);
   
@@ -20,8 +42,11 @@ const EmergencySlugPage: React.FC = () => {
     if (slug && Array.isArray(slug)) {
       const fullPath = `/emergency/${slug.join('/')}`;
       
-      // Set page title based on slug
-      const categoryTitle = slug[slug.length - 1]
+      // Try to find the category in the navigation structure
+      const category = findCategoryByPath(fullPath);
+      
+      // Set page title based on category or slug
+      const categoryTitle = category?.name || slug[slug.length - 1]
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
@@ -41,7 +66,7 @@ const EmergencySlugPage: React.FC = () => {
       
       setFilteredScripts(matchingScripts);
     }
-  }, [slug, emergencyScripts]);
+  }, [slug, emergencyScripts, findCategoryByPath]);
   
   if (isLoading || !slug) {
     return <LoadingPlaceholder />;
@@ -55,11 +80,12 @@ const EmergencySlugPage: React.FC = () => {
       <Head>
         <title>{pageTitle} Emergency Scripts | Sp1sh</title>
         <meta name="description" content={`Emergency scripts for ${pageTitle}. Quick solutions for critical situations.`} />
+        <meta name="keywords" content={`emergency scripts, ${pageTitle.toLowerCase()}, disaster recovery, incident response`} />
       </Head>
       
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumbs */}
-        <nav className="flex text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <nav className="flex flex-wrap text-sm text-gray-500 dark:text-gray-400 mb-6">
           {breadcrumbs.map((crumb, index) => (
             <React.Fragment key={crumb.path}>
               {index > 0 && <FiChevronRight className="mx-2 mt-0.5" />}
@@ -91,11 +117,18 @@ const EmergencySlugPage: React.FC = () => {
           </h2>
           
           {filteredScripts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {filteredScripts.map((script) => (
-                <ScriptCard key={script.id} script={script} />
+                <motion.div key={script.id} variants={itemVariants}>
+                  <ScriptCard script={script} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : (
             <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
               <div className="text-4xl mb-3">🔍</div>

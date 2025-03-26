@@ -3,207 +3,100 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FiChevronRight, FiFolder, FiList, FiGrid, FiArrowLeft, FiChevronDown } from 'react-icons/fi';
+import { FiChevronRight, FiGrid, FiList, FiFilter } from 'react-icons/fi';
 import { useScripts } from '../../context/ScriptsContext';
+import { useNavigation } from '../../context/NavigationContext';
 import { ScriptCard } from '../../components/scripts/ScriptCard';
-import { Script, mockScripts, OSType } from '../../mocks/scripts';
 import { LoadingPlaceholder } from '../../components/ui/LoadingPlaceholder';
-import { navigationMenu } from '../../components/layout/EnhancedNavbar';
+import { filterScriptsByCategory } from '../../utils/categories/categoryUtils';
+import { CategoryItem, OperatingSystem } from '../../types/categories';
 
-// Import the navigation menu structure from EnhancedNavbar
-// This is a dummy import since we don't want to modify the actual file structure
-// In a real implementation, you'd properly export the navigation structure
-
-// Helper interfaces for types
-interface CategoryItem {
-  name: string;
-  path: string;
-  icon?: string;
-  description?: string;
-}
-
-interface CategoryData {
-  title: string;
-  description: string;
-  breadcrumbs: { name: string; path: string }[];
-  subcategories: CategoryItem[];
-  scripts: Script[];
-  parentCategory?: CategoryItem;
-  iconEmoji?: string;
-}
-
-// Function to find a category in the navigation structure
-const findCategoryInNavigation = (
-  slug: string[],
-  navigationItems = navigationMenu
-): CategoryData | null => {
-  // Convert slug to path format
-  const fullPath = `/categories/${slug.join('/')}`;
-  
-  // Search first level
-  const firstLevelItem = navigationItems.find(
-    item => item.path === fullPath || 
-           (item.path.startsWith('/categories/') && fullPath.startsWith(item.path))
-  );
-  
-  if (!firstLevelItem) return null;
-  
-  // If exact match at first level
-  if (firstLevelItem.path === fullPath) {
-    return {
-      title: firstLevelItem.name,
-      description: `Find the best ${firstLevelItem.name.toLowerCase()} scripts for all platforms.`,
-      breadcrumbs: [
-        { name: 'Home', path: '/' },
-        { name: firstLevelItem.name, path: firstLevelItem.path }
-      ],
-      subcategories: firstLevelItem.children.map(child => ({
-        name: child.name,
-        path: child.path,
-        icon: child.icon
-      })),
-      scripts: mockScripts.filter(script => 
-        script.category.toLowerCase() === slug[0].toLowerCase()
-      ),
-      iconEmoji: firstLevelItem.icon
-    };
-  }
-  
-  // Search second level
-  for (const firstLevel of navigationItems) {
-    const secondLevelItem = firstLevel.children?.find(
-      item => item.path === fullPath || 
-             (item.path.startsWith('/categories/') && fullPath.startsWith(item.path))
-    );
-    
-    if (secondLevelItem) {
-      // If exact match at second level
-      if (secondLevelItem.path === fullPath) {
-        return {
-          title: secondLevelItem.name,
-          description: `Explore ${secondLevelItem.name.toLowerCase()} scripts and solutions.`,
-          breadcrumbs: [
-            { name: 'Home', path: '/' },
-            { name: firstLevel.name, path: firstLevel.path },
-            { name: secondLevelItem.name, path: secondLevelItem.path }
-          ],
-          subcategories: secondLevelItem.children?.map(child => ({
-            name: child.name,
-            path: child.path
-          })) || [],
-          scripts: mockScripts.filter(script => 
-            script.category.toLowerCase() === slug[0].toLowerCase() &&
-            script.title.toLowerCase().includes(secondLevelItem.name.toLowerCase())
-          ),
-          parentCategory: {
-            name: firstLevel.name,
-            path: firstLevel.path,
-            icon: firstLevel.icon
-          },
-          iconEmoji: secondLevelItem.icon || firstLevel.icon
-        };
-      }
-      
-      // Search third level
-      const thirdLevelItem = secondLevelItem.children?.find(
-        item => item.path === fullPath
-      );
-      
-      if (thirdLevelItem) {
-        return {
-          title: thirdLevelItem.name,
-          description: `Ready-to-use ${thirdLevelItem.name.toLowerCase()} scripts for your needs.`,
-          breadcrumbs: [
-            { name: 'Home', path: '/' },
-            { name: firstLevel.name, path: firstLevel.path },
-            { name: secondLevelItem.name, path: secondLevelItem.path },
-            { name: thirdLevelItem.name, path: thirdLevelItem.path }
-          ],
-          subcategories: [],
-          scripts: mockScripts.filter(script => 
-            script.category.toLowerCase() === slug[0].toLowerCase() &&
-            script.title.toLowerCase().includes(thirdLevelItem.name.toLowerCase())
-          ),
-          parentCategory: {
-            name: secondLevelItem.name,
-            path: secondLevelItem.path,
-            icon: secondLevelItem.icon
-          },
-          iconEmoji: firstLevel.icon
-        };
-      }
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      when: "beforeChildren",
+      staggerChildren: 0.1
     }
   }
-  
-  return null;
 };
 
-const DynamicCategoryPage: React.FC = () => {
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1
+  }
+};
+
+const CategorySlugPage: React.FC = () => {
   const router = useRouter();
   const { slug } = router.query;
   const { allScripts, isLoading } = useScripts();
-  const [categoryData, setCategoryData] = useState<CategoryData | null>(null);
+  const { getBreadcrumbs, findCategoryByPath } = useNavigation();
+  const [currentCategory, setCurrentCategory] = useState<CategoryItem | null>(null);
+  const [filteredScripts, setFilteredScripts] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [filterOS, setFilterOS] = useState<OSType | 'all'>('all');
+  const [filterOS, setFilterOS] = useState<OperatingSystem>('all');
   const [expandedInfo, setExpandedInfo] = useState(false);
-  
+
   useEffect(() => {
     if (slug && Array.isArray(slug)) {
-      // Find category in navigation structure
-      const data = findCategoryInNavigation(slug);
-      setCategoryData(data);
+      const fullPath = `/categories/${slug.join('/')}`;
       
-      // If data is null or couldn't be found, redirect to 404
-      if (!data && !isLoading) {
-        router.push('/404');
+      // Try to find the category in the navigation structure
+      const category = findCategoryByPath(fullPath);
+      setCurrentCategory(category);
+      
+      // Filter scripts based on category
+      let categoryScripts = filterScriptsByCategory(allScripts, fullPath);
+      
+      // Apply OS filter if needed
+      if (filterOS !== 'all') {
+        categoryScripts = categoryScripts.filter(script => 
+          script.os === filterOS || script.os === 'cross-platform'
+        );
       }
+      
+      setFilteredScripts(categoryScripts);
     }
-  }, [slug, router, isLoading]);
+  }, [slug, allScripts, filterOS, findCategoryByPath]);
   
-  // Loading state
-  if (isLoading || !categoryData) {
+  if (isLoading || !slug) {
     return <LoadingPlaceholder />;
   }
   
-  // Filter scripts by OS if necessary
-  const filteredScripts = filterOS === 'all' 
-    ? categoryData.scripts 
-    : categoryData.scripts.filter(script => script.os === filterOS || script.os === 'cross-platform');
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        when: "beforeChildren",
-        staggerChildren: 0.1
-      }
-    }
-  };
+  const fullPath = `/categories/${Array.isArray(slug) ? slug.join('/') : slug}`;
+  const breadcrumbs = getBreadcrumbs(fullPath);
   
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1
-    }
-  };
+  // Get category information, falling back to slug-based formatting if needed
+  const categoryName = currentCategory?.name || slug[slug.length - 1]
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+  
+  const categoryDescription = currentCategory?.description || 
+    `Find the best ${categoryName.toLowerCase()} scripts for system administration and automation.`;
+  
+  const categoryIcon = currentCategory?.icon;
 
   return (
     <>
       <Head>
-        <title>{categoryData.title} Scripts | Sp1sh</title>
-        <meta name="description" content={categoryData.description} />
+        <title>{categoryName} Scripts | Sp1sh</title>
+        <meta name="description" content={categoryDescription} />
+        <meta name="keywords" content={`shell scripts, ${categoryName.toLowerCase()}, automation, system administration`} />
       </Head>
       
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumbs */}
-        <nav className="flex text-sm text-gray-500 dark:text-gray-400 mb-6">
-          {categoryData.breadcrumbs.map((crumb, index) => (
+        <nav className="flex flex-wrap text-sm text-gray-500 dark:text-gray-400 mb-6">
+          {breadcrumbs.map((crumb, index) => (
             <React.Fragment key={crumb.path}>
               {index > 0 && <FiChevronRight className="mx-2 mt-0.5" />}
-              {index === categoryData.breadcrumbs.length - 1 ? (
+              {index === breadcrumbs.length - 1 ? (
                 <span className="text-gray-900 dark:text-white font-medium">{crumb.name}</span>
               ) : (
                 <Link href={crumb.path} className="hover:text-primary dark:hover:text-primary-light">
@@ -216,54 +109,52 @@ const DynamicCategoryPage: React.FC = () => {
         
         {/* Category Header */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8 border border-gray-100 dark:border-gray-700">
-          <div className="flex items-start justify-between">
-            <div className="flex">
-              {categoryData.iconEmoji && (
-                <div className="mr-4 text-4xl">{categoryData.iconEmoji}</div>
-              )}
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  {categoryData.title}
-                </h1>
-                <p className={`text-gray-600 dark:text-gray-300 ${!expandedInfo && 'line-clamp-2'}`}>
-                  {categoryData.description}
-                  {expandedInfo && (
-                    <>
-                      <br/><br/>
-                      This category contains {categoryData.scripts.length} scripts and {categoryData.subcategories.length} subcategories.
-                      Browse the available scripts below or explore subcategories for more specific solutions.
-                    </>
-                  )}
-                </p>
-                {categoryData.description.length > 120 && (
-                  <button 
-                    onClick={() => setExpandedInfo(!expandedInfo)}
-                    className="text-primary dark:text-primary-light text-sm font-medium flex items-center mt-2"
-                  >
-                    {expandedInfo ? 'Show less' : 'Show more'}
-                    <FiChevronDown className={`ml-1 transform transition-transform ${expandedInfo ? 'rotate-180' : ''}`} />
-                  </button>
-                )}
+          <div className="flex items-start">
+            {categoryIcon && (
+              <div className="mr-4 text-4xl">
+                {categoryIcon}
               </div>
-            </div>
-            
-            {categoryData.parentCategory && (
-              <Link 
-                href={categoryData.parentCategory.path}
-                className="flex items-center text-primary dark:text-primary-light text-sm font-medium bg-primary/5 dark:bg-primary-dark/10 px-3 py-1.5 rounded-md hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-colors"
-              >
-                <FiArrowLeft className="mr-2" />
-                Back to {categoryData.parentCategory.name}
-              </Link>
             )}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {categoryName} Scripts
+              </h1>
+              <p className={`text-gray-600 dark:text-gray-300 ${!expandedInfo && 'line-clamp-2'}`}>
+                {categoryDescription}
+                {expandedInfo && currentCategory?.children && currentCategory.children.length > 0 && (
+                  <>
+                    <br /><br />
+                    This category contains {filteredScripts.length} scripts and {currentCategory.children.length} subcategories.
+                    Browse the available scripts below or explore subcategories for more specific solutions.
+                  </>
+                )}
+              </p>
+              {categoryDescription.length > 100 && (
+                <button 
+                  onClick={() => setExpandedInfo(!expandedInfo)}
+                  className="text-primary dark:text-primary-light text-sm font-medium flex items-center mt-2"
+                >
+                  {expandedInfo ? 'Show less' : 'Show more'}
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className={`ml-1 w-4 h-4 transform transition-transform ${expandedInfo ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         </div>
         
         {/* Subcategories Section */}
-        {categoryData.subcategories.length > 0 && (
+        {currentCategory?.children && currentCategory.children.length > 0 && (
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              {categoryData.subcategories.length > 0 && 'Subcategories'}
+              Subcategories
             </h2>
             
             <motion.div 
@@ -272,7 +163,7 @@ const DynamicCategoryPage: React.FC = () => {
               initial="hidden"
               animate="visible"
             >
-              {categoryData.subcategories.map((subcategory) => (
+              {currentCategory.children.map((subcategory, index) => (
                 <motion.div
                   key={subcategory.path}
                   variants={itemVariants}
@@ -286,7 +177,15 @@ const DynamicCategoryPage: React.FC = () => {
                     {subcategory.icon ? (
                       <span className="text-2xl mr-3">{subcategory.icon}</span>
                     ) : (
-                      <FiFolder className="w-6 h-6 mr-3 text-primary dark:text-primary-light" />
+                      <svg 
+                        className="w-6 h-6 mr-3 text-primary dark:text-primary-light" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24" 
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                      </svg>
                     )}
                     <div>
                       <h3 className="font-medium text-gray-900 dark:text-white mb-1">
@@ -392,72 +291,7 @@ const DynamicCategoryPage: React.FC = () => {
             >
               {filteredScripts.map((script) => (
                 <motion.div key={script.id} variants={itemVariants}>
-                  {viewMode === 'grid' ? (
-                    <ScriptCard script={script} />
-                  ) : (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                      <div className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-medium text-gray-900 dark:text-white mb-1">
-                              {script.title}
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-2">
-                              {script.description}
-                            </p>
-                          </div>
-                          <div className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            script.os === 'linux' ? 'bg-linux-green/10 text-linux-green' :
-                            script.os === 'windows' ? 'bg-windows-blue/10 text-windows-blue' :
-                            script.os === 'macos' ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' :
-                            'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                          }`}>
-                            {script.os === 'linux' && '🐧 '}
-                            {script.os === 'windows' && '🪟 '}
-                            {script.os === 'macos' && '🍎 '}
-                            {script.os === 'cross-platform' && '🔄 '}
-                            {script.os.charAt(0).toUpperCase() + script.os.slice(1)}
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-1.5 mb-3">
-                          {script.tags.slice(0, 3).map((tag) => (
-                            <span 
-                              key={tag}
-                              className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs text-gray-600 dark:text-gray-400"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {script.tags.length > 3 && (
-                            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs text-gray-600 dark:text-gray-400">
-                              +{script.tags.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                            <span className="flex items-center gap-1">
-                              <span>⭐</span>
-                              <span>{script.rating.toFixed(1)}</span>
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span>⬇️</span>
-                              <span>{script.downloads.toLocaleString()}</span>
-                            </span>
-                          </div>
-                          
-                          <Link
-                            href={`/scripts/${script.id}`}
-                            className="inline-flex items-center px-3 py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-medium rounded-full transition-colors"
-                          >
-                            View Script
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <ScriptCard script={script} />
                 </motion.div>
               ))}
             </motion.div>
@@ -470,13 +304,20 @@ const DynamicCategoryPage: React.FC = () => {
                   ? `No ${filterOS} scripts found in this category. Try selecting a different OS or check back later.`
                   : 'No scripts found in this category yet. Check back later or explore other categories.'}
               </p>
-              {filterOS !== 'all' && (
+              {filterOS !== 'all' ? (
                 <button
                   onClick={() => setFilterOS('all')}
                   className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-medium rounded-md transition-colors"
                 >
                   Show All OS
                 </button>
+              ) : (
+                <Link
+                  href="/categories"
+                  className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-medium rounded-md transition-colors inline-block"
+                >
+                  Browse All Categories
+                </Link>
               )}
             </div>
           )}
@@ -486,4 +327,4 @@ const DynamicCategoryPage: React.FC = () => {
   );
 };
 
-export default DynamicCategoryPage;
+export default CategorySlugPage;

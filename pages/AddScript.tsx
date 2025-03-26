@@ -29,7 +29,7 @@ const initialFormState = {
   authorUsername: '',
 };
 
-export default function AddScript() {
+export default function AddScriptPage() {
   const [formData, setFormData] = useState(initialFormState);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
