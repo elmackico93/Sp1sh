@@ -1,14 +1,14 @@
 // pages/categories/security/index.tsx
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter as useNextRouter } from 'next/router';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { 
   FiShield, FiLock, FiServer, FiKey, FiUsers, FiAlertTriangle,
   FiMonitor, FiFileText, FiCheckCircle, FiSearch, FiFilter, FiRefreshCw, 
-  FiChevronDown, FiChevronRight, FiHelpCircle, FiClock, FiStar, FiDownload,
-  FiX, FiGrid, FiList, FiEye, FiChevronUp, FiExternalLink, FiAward, FiCopy, FiWifi
+  FiChevronDown, FiChevronUp, FiChevronRight, FiHelpCircle, FiClock, FiStar, FiDownload,
+  FiX, FiList, FiGrid
 } from 'react-icons/fi';
 
 import { useScripts } from '../../../context/ScriptsContext';
@@ -16,12 +16,9 @@ import { Script } from '../../../mocks/scripts';
 import { ScriptCard } from '../../../components/scripts/ScriptCard';
 import { LoadingPlaceholder } from '../../../components/ui/LoadingPlaceholder';
 import { EnhancedSearch } from '../../../components/search/EnhancedSearch';
-import { FormButton } from '../../../components/ui/FormButton';
 
 // Types for security subcategories
 type SecurityLevel = 'critical' | 'high' | 'medium' | 'low';
-type ViewMode = 'grid' | 'list' | 'compact';
-type SortOption = 'downloads' | 'rating' | 'date' | 'name';
 
 interface SecuritySubcategory {
   id: string;
@@ -31,26 +28,6 @@ interface SecuritySubcategory {
   path: string;
   level: SecurityLevel;
   tags: string[];
-  resources?: {
-    title: string;
-    url: string;
-  }[];
-  commandLine?: string;
-}
-
-interface SecurityTip {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  link?: string;
-}
-
-interface SecurityStatistic {
-  label: string;
-  value: string | number;
-  icon: React.ReactNode;
-  change?: string;
-  trend?: 'up' | 'down' | 'neutral';
 }
 
 // Define security subcategories with enhanced metadata
@@ -62,12 +39,7 @@ const securitySubcategories: SecuritySubcategory[] = [
     icon: <FiShield className="w-6 h-6" />,
     path: '/categories/security/hardening',
     level: 'high',
-    tags: ['hardening', 'lockdown', 'security-baseline', 'compliance'],
-    resources: [
-      { title: 'CIS Benchmarks', url: 'https://www.cisecurity.org/cis-benchmarks/' },
-      { title: 'NIST Security Guidelines', url: 'https://www.nist.gov/cyberframework' }
-    ],
-    commandLine: 'sudo sh ./system-hardening.sh --apply-all --backup'
+    tags: ['hardening', 'lockdown', 'security-baseline', 'compliance']
   },
   {
     id: 'firewalls',
@@ -76,12 +48,7 @@ const securitySubcategories: SecuritySubcategory[] = [
     icon: <FiServer className="w-6 h-6" />,
     path: '/categories/security/firewall-ips',
     level: 'critical',
-    tags: ['firewall', 'iptables', 'network-security', 'intrusion-prevention'],
-    resources: [
-      { title: 'Iptables Essential Guide', url: 'https://wiki.archlinux.org/title/iptables' },
-      { title: 'Snort IPS Documentation', url: 'https://www.snort.org/documents' }
-    ],
-    commandLine: 'iptables -A INPUT -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT'
+    tags: ['firewall', 'iptables', 'network-security', 'intrusion-prevention']
   },
   {
     id: 'encryption',
@@ -90,12 +57,7 @@ const securitySubcategories: SecuritySubcategory[] = [
     icon: <FiLock className="w-6 h-6" />,
     path: '/categories/security/encryption',
     level: 'high',
-    tags: ['encryption', 'ssl', 'tls', 'data-protection'],
-    resources: [
-      { title: 'OpenSSL Cookbook', url: 'https://www.feistyduck.com/library/openssl-cookbook/' },
-      { title: 'LUKS Encryption Guide', url: 'https://wiki.archlinux.org/title/dm-crypt' }
-    ],
-    commandLine: 'openssl enc -aes-256-cbc -salt -in file.txt -out file.enc'
+    tags: ['encryption', 'ssl', 'tls', 'data-protection']
   },
   {
     id: 'authentication',
@@ -104,12 +66,7 @@ const securitySubcategories: SecuritySubcategory[] = [
     icon: <FiKey className="w-6 h-6" />,
     path: '/categories/security/authentication',
     level: 'high', 
-    tags: ['authentication', 'mfa', 'rbac', 'access-control'],
-    resources: [
-      { title: 'PAM Configuration Guide', url: 'https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system-level_authentication_guide/pluggable_authentication_modules' },
-      { title: 'NIST Authentication Guidelines', url: 'https://pages.nist.gov/800-63-3/' }
-    ],
-    commandLine: 'sudo pam-auth-update --enable mfa'
+    tags: ['authentication', 'mfa', 'rbac', 'access-control']
   },
   {
     id: 'monitoring',
@@ -118,12 +75,7 @@ const securitySubcategories: SecuritySubcategory[] = [
     icon: <FiMonitor className="w-6 h-6" />,
     path: '/categories/security/monitoring',
     level: 'medium',
-    tags: ['siem', 'logging', 'auditing', 'monitoring'],
-    resources: [
-      { title: 'ELK Stack Guide', url: 'https://www.elastic.co/guide/index.html' },
-      { title: 'Auditd Configuration', url: 'https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-understanding_audit_log_files' }
-    ],
-    commandLine: 'sudo auditctl -w /etc/passwd -p wa -k passwd_changes'
+    tags: ['siem', 'logging', 'auditing', 'monitoring']
   },
   {
     id: 'incident-response',
@@ -132,84 +84,31 @@ const securitySubcategories: SecuritySubcategory[] = [
     icon: <FiAlertTriangle className="w-6 h-6" />,
     path: '/categories/security/incident-response',
     level: 'critical',
-    tags: ['incident', 'forensics', 'response', 'containment'],
-    resources: [
-      { title: 'SANS Incident Handler\'s Handbook', url: 'https://www.sans.org/white-papers/33901/' },
-      { title: 'NIST Incident Response Guide', url: 'https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-61r2.pdf' }
-    ],
-    commandLine: 'sudo ./incident-collector.sh -t memory,network,disk -o /forensics/'
+    tags: ['incident', 'forensics', 'response', 'containment']
   }
 ];
 
 // Security tips for the resource section
-const securityTips: SecurityTip[] = [
+const securityTips = [
   {
     title: "Principle of Least Privilege",
-    description: "Grant minimal access rights required for users to perform their functions. Regularly review and audit permissions.",
-    icon: <FiUsers className="w-5 h-5" />,
-    link: "/guides/security/least-privilege"
+    description: "Grant minimal access rights required for users to perform their functions.",
+    icon: <FiUsers className="w-5 h-5" />
   },
   {
     title: "Defense in Depth",
-    description: "Implement multiple layers of security controls throughout your systems. Don't rely on a single protection mechanism.",
-    icon: <FiShield className="w-5 h-5" />,
-    link: "/guides/security/defense-in-depth"
+    description: "Implement multiple layers of security controls throughout your systems.",
+    icon: <FiShield className="w-5 h-5" />
   },
   {
     title: "Regular Security Audits",
-    description: "Perform scheduled security reviews to identify and mitigate vulnerabilities. Document and track findings over time.",
-    icon: <FiFileText className="w-5 h-5" />,
-    link: "/guides/security/audits"
+    description: "Perform scheduled security reviews to identify and mitigate vulnerabilities.",
+    icon: <FiFileText className="w-5 h-5" />
   },
   {
     title: "Keep Systems Updated",
-    description: "Apply security patches promptly to protect against known vulnerabilities. Establish a systematic patching process.",
-    icon: <FiRefreshCw className="w-5 h-5" />,
-    link: "/guides/security/patching"
-  },
-  {
-    title: "Encrypt Sensitive Data",
-    description: "Use strong encryption for data at rest and in transit. Properly manage and secure encryption keys.",
-    icon: <FiLock className="w-5 h-5" />,
-    link: "/guides/security/encryption"
-  },
-  {
-    title: "Monitor and Log",
-    description: "Implement comprehensive logging and monitoring to detect and respond to security events quickly.",
-    icon: <FiMonitor className="w-5 h-5" />,
-    link: "/guides/security/monitoring"
-  }
-];
-
-// Security statistics
-const securityStatistics: SecurityStatistic[] = [
-  {
-    label: "Security Scripts",
-    value: 248,
-    icon: <FiShield className="w-5 h-5" />,
-    change: "+12% this month",
-    trend: "up"
-  },
-  {
-    label: "Downloads",
-    value: "125K+",
-    icon: <FiDownload className="w-5 h-5" />,
-    change: "+8% this month",
-    trend: "up"
-  },
-  {
-    label: "Avg. Rating",
-    value: 4.7,
-    icon: <FiStar className="w-5 h-5" />,
-    change: "+0.2 this month",
-    trend: "up"
-  },
-  {
-    label: "Contributors",
-    value: 78,
-    icon: <FiUsers className="w-5 h-5" />,
-    change: "5 new this month",
-    trend: "up"
+    description: "Apply security patches promptly to protect against known vulnerabilities.",
+    icon: <FiRefreshCw className="w-5 h-5" />
   }
 ];
 
@@ -235,14 +134,6 @@ const itemVariants = {
       stiffness: 300,
       damping: 24
     }
-  }
-};
-
-const fadeVariants = {
-  hidden: { opacity: 0 },
-  visible: { 
-    opacity: 1,
-    transition: { duration: 0.4 }
   }
 };
 
@@ -286,56 +177,22 @@ const getLevelStyles = (level: SecurityLevel) => {
 };
 
 export default function SecurityCategoryPage() {
-  // Use NextRouter directly to avoid compatibility issues
-  const router = useNextRouter();
+  const router = useRouter();
   const { allScripts, isLoading } = useScripts();
   const [securityScripts, setSecurityScripts] = useState<Script[]>([]);
   const [featuredScripts, setFeaturedScripts] = useState<Script[]>([]);
   const [filteredScripts, setFilteredScripts] = useState<Script[]>([]);
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [sortOption, setSortOption] = useState<SortOption>('downloads');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [expandedInfo, setExpandedInfo] = useState(false);
   const [filterOS, setFilterOS] = useState<'all' | 'linux' | 'windows' | 'macos' | 'cross-platform'>('all');
   const [showRecommendations, setShowRecommendations] = useState(true);
   const [showResources, setShowResources] = useState(false);
-  const [showStatistics, setShowStatistics] = useState(true);
-  const [activeScript, setActiveScript] = useState<string | null>(null);
-  const [isCopySuccess, setIsCopySuccess] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   
   const contentRef = useRef<HTMLDivElement>(null);
-  
-  // Total scripts count
-  const totalScriptsCount = useMemo(() => securityScripts.length, [securityScripts]);
-  
-  // Get current URL query params to sync with UI state
-  useEffect(() => {
-    // Safe access to query params
-    const query = router.query || {};
-    
-    // Initialize state from URL if present
-    if (query.subcategory && typeof query.subcategory === 'string') {
-      setActiveSubcategory(query.subcategory);
-    }
-    
-    if (query.os && typeof query.os === 'string') {
-      setFilterOS(query.os as any);
-    }
-    
-    if (query.q && typeof query.q === 'string') {
-      setSearchQuery(query.q);
-    }
-    
-    if (query.view && typeof query.view === 'string') {
-      setViewMode(query.view as ViewMode);
-    }
-    
-    if (query.sort && typeof query.sort === 'string') {
-      setSortOption(query.sort as SortOption);
-    }
-  }, [router.query]);
+  const totalScriptsCount = securityScripts.length;
   
   // Filter scripts by subcategory, OS, and search query
   useEffect(() => {
@@ -387,80 +244,18 @@ export default function SecurityCategoryPage() {
         );
       }
       
-      // Apply sorting
-      filtered = sortScripts(filtered, sortOption);
-      
       setFilteredScripts(filtered);
     }
-  }, [allScripts, activeSubcategory, filterOS, searchQuery, sortOption]);
-  
-  // Sort scripts based on selected option
-  const sortScripts = (scripts: Script[], sortBy: SortOption): Script[] => {
-    switch (sortBy) {
-      case 'downloads':
-        return [...scripts].sort((a, b) => b.downloads - a.downloads);
-      case 'rating':
-        return [...scripts].sort((a, b) => b.rating - a.rating);
-      case 'date':
-        return [...scripts].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-      case 'name':
-        return [...scripts].sort((a, b) => a.title.localeCompare(b.title));
-      default:
-        return scripts;
-    }
-  };
-  
-  // Update URL when filters change
-  useEffect(() => {
-    // Only update after initial load
-    if (allScripts.length > 0) {
-      // Build query params
-      const queryParams: Record<string, string> = {};
-      
-      if (activeSubcategory) {
-        queryParams.subcategory = activeSubcategory;
-      }
-      
-      if (filterOS !== 'all') {
-        queryParams.os = filterOS;
-      }
-      
-      if (searchQuery) {
-        queryParams.q = searchQuery;
-      }
-      
-      if (viewMode !== 'grid') {
-        queryParams.view = viewMode;
-      }
-      
-      if (sortOption !== 'downloads') {
-        queryParams.sort = sortOption;
-      }
-      
-      // Update URL without page reload
-      router.push(
-        {
-          pathname: router.pathname,
-          query: Object.keys(queryParams).length > 0 ? queryParams : undefined
-        },
-        undefined,
-        { shallow: true }
-      );
-    }
-  }, [activeSubcategory, filterOS, searchQuery, viewMode, sortOption, allScripts.length, router]);
+  }, [allScripts, activeSubcategory, filterOS, searchQuery]);
   
   // Scroll to content when changing filters
   useEffect(() => {
-    if (activeSubcategory && contentRef.current && !shouldReduceMotion) {
-      // Add a small delay to allow rendering
-      setTimeout(() => {
-        if (contentRef.current) {
-          contentRef.current.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
-      }, 100);
+    if (activeSubcategory && contentRef.current) {
+      const scrollOptions: ScrollIntoViewOptions = {
+        behavior: shouldReduceMotion ? 'auto' : 'smooth',
+        block: 'start'
+      };
+      contentRef.current.scrollIntoView(scrollOptions);
     }
   }, [activeSubcategory, shouldReduceMotion]);
   
@@ -480,19 +275,6 @@ export default function SecurityCategoryPage() {
   const toggleSubcategory = (subcategoryId: string) => {
     setActiveSubcategory(prev => prev === subcategoryId ? null : subcategoryId);
   };
-  
-  // Copy command to clipboard
-  const copyCommand = (command: string) => {
-    navigator.clipboard.writeText(command).then(() => {
-      setIsCopySuccess(true);
-      setTimeout(() => setIsCopySuccess(false), 2000);
-    });
-  };
-  
-  // Quick view a script
-  const handleQuickView = (scriptId: string) => {
-    setActiveScript(prev => prev === scriptId ? null : scriptId);
-  };
 
   if (isLoading) {
     return <LoadingPlaceholder />;
@@ -506,44 +288,18 @@ export default function SecurityCategoryPage() {
         <meta name="keywords" content="security scripts, system hardening, firewall scripts, encryption tools, authentication scripts, security monitoring" />
       </Head>
       
-      {/* Enhanced Hero Section with Particles Background */}
-      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
+      {/* Enhanced Hero Section */}
+      <section className="relative bg-gradient-to-br from-gray-900 to-gray-800 text-white overflow-hidden">
         {/* Background pattern */}
-        <div className="absolute inset-0 opacity-10 z-0 security-particles">
+        <div className="absolute inset-0 opacity-10 z-0">
           <svg className="w-full h-full" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="securityPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
                 <path d="M0,10 L20,10 M10,0 L10,20" stroke="currentColor" strokeWidth="0.5" />
               </pattern>
-              <linearGradient id="shieldGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#4C51BF" stopOpacity="0.6" />
-                <stop offset="100%" stopColor="#0070e0" stopOpacity="0.6" />
-              </linearGradient>
             </defs>
             <rect width="100%" height="100%" fill="url(#securityPattern)" />
           </svg>
-        </div>
-        
-        {/* Floating security icons */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(12)].map((_, i) => (
-            <div 
-              key={i}
-              className="absolute opacity-20 security-float"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${15 + Math.random() * 20}s`
-              }}
-            >
-              {i % 5 === 0 ? <FiShield size={24} /> : 
-               i % 5 === 1 ? <FiLock size={24} /> : 
-               i % 5 === 2 ? <FiKey size={24} /> :
-               i % 5 === 3 ? <FiServer size={24} /> :
-               <FiMonitor size={24} />}
-            </div>
-          ))}
         </div>
         
         {/* Hero content */}
@@ -563,9 +319,9 @@ export default function SecurityCategoryPage() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-primary-light"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6"
             >
-              Secure Your Systems with Expert Scripts
+              Secure Your Systems with <span className="text-primary-light">Expert Scripts</span>
             </motion.h1>
             
             <motion.p
@@ -583,57 +339,15 @@ export default function SecurityCategoryPage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-wrap justify-center gap-4"
             >
-              <a 
-                href="#security-areas" 
-                className="px-6 py-3 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition-colors"
-              >
+              <a href="#security-areas" className="btn btn-primary">
                 Explore Security Categories
               </a>
-              <Link 
-                href="/add-script" 
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg transition-colors backdrop-blur-sm"
-              >
+              <Link href="/add-script" className="btn btn-secondary bg-white/10 text-white hover:bg-white/20">
                 Contribute a Script
               </Link>
             </motion.div>
           </div>
         </div>
-        
-        {/* Statistics overlay */}
-        {showStatistics && (
-          <motion.div 
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="container mx-auto px-4 relative z-20 -mb-16"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-              {securityStatistics.map((stat, index) => (
-                <div 
-                  key={index}
-                  className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20 text-white"
-                >
-                  <div className="flex items-center mb-2">
-                    <div className="p-2 rounded-md bg-white/10 mr-3">
-                      {stat.icon}
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold">{stat.value}</div>
-                      <div className="text-xs">{stat.label}</div>
-                    </div>
-                  </div>
-                  {stat.change && (
-                    <div className="text-xs flex items-center mt-1">
-                      {stat.trend === 'up' && <span className="text-green-400">↑</span>}
-                      {stat.trend === 'down' && <span className="text-red-400">↓</span>}
-                      <span className="ml-1">{stat.change}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
         
         {/* Wave separator */}
         <div className="absolute bottom-0 left-0 right-0">
@@ -645,23 +359,11 @@ export default function SecurityCategoryPage() {
       
       <div className="container mx-auto px-4 py-8">
         {/* Enhanced Search with Filters */}
-        <section className="mb-12 -mt-16 relative z-20">
+        <section className="mb-12 -mt-20 relative z-20">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <FiSearch className="text-primary" />
-                Find Security Scripts
-              </h2>
-              
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowStatistics(!showStatistics)}
-                  className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                >
-                  {showStatistics ? 'Hide' : 'Show'} Statistics
-                </button>
-              </div>
-            </div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Find Security Scripts
+            </h2>
             
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-grow">
@@ -783,7 +485,7 @@ export default function SecurityCategoryPage() {
           <section className="mb-16">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <FiAward className="text-yellow-500" />
+                <FiStar className="text-yellow-500" />
                 Featured Security Scripts
               </h2>
               
@@ -797,21 +499,7 @@ export default function SecurityCategoryPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {featuredScripts.map((script) => (
-                <motion.div
-                  key={script.id}
-                  whileHover={{ y: -5 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div className="relative">
-                    {/* Featured badge */}
-                    <div className="absolute -top-2 -right-2 z-10">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-500 text-white shadow-md">
-                        <FiStar className="w-3 h-3 mr-1" /> Featured
-                      </span>
-                    </div>
-                    <ScriptCard script={script} />
-                  </div>
-                </motion.div>
+                <ScriptCard key={script.id} script={script} />
               ))}
             </div>
           </section>
@@ -825,7 +513,7 @@ export default function SecurityCategoryPage() {
               Security Areas
             </h2>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowRecommendations(!showRecommendations)}
                 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1 hover:text-primary dark:hover:text-primary-light"
@@ -901,22 +589,6 @@ export default function SecurityCategoryPage() {
                       )}
                     </div>
                     
-                    {/* Command line example */}
-                    {subcategory.commandLine && (
-                      <div className="relative mb-4 group">
-                        <div className="bg-gray-900 text-green-400 p-2 rounded-md text-xs font-mono overflow-x-auto whitespace-nowrap">
-                          <span>{subcategory.commandLine}</span>
-                        </div>
-                        <button
-                          onClick={() => copyCommand(subcategory.commandLine!)}
-                          className="absolute top-1 right-1 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                          aria-label="Copy command"
-                        >
-                          {isCopySuccess ? <FiCheckCircle size={14} /> : <FiCopy size={14} />}
-                        </button>
-                      </div>
-                    )}
-                    
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         {matchingScripts} scripts
@@ -936,32 +608,6 @@ export default function SecurityCategoryPage() {
                     </div>
                   </div>
                   
-                  {/* Expandable resource links */}
-                  {subcategory.resources && subcategory.resources.length > 0 && (
-                    <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-3">
-                      <details className="group">
-                        <summary className="cursor-pointer text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center">
-                          <span>Related Resources</span>
-                          <FiChevronDown className="w-4 h-4 ml-1 transition-transform group-open:rotate-180" />
-                        </summary>
-                        <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
-                          {subcategory.resources.map((resource, idx) => (
-                            <a 
-                              key={idx}
-                              href={resource.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block text-xs text-primary dark:text-primary-light hover:underline py-1 flex items-center"
-                            >
-                              <FiExternalLink className="w-3 h-3 mr-1" />
-                              {resource.title}
-                            </a>
-                          ))}
-                        </div>
-                      </details>
-                    </div>
-                  )}
-                  
                   {/* Show recommended practice for each subcategory if recommendations are visible */}
                   {showRecommendations && (
                     <div className={`p-4 ${levelStyles.bg} border-t border-gray-100 dark:border-gray-700`}>
@@ -974,12 +620,12 @@ export default function SecurityCategoryPage() {
                             Best Practice
                           </h4>
                           <p className="text-xs text-gray-700 dark:text-gray-300">
-                            {subcategory.id === 'hardening' && "Apply system hardening in stages, testing functionality after each change. Document each step for reproducibility."}
-                            {subcategory.id === 'firewalls' && "Implement default-deny policies and only allow necessary services. Use stateful inspection and regularly audit rules."}
-                            {subcategory.id === 'encryption' && "Use industry-standard encryption algorithms with proper key management. Rotate keys regularly and secure your key material."}
-                            {subcategory.id === 'authentication' && "Enforce multi-factor authentication for all privileged accounts. Implement failed login attempt limitations and strong password policies."}
-                            {subcategory.id === 'monitoring' && "Centralize security logs and implement automated alerting for critical events. Establish a baseline for normal behavior to detect anomalies."}
-                            {subcategory.id === 'incident-response' && "Maintain documented incident response procedures and practice regularly. Prioritize containment to limit damage and collect evidence."}
+                            {subcategory.id === 'hardening' && "Apply system hardening in stages, testing functionality after each change."}
+                            {subcategory.id === 'firewalls' && "Implement default-deny policies and only allow necessary services."}
+                            {subcategory.id === 'encryption' && "Use industry-standard encryption algorithms with proper key management."}
+                            {subcategory.id === 'authentication' && "Enforce multi-factor authentication for all privileged accounts."}
+                            {subcategory.id === 'monitoring' && "Centralize security logs and implement automated alerting for critical events."}
+                            {subcategory.id === 'incident-response' && "Maintain documented incident response procedures and practice regularly."}
                           </p>
                         </div>
                       </div>
@@ -1028,28 +674,16 @@ export default function SecurityCategoryPage() {
                     >
                       <FiList className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => setViewMode('compact')}
-                      className={`p-1.5 rounded ${
-                        viewMode === 'compact'
-                          ? 'bg-primary text-white'
-                          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                      }`}
-                      aria-label="Compact view"
-                    >
-                      <FiAlignLeft className="w-4 h-4" />
-                    </button>
                   </div>
                   
-                  {/* Sort selector */}
+                  {/* Sort selector - could be expanded in a real implementation */}
                   <select 
                     className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value as SortOption)}
+                    defaultValue="downloads"
                   >
-                    <option value="downloads">Most Downloads</option>
-                    <option value="rating">Highest Rated</option>
+                    <option value="downloads">Most Popular</option>
                     <option value="date">Newest First</option>
+                    <option value="rating">Highest Rated</option>
                     <option value="name">Alphabetical</option>
                   </select>
                 </div>
@@ -1060,24 +694,21 @@ export default function SecurityCategoryPage() {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className={
-                    viewMode === 'grid' 
-                      ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
-                      : viewMode === 'list'
-                        ? 'space-y-4'
-                        : 'grid grid-cols-1 gap-2' // Compact view
+                  className={viewMode === 'grid' 
+                    ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
+                    : 'space-y-4'
                   }
                 >
                   {filteredScripts.map((script) => (
                     <motion.div 
                       key={script.id}
                       variants={itemVariants}
-                      whileHover={viewMode !== 'compact' ? { y: -5 } : undefined}
+                      whileHover={{ y: -5 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
                       {viewMode === 'grid' ? (
                         <ScriptCard script={script} />
-                      ) : viewMode === 'list' ? (
+                      ) : (
                         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all p-4">
                           <div className="flex flex-col md:flex-row md:items-center gap-4">
                             <div className="flex-1">
@@ -1150,126 +781,11 @@ export default function SecurityCategoryPage() {
                               >
                                 View Script
                               </Link>
-                              <button 
-                                onClick={() => handleQuickView(script.id)}
-                                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors whitespace-nowrap"
-                              >
-                                {activeScript === script.id ? 'Hide Preview' : 'Quick View'}
+                              <button className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors whitespace-nowrap">
+                                Quick View
                               </button>
                             </div>
                           </div>
-                          
-                          {/* Quick view preview */}
-                          <AnimatePresence>
-                            {activeScript === script.id && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 overflow-hidden"
-                              >
-                                <div className="bg-gray-900 text-gray-200 p-4 rounded-md font-mono text-sm overflow-x-auto">
-                                  <pre className="whitespace-pre-wrap">
-                                    {script.code.length > 500 
-                                      ? script.code.substring(0, 500) + '...\n\n[View full script for complete code]'
-                                      : script.code}
-                                  </pre>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      ) : (
-                        // Compact view
-                        <div className="bg-white dark:bg-gray-800 rounded-md border border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 p-3 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className={`p-1.5 rounded-md ${
-                                script.os === 'linux' 
-                                  ? 'bg-linux-green/10 text-linux-green'
-                                  : script.os === 'windows'
-                                    ? 'bg-windows-blue/10 text-windows-blue'
-                                    : script.os === 'macos'
-                                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                                      : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                              }`}>
-                                {script.os === 'linux' && <span>🐧</span>}
-                                {script.os === 'windows' && <span>🪟</span>}
-                                {script.os === 'macos' && <span>🍎</span>}
-                                {script.os === 'cross-platform' && <span>🔄</span>}
-                              </div>
-                              <div>
-                                <h3 className="font-medium text-gray-900 dark:text-white text-sm">
-                                  <Link href={`/scripts/${script.id}`} className="hover:text-primary dark:hover:text-primary-light">
-                                    {script.title}
-                                  </Link>
-                                </h3>
-                                <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 gap-3 mt-0.5">
-                                  <span className="flex items-center gap-0.5">
-                                    <FiStar className="w-3 h-3 text-yellow-500" />
-                                    {script.rating.toFixed(1)}
-                                  </span>
-                                  <span className="flex items-center gap-0.5">
-                                    <FiDownload className="w-3 h-3" />
-                                    {script.downloads.toLocaleString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex gap-1">
-                              <button
-                                onClick={() => handleQuickView(script.id)}
-                                className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                              >
-                                <FiEye size={16} />
-                              </button>
-                              <Link 
-                                href={`/scripts/${script.id}`}
-                                className="p-1.5 text-primary hover:text-primary-dark"
-                              >
-                                <FiExternalLink size={16} />
-                              </Link>
-                            </div>
-                          </div>
-                          
-                          {/* Quick view in compact mode */}
-                          <AnimatePresence>
-                            {activeScript === script.id && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 overflow-hidden"
-                              >
-                                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
-                                  {script.description}
-                                </p>
-                                <div className="flex flex-wrap gap-1 mb-2">
-                                  {script.tags.slice(0, 3).map((tag) => (
-                                    <span 
-                                      key={tag}
-                                      className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs text-gray-600 dark:text-gray-400"
-                                    >
-                                      {tag}
-                                    </span>
-                                  ))}
-                                  {script.tags.length > 3 && (
-                                    <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs text-gray-600 dark:text-gray-400">
-                                      +{script.tags.length - 3}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="bg-gray-900 text-green-400 p-2 rounded text-xs font-mono overflow-x-auto">
-                                  <pre className="whitespace-pre-wrap">
-                                    {script.code.split('\n').slice(0, 5).join('\n')}
-                                    {script.code.split('\n').length > 5 ? '\n...' : ''}
-                                  </pre>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
                         </div>
                       )}
                     </motion.div>
@@ -1284,13 +800,12 @@ export default function SecurityCategoryPage() {
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
                     Try adjusting your search terms or filters to find what you're looking for.
                   </p>
-                  <FormButton
+                  <button
                     onClick={clearFilters}
-                    type="button"
-                    variant="primary"
+                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-medium rounded-md transition-colors"
                   >
                     Clear All Filters
-                  </FormButton>
+                  </button>
                 </div>
               )}
             </section>
@@ -1305,7 +820,7 @@ export default function SecurityCategoryPage() {
           >
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <FiFileText className="text-primary" />
-              Security Best Practices & Resources
+              Security Best Practices
             </h2>
             
             <span className={`transition-transform duration-200 ${showResources ? 'rotate-180' : ''}`}>
@@ -1322,14 +837,11 @@ export default function SecurityCategoryPage() {
                 transition={{ duration: 0.3 }}
                 className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 overflow-hidden"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
                   {securityTips.map((tip, index) => (
-                    <motion.div 
+                    <div 
                       key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="flex items-start gap-4 bg-gray-50 dark:bg-gray-750 p-4 rounded-lg hover:shadow-md transition-shadow"
+                      className="flex items-start gap-4 bg-gray-50 dark:bg-gray-750 p-4 rounded-lg"
                     >
                       <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary dark:text-primary-light flex-shrink-0">
                         {tip.icon}
@@ -1338,39 +850,23 @@ export default function SecurityCategoryPage() {
                         <h3 className="font-medium text-gray-900 dark:text-white mb-1">
                           {tip.title}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           {tip.description}
                         </p>
-                        {tip.link && (
-                          <Link
-                            href={tip.link}
-                            className="text-xs text-primary dark:text-primary-light hover:underline inline-flex items-center"
-                          >
-                            Learn more <FiChevronRight className="w-3 h-3 ml-1" />
-                          </Link>
-                        )}
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
                 
                 <div className="bg-gray-50 dark:bg-gray-750 p-4 border-t border-gray-100 dark:border-gray-700">
                   <div className="flex justify-between items-center">
                     <h3 className="font-medium text-gray-900 dark:text-white">Need more security guidance?</h3>
-                    <div className="flex gap-3">
-                      <Link 
-                        href="/security-guides" 
-                        className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap"
-                      >
-                        View Security Guides
-                      </Link>
-                      <Link 
-                        href="/security-tools" 
-                        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap"
-                      >
-                        Security Tools
-                      </Link>
-                    </div>
+                    <Link 
+                      href="/security-guides" 
+                      className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap"
+                    >
+                      View Security Guides
+                    </Link>
                   </div>
                 </div>
               </motion.div>
@@ -1380,29 +876,26 @@ export default function SecurityCategoryPage() {
         
         {/* Call to Action Section */}
         <section className="mb-16">
-          <div className="relative bg-gradient-to-r from-primary-dark to-primary rounded-xl overflow-hidden group">
-            {/* Background pattern */}
-            <div className="absolute inset-0 opacity-10 bg-[url('/images/security-pattern.svg')] bg-repeat"></div>
-            
-            <div className="relative p-8 md:p-12 z-10">
+          <div className="bg-gradient-to-r from-primary/20 to-primary/5 dark:from-primary-dark/20 dark:to-primary-dark/5 rounded-xl overflow-hidden">
+            <div className="p-8 md:p-12">
               <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="md:w-2/3">
-                  <h2 className="text-2xl font-bold text-white mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                     Contribute to Our Security Collection
                   </h2>
-                  <p className="text-lg text-white/90 mb-6">
+                  <p className="text-lg text-gray-700 dark:text-gray-200 mb-6">
                     Have a valuable security script? Share it with the community and help others secure their systems.
                   </p>
                   <div className="flex flex-wrap gap-4">
                     <Link 
                       href="/add-script" 
-                      className="px-6 py-3 bg-white hover:bg-gray-100 text-primary font-medium rounded-md transition-colors group-hover:shadow-lg"
+                      className="px-6 py-3 bg-primary hover:bg-primary-dark text-white font-medium rounded-md transition-colors"
                     >
                       Submit a Script
                     </Link>
                     <Link 
                       href="/guidelines" 
-                      className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white font-medium rounded-md transition-colors"
+                      className="px-6 py-3 bg-white/70 dark:bg-gray-800/70 hover:bg-white dark:hover:bg-gray-800 text-gray-900 dark:text-white font-medium rounded-md transition-colors"
                     >
                       Read Submission Guidelines
                     </Link>
@@ -1410,18 +903,12 @@ export default function SecurityCategoryPage() {
                 </div>
                 
                 <div className="md:w-1/3 flex justify-center">
-                  <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                    <div className="w-24 h-24 bg-white/30 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform">
-                      <FiShield className="w-16 h-16 text-white" />
-                    </div>
+                  <div className="w-32 h-32 bg-white/20 dark:bg-white/5 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <FiShield className="w-16 h-16 text-primary dark:text-primary-light" />
                   </div>
                 </div>
               </div>
             </div>
-            
-            {/* Decorative accents */}
-            <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
-            <div className="absolute -top-8 -left-8 w-32 h-32 bg-white/5 rounded-full blur-xl"></div>
           </div>
         </section>
         
@@ -1450,7 +937,7 @@ export default function SecurityCategoryPage() {
               className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200"
             >
               <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-primary">
-                <FiWifi className="w-5 h-5" />
+                <FiServer className="w-5 h-5" />
               </div>
               <div>
                 <div className="font-medium text-gray-900 dark:text-white">Networking</div>
@@ -1459,44 +946,20 @@ export default function SecurityCategoryPage() {
             </Link>
             
             <Link 
-              href="/emergency"
+              href="/categories/monitoring"
               className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200"
             >
-              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
-                <FiAlertTriangle className="w-5 h-5" />
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-primary">
+                <FiMonitor className="w-5 h-5" />
               </div>
               <div>
-                <div className="font-medium text-gray-900 dark:text-white">Emergency</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Critical incident response scripts</div>
+                <div className="font-medium text-gray-900 dark:text-white">Monitoring</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">System performance & visibility</div>
               </div>
             </Link>
           </div>
         </section>
       </div>
-      
-      {/* Custom styles for security page animations */}
-      <style jsx>{`
-        .security-particles {
-          position: relative;
-          overflow: hidden;
-        }
-        
-        @keyframes float {
-          0% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(5deg); }
-          100% { transform: translateY(0px) rotate(0deg); }
-        }
-        
-        .security-float {
-          animation: float 15s ease-in-out infinite;
-        }
-        
-        @media (prefers-reduced-motion) {
-          .security-float {
-            animation: none;
-          }
-        }
-      `}</style>
     </>
   );
 }

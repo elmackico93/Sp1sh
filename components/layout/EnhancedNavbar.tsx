@@ -384,21 +384,6 @@ export const navigationMenu: FirstLevelItem[] = [
   }
 ];
 
-// Function to extract the base category from a path
-const extractCategory = (path: string): string => {
-  // Handle special case for emergency path
-  if (path === '/emergency' || path.startsWith('/emergency/')) {
-    return '/emergency';
-  }
-  
-  const pathParts = path.split('/');
-  if (pathParts.length >= 3 && pathParts[1] === 'categories') {
-    return `/categories/${pathParts[2]}`;
-  }
-  
-  return path;
-};
-
 export const EnhancedNavbar: React.FC = () => {
   const router = useRouter();
   const { currentOS, setCurrentOS } = useScripts();
@@ -408,25 +393,25 @@ export const EnhancedNavbar: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMobileItems, setExpandedMobileItems] = useState<Set<string>>(new Set());
-  const menuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const submenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Detect mobile view
   useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-    
-    // Initialize
-    checkIsMobile();
-    
-    // Add resize listener
-    window.addEventListener('resize', checkIsMobile);
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', checkIsMobile);
-    };
+    if (typeof window !== 'undefined') {
+      const checkIfMobile = () => {
+        setIsMobile(window.innerWidth < 1024);
+      };
+      
+      // Initialize
+      checkIfMobile();
+      
+      // Add event listener for window resize
+      window.addEventListener('resize', checkIfMobile);
+      
+      // Cleanup
+      return () => {
+        window.removeEventListener('resize', checkIfMobile);
+      };
+    }
   }, []);
 
   // Set active category based on current route
@@ -435,60 +420,38 @@ export const EnhancedNavbar: React.FC = () => {
     setActiveCategory(category);
   }, [router.pathname]);
 
-  // Handle menu hover events with delay
+  // Handle menu hover events - no delay for showing
   const handleMenuEnter = (categoryPath: string) => {
     if (isMobile) return;
-    
-    // Clear any existing timeout
-    if (menuTimeoutRef.current) {
-      clearTimeout(menuTimeoutRef.current);
-    }
-    
-    // Set a short delay before showing menu
-    menuTimeoutRef.current = setTimeout(() => {
-      setHoveredCategory(categoryPath);
-    }, 100);
+    setHoveredCategory(categoryPath);
   };
 
+  // Keep menu open when moving to it
   const handleMenuLeave = () => {
     if (isMobile) return;
     
-    // Clear any existing timeout
-    if (menuTimeoutRef.current) {
-      clearTimeout(menuTimeoutRef.current);
-    }
-    
-    // Set a delay before hiding menu
-    menuTimeoutRef.current = setTimeout(() => {
-      setHoveredCategory(null);
-    }, 300);
+    // Use setTimeout to give time to move to submenu
+    setTimeout(() => {
+      // Only close if we're not hovering a submenu
+      if (!hoveredSubmenu) {
+        setHoveredCategory(null);
+      }
+    }, 50);
   };
 
-  // Handle submenu hover events with delay
+  // Handle submenu hover events - no delay
   const handleSubmenuEnter = (submenuPath: string) => {
     if (isMobile) return;
-    
-    // Clear any existing timeout
-    if (submenuTimeoutRef.current) {
-      clearTimeout(submenuTimeoutRef.current);
-    }
-    
-    submenuTimeoutRef.current = setTimeout(() => {
-      setHoveredSubmenu(submenuPath);
-    }, 100);
+    setHoveredSubmenu(submenuPath);
   };
 
+  // Handle submenu leave with small delay
   const handleSubmenuLeave = () => {
     if (isMobile) return;
     
-    // Clear any existing timeout
-    if (submenuTimeoutRef.current) {
-      clearTimeout(submenuTimeoutRef.current);
-    }
-    
-    submenuTimeoutRef.current = setTimeout(() => {
+    setTimeout(() => {
       setHoveredSubmenu(null);
-    }, 300);
+    }, 50);
   };
 
   // Toggle mobile menu item expansion
@@ -560,6 +523,21 @@ export const EnhancedNavbar: React.FC = () => {
     }
   };
 
+  // Function to extract the base category from a path
+  const extractCategory = (path: string): string => {
+    // Handle special case for emergency path
+    if (path === '/emergency' || path.startsWith('/emergency/')) {
+      return '/emergency';
+    }
+    
+    const pathParts = path.split('/');
+    if (pathParts.length >= 3 && pathParts[1] === 'categories') {
+      return `/categories/${pathParts[2]}`;
+    }
+    
+    return path;
+  };
+
   return (
     <nav className="sticky top-16 z-40 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
       <div className="container mx-auto relative">
@@ -603,7 +581,7 @@ export const EnhancedNavbar: React.FC = () => {
             {navigationMenu.map((item) => (
               <li 
                 key={item.path} 
-                className="relative"
+                className="relative group"
                 onMouseEnter={() => handleMenuEnter(item.path)}
                 onMouseLeave={handleMenuLeave}
               >
@@ -629,7 +607,7 @@ export const EnhancedNavbar: React.FC = () => {
                       animate="visible"
                       exit="exit"
                       variants={dropdownVariants}
-                      className="absolute left-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-100 dark:border-gray-700 z-50"
+                      className="absolute left-0 top-full w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-100 dark:border-gray-700 z-50"
                       onMouseEnter={() => setHoveredCategory(item.path)}
                       onMouseLeave={handleMenuLeave}
                     >
@@ -637,7 +615,7 @@ export const EnhancedNavbar: React.FC = () => {
                         {item.children.map((subItem) => (
                           <div 
                             key={subItem.path}
-                            className="relative"
+                            className="relative group"
                             onMouseEnter={() => handleSubmenuEnter(subItem.path)}
                             onMouseLeave={handleSubmenuLeave}
                           >
@@ -664,7 +642,7 @@ export const EnhancedNavbar: React.FC = () => {
                                   animate="visible"
                                   exit="exit"
                                   variants={submenuVariants}
-                                  className="absolute left-full top-0 ml-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-100 dark:border-gray-700 z-50"
+                                  className="absolute left-full top-0 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-100 dark:border-gray-700 z-50"
                                   onMouseEnter={() => setHoveredSubmenu(subItem.path)}
                                   onMouseLeave={handleSubmenuLeave}
                                 >
