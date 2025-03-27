@@ -5,7 +5,6 @@ import { useTheme } from 'next-themes';
 import { FiSun, FiMoon, FiMenu, FiX } from 'react-icons/fi';
 import { useScripts } from '../../context/ScriptsContext';
 import { HeaderSearch } from '../search/HeaderSearch';
-import useClaimCursorEffect from '../../hooks/useClaimCursorEffect';
 
 export const Header = () => {
   const { setSearchTerm } = useScripts();
@@ -14,7 +13,55 @@ export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
-  useClaimCursorEffect();
+  const claims = [
+    '> Scripts that automate the world',
+    '> Your terminal. Supercharged.',
+    '> Deploy. Fix. Repeat.',
+    '> One-liners that win wars',
+    '> Code. Automate. Dominate.',
+    '> Instant power. No fluff.',
+    '> Shell mastery, simplified',
+    '> Secure. Fast. Reliable.',
+    '> System wisdom in a click',
+    '> Click, code, conquer.'
+  ];
+
+  const [claimIndex, setClaimIndex] = useState(0);
+  const [animatedClaim, setAnimatedClaim] = useState('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const full = claims[claimIndex];
+    let current = '';
+    let i = 0;
+
+    // mostra subito il cursore
+    const cursor = document.getElementById('cursor');
+    if (cursor) cursor.style.opacity = '1';
+
+    const interval = setInterval(() => {
+      current += full[i];
+      setAnimatedClaim(current);
+      i++;
+      if (i >= full.length) {
+        clearInterval(interval);
+        setTimeout(() => {
+          const cursor = document.getElementById('cursor');
+          if (cursor) cursor.style.opacity = '0';
+        }, 200);
+      }
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [claimIndex]);
+
+  const rotateClaim = () => {
+    if (typeof window === 'undefined') return;
+    const cursor = document.getElementById('cursor');
+    if (cursor) cursor.style.opacity = '1';
+    setClaimIndex((prev) => (prev + 1) % claims.length);
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -31,7 +78,7 @@ export const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-sm backdrop-blur-lg dark:shadow-gray-800/10 border-b border-gray-100 dark:border-gray-800">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" passHref className="flex items-center gap-3 mt-2 sm:mt-3 mb-2 sm:mb-3">
+        <button onClick={rotateClaim} className="flex items-center gap-3 mt-2 sm:mt-3 mb-2 sm:mb-3 focus:outline-none">
           <div className="flex items-center gap-3">
             <div className="flex-shrink-0">
               <img
@@ -41,13 +88,22 @@ export const Header = () => {
                 loading="eager"
               />
             </div>
-            <span className="brand-claim font-mono text-sm sm:text-[13px] text-blue-500 dark:text-primary-light opacity-100 whitespace-nowrap select-none">
-            <span id="typed-claim">> Scripts that automate the world</span>
-            <span id="cursor" className="cursor">|</span>
-          </span>
-
+            <span
+              className="font-mono text-sm sm:text-[13px] text-blue-500 dark:text-primary-light opacity-100 select-none flex items-center justify-start overflow-hidden"
+              style={{ minWidth: 'calc(34ch + 3px)', maxWidth: 'calc(34ch + 3px)' }}
+            >
+              <span
+                id="typed-claim"
+                key={claimIndex}
+                className="animate-typing overflow-hidden whitespace-nowrap text-left block"
+                style={{ width: 'calc(34ch + 3px)', textAlign: 'left' }}
+              >
+                {animatedClaim}
+              </span>
+              <span id="cursor" className="cursor">|</span>
+            </span>
           </div>
-        </Link>
+        </button>
 
         <div className="hidden md:flex flex-1 max-w-md mx-8 relative">
           <HeaderSearch />
@@ -81,7 +137,6 @@ export const Header = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 p-4 shadow-md">
           <div className="mb-4">
