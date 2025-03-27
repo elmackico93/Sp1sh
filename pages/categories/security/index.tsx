@@ -1,22 +1,44 @@
-// pages/categories/security/index.tsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter as useNextRouter } from 'next/router';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useRouter } from 'next/router';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  FiShield, FiLock, FiServer, FiKey, FiUsers, FiAlertTriangle,
-  FiMonitor, FiFileText, FiCheckCircle, FiSearch, FiFilter, FiRefreshCw, 
-  FiChevronDown, FiChevronRight, FiHelpCircle, FiClock, FiStar, FiDownload,
-  FiX, FiGrid, FiList, FiEye, FiChevronUp, FiExternalLink, FiAward, FiCopy, FiWifi
+  FiShield, 
+  FiLock, 
+  FiServer, 
+  FiKey, 
+  FiUsers, 
+  FiAlertTriangle,
+  FiMonitor, 
+  FiFileText, 
+  FiCheckCircle, 
+  FiSearch, 
+  FiFilter, 
+  FiRefreshCw, 
+  FiChevronDown, 
+  FiChevronRight, 
+  FiHelpCircle, 
+  FiClock, 
+  FiStar, 
+  FiDownload,
+  FiX, 
+  FiGrid, 
+  FiList, 
+  FiEye, 
+  FiChevronUp, 
+  FiExternalLink, 
+  FiAward, 
+  FiCopy, 
+  FiInfo,
+  FiWifi,
+  FiTerminal
 } from 'react-icons/fi';
 
 import { useScripts } from '../../../context/ScriptsContext';
-import { Script } from '../../../mocks/scripts';
 import { ScriptCard } from '../../../components/scripts/ScriptCard';
 import { LoadingPlaceholder } from '../../../components/ui/LoadingPlaceholder';
 import { EnhancedSearch } from '../../../components/search/EnhancedSearch';
-import { FormButton } from '../../../components/ui/FormButton';
 
 // Types for security subcategories
 type SecurityLevel = 'critical' | 'high' | 'medium' | 'low';
@@ -285,13 +307,12 @@ const getLevelStyles = (level: SecurityLevel) => {
   }
 };
 
-export default function SecurityCategoryPage() {
-  // Use NextRouter directly to avoid compatibility issues
-  const router = useNextRouter();
+const SecurityCategoryPage = () => {
+  const router = useRouter();
   const { allScripts, isLoading } = useScripts();
-  const [securityScripts, setSecurityScripts] = useState<Script[]>([]);
-  const [featuredScripts, setFeaturedScripts] = useState<Script[]>([]);
-  const [filteredScripts, setFilteredScripts] = useState<Script[]>([]);
+  const [securityScripts, setSecurityScripts] = useState<any[]>([]);
+  const [featuredScripts, setFeaturedScripts] = useState<any[]>([]);
+  const [filteredScripts, setFilteredScripts] = useState<any[]>([]);
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -303,7 +324,8 @@ export default function SecurityCategoryPage() {
   const [showStatistics, setShowStatistics] = useState(true);
   const [activeScript, setActiveScript] = useState<string | null>(null);
   const [isCopySuccess, setIsCopySuccess] = useState(false);
-  const shouldReduceMotion = useReducedMotion();
+  const [showTerminal, setShowTerminal] = useState(false);
+  const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
   
   const contentRef = useRef<HTMLDivElement>(null);
   
@@ -312,28 +334,27 @@ export default function SecurityCategoryPage() {
   
   // Get current URL query params to sync with UI state
   useEffect(() => {
-    // Safe access to query params
-    const query = router.query || {};
-    
     // Initialize state from URL if present
-    if (query.subcategory && typeof query.subcategory === 'string') {
-      setActiveSubcategory(query.subcategory);
+    const { subcategory, os, q, view, sort } = router.query;
+    
+    if (subcategory && typeof subcategory === 'string') {
+      setActiveSubcategory(subcategory);
     }
     
-    if (query.os && typeof query.os === 'string') {
-      setFilterOS(query.os as any);
+    if (os && typeof os === 'string' && ['all', 'linux', 'windows', 'macos', 'cross-platform'].includes(os)) {
+      setFilterOS(os as any);
     }
     
-    if (query.q && typeof query.q === 'string') {
-      setSearchQuery(query.q);
+    if (q && typeof q === 'string') {
+      setSearchQuery(q);
     }
     
-    if (query.view && typeof query.view === 'string') {
-      setViewMode(query.view as ViewMode);
+    if (view && typeof view === 'string' && ['grid', 'list', 'compact'].includes(view)) {
+      setViewMode(view as ViewMode);
     }
     
-    if (query.sort && typeof query.sort === 'string') {
-      setSortOption(query.sort as SortOption);
+    if (sort && typeof sort === 'string' && ['downloads', 'rating', 'date', 'name'].includes(sort)) {
+      setSortOption(sort as SortOption);
     }
   }, [router.query]);
   
@@ -395,7 +416,7 @@ export default function SecurityCategoryPage() {
   }, [allScripts, activeSubcategory, filterOS, searchQuery, sortOption]);
   
   // Sort scripts based on selected option
-  const sortScripts = (scripts: Script[], sortBy: SortOption): Script[] => {
+  const sortScripts = (scripts: any[], sortBy: SortOption): any[] => {
     switch (sortBy) {
       case 'downloads':
         return [...scripts].sort((a, b) => b.downloads - a.downloads);
@@ -451,7 +472,7 @@ export default function SecurityCategoryPage() {
   
   // Scroll to content when changing filters
   useEffect(() => {
-    if (activeSubcategory && contentRef.current && !shouldReduceMotion) {
+    if (activeSubcategory && contentRef.current) {
       // Add a small delay to allow rendering
       setTimeout(() => {
         if (contentRef.current) {
@@ -462,7 +483,7 @@ export default function SecurityCategoryPage() {
         }
       }, 100);
     }
-  }, [activeSubcategory, shouldReduceMotion]);
+  }, [activeSubcategory]);
   
   // Handle search input
   const handleSearch = (query: string) => {
@@ -492,6 +513,81 @@ export default function SecurityCategoryPage() {
   // Quick view a script
   const handleQuickView = (scriptId: string) => {
     setActiveScript(prev => prev === scriptId ? null : scriptId);
+  };
+  
+  // Run a security command in the terminal demo
+  const runSecurityCommand = (command: string) => {
+    setShowTerminal(true);
+    
+    // Clear previous output
+    setTerminalOutput([`$ ${command}`, '']);
+    
+    // Simulate command execution with delay
+    setTimeout(() => {
+      let output: string[] = [];
+      
+      // Generate appropriate output based on the command
+      if (command.includes('system-hardening')) {
+        output = [
+          'Running system hardening script...',
+          '- Configuring password policies...[✓]',
+          '- Setting file permissions...[✓]',
+          '- Configuring firewall rules...[✓]',
+          '- Updating security settings...[✓]',
+          '- Creating backup...[✓]',
+          'Hardening complete. System security score: 87/100'
+        ];
+      } else if (command.includes('iptables')) {
+        output = [
+          'Adding firewall rule for SSH connections...',
+          'Rule added successfully.',
+          'Current active rules:',
+          'Chain INPUT (policy DROP)',
+          'target     prot opt source               destination',
+          'ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0            state NEW,ESTABLISHED tcp dpt:22',
+          'ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0            state RELATED,ESTABLISHED'
+        ];
+      } else if (command.includes('openssl')) {
+        output = [
+          'Encrypting file.txt using AES-256-CBC...',
+          'Enter encryption password:',
+          'Verifying password:',
+          'Encryption complete.',
+          'Output file: file.enc'
+        ];
+      } else if (command.includes('pam-auth-update')) {
+        output = [
+          'Updating PAM configuration...',
+          'Enabling multi-factor authentication...',
+          'Setting up TOTP module...',
+          'Configuration complete.',
+          'MFA is now required for all privileged operations.'
+        ];
+      } else if (command.includes('auditctl')) {
+        output = [
+          'Setting up audit rule for password file changes...',
+          'Rule added.',
+          'Any write or attribute change to /etc/passwd will be logged to the audit log.'
+        ];
+      } else if (command.includes('incident-collector')) {
+        output = [
+          'Collecting forensic data...',
+          '- Memory dump in progress [######################] 100%',
+          '- Network captures [######################] 100%',
+          '- Disk images [######################] 100%',
+          'All evidence collected and stored in /forensics/',
+          'SHA256 hashes generated for chain of custody.'
+        ];
+      } else {
+        output = [
+          'Command executed successfully.',
+          'Output files generated.',
+          'Process completed with code: 0'
+        ];
+      }
+      
+      setTerminalOutput(prev => [...prev, ...output]);
+    }, 500);
   };
 
   if (isLoading) {
@@ -527,22 +623,30 @@ export default function SecurityCategoryPage() {
         {/* Floating security icons */}
         <div className="absolute inset-0 overflow-hidden">
           {[...Array(12)].map((_, i) => (
-            <div 
+            <motion.div 
               key={i}
-              className="absolute opacity-20 security-float"
+              className="absolute text-opacity-20 text-white security-float"
+              animate={{ 
+                x: [0, Math.random() * 20 - 10], 
+                y: [0, Math.random() * 20 - 10] 
+              }}
+              transition={{ 
+                repeat: Infinity, 
+                repeatType: "reverse", 
+                duration: 5 + Math.random() * 5 
+              }}
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${15 + Math.random() * 20}s`
+                fontSize: `${24 + Math.random() * 32}px`
               }}
             >
-              {i % 5 === 0 ? <FiShield size={24} /> : 
-               i % 5 === 1 ? <FiLock size={24} /> : 
-               i % 5 === 2 ? <FiKey size={24} /> :
-               i % 5 === 3 ? <FiServer size={24} /> :
-               <FiMonitor size={24} />}
-            </div>
+              {i % 5 === 0 ? <FiShield /> : 
+               i % 5 === 1 ? <FiLock /> : 
+               i % 5 === 2 ? <FiKey /> :
+               i % 5 === 3 ? <FiServer /> :
+               <FiMonitor />}
+            </motion.div>
           ))}
         </div>
         
@@ -891,7 +995,7 @@ export default function SecurityCategoryPage() {
                           key={tag}
                           className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs text-gray-600 dark:text-gray-400"
                         >
-                          {tag}
+                          #{tag}
                         </span>
                       ))}
                       {subcategory.tags.length > 3 && (
@@ -907,13 +1011,22 @@ export default function SecurityCategoryPage() {
                         <div className="bg-gray-900 text-green-400 p-2 rounded-md text-xs font-mono overflow-x-auto whitespace-nowrap">
                           <span>{subcategory.commandLine}</span>
                         </div>
-                        <button
-                          onClick={() => copyCommand(subcategory.commandLine!)}
-                          className="absolute top-1 right-1 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                          aria-label="Copy command"
-                        >
-                          {isCopySuccess ? <FiCheckCircle size={14} /> : <FiCopy size={14} />}
-                        </button>
+                        <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
+                          <button
+                            onClick={() => runSecurityCommand(subcategory.commandLine!)}
+                            className="p-1 mr-1 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded"
+                            title="Run command"
+                          >
+                            <FiTerminal size={14} />
+                          </button>
+                          <button
+                            onClick={() => copyCommand(subcategory.commandLine!)}
+                            className="p-1 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded"
+                            title="Copy command"
+                          >
+                            {isCopySuccess ? <FiCheckCircle size={14} /> : <FiCopy size={14} />}
+                          </button>
+                        </div>
                       </div>
                     )}
                     
@@ -931,7 +1044,7 @@ export default function SecurityCategoryPage() {
                         }`}
                       >
                         {isActive ? 'Selected' : 'Browse Scripts'}
-                        {isActive ? <FiCheck className="w-3 h-3" /> : <FiChevronRight className="w-3 h-3" />}
+                        {isActive ? <FiCheckCircle className="w-3 h-3" /> : <FiChevronRight className="w-3 h-3" />}
                       </button>
                     </div>
                   </div>
@@ -991,6 +1104,53 @@ export default function SecurityCategoryPage() {
           </motion.div>
         </section>
         
+        {/* Interactive Terminal Demo */}
+        <AnimatePresence>
+          {showTerminal && (
+            <motion.section
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mb-12"
+            >
+              <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-700">
+                <div className="p-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="flex space-x-1.5 ml-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div className="ml-4 text-xs text-gray-400">secure-shell ~ </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowTerminal(false)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <FiX />
+                  </button>
+                </div>
+                
+                <div className="p-4 text-gray-200 font-mono text-sm overflow-x-auto max-h-96 overflow-y-auto">
+                  {terminalOutput.map((line, idx) => (
+                    <motion.div 
+                      key={idx}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="whitespace-pre-wrap mb-1"
+                    >
+                      {line}
+                    </motion.div>
+                  ))}
+                  <div className="animate-pulse text-green-400 mt-1">▋</div>
+                </div>
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+        
         {/* Script Listing Section */}
         <div ref={contentRef}>
           {(activeSubcategory || searchQuery || filterOS !== 'all') && (
@@ -1037,7 +1197,7 @@ export default function SecurityCategoryPage() {
                       }`}
                       aria-label="Compact view"
                     >
-                      <FiAlignLeft className="w-4 h-4" />
+                      <FiInfo className="w-4 h-4" />
                     </button>
                   </div>
                   
@@ -1117,7 +1277,7 @@ export default function SecurityCategoryPage() {
                                     key={tag}
                                     className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs text-gray-600 dark:text-gray-400"
                                   >
-                                    {tag}
+                                    #{tag}
                                   </span>
                                 ))}
                                 {script.tags.length > 4 && (
@@ -1252,7 +1412,7 @@ export default function SecurityCategoryPage() {
                                       key={tag}
                                       className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs text-gray-600 dark:text-gray-400"
                                     >
-                                      {tag}
+                                      #{tag}
                                     </span>
                                   ))}
                                   {script.tags.length > 3 && (
@@ -1284,13 +1444,12 @@ export default function SecurityCategoryPage() {
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
                     Try adjusting your search terms or filters to find what you're looking for.
                   </p>
-                  <FormButton
+                  <button
                     onClick={clearFilters}
-                    type="button"
-                    variant="primary"
+                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-medium rounded-md transition-colors"
                   >
                     Clear All Filters
-                  </FormButton>
+                  </button>
                 </div>
               )}
             </section>
@@ -1499,4 +1658,6 @@ export default function SecurityCategoryPage() {
       `}</style>
     </>
   );
-}
+};
+
+export default SecurityCategoryPage;
