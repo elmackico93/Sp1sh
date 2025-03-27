@@ -69,9 +69,11 @@ export const Header = () => {
       cursor.style.animation = 'none';
     } else {
       // Start blinking after typing is complete
-      cursor.style.animation = 'blink 1s step-end infinite';
+      cursor.style.animation = theme === 'dark' 
+        ? 'blink 1s step-end infinite, darkModeCursorPulse 2s ease-in-out infinite'
+        : 'blink 1s step-end infinite';
     }
-  }, [isTyping]);
+  }, [isTyping, theme]);
 
   const rotateClaim = () => {
     if (isTyping) return; // Prevent changing during typing animation
@@ -93,13 +95,13 @@ export const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-sm backdrop-blur-lg dark:shadow-gray-800/10 border-b border-gray-100 dark:border-gray-800">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <button onClick={rotateClaim} className="flex items-center gap-3 mt-2 sm:mt-3 mb-2 sm:mb-3 focus:outline-none">
+        <button onClick={rotateClaim} className="flex items-center gap-3 mt-2 sm:mt-3 mb-2 sm:mb-3 focus:outline-none logo-container">
           <div className="flex items-center gap-3">
             <div className="flex-shrink-0">
               <img
                 src="/assets/logo.svg"
                 alt="Sp1sh Logo"
-                className="h-12 sm:h-14 w-auto bg-white dark:bg-gray-900 rounded-2xl p-1 ring-2 ring-primary drop-shadow-md transition-transform duration-200 hover:scale-110"
+                className="h-12 sm:h-14 w-auto bg-white dark:bg-gray-900 rounded-2xl p-1 ring-2 ring-primary dark:ring-primary-light drop-shadow-md transition-transform duration-200 hover:scale-110"
                 loading="eager"
               />
             </div>
@@ -128,14 +130,17 @@ export const Header = () => {
             className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
             aria-label={mounted && theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
-            {mounted && theme === 'dark' ? <FiSun className="text-xl" /> : <FiMoon className="text-xl" />}
+            {mounted && theme === 'dark' ? 
+              <FiSun className="text-xl text-primary-light" /> : 
+              <FiMoon className="text-xl" />
+            }
           </button>
 
           <Link href="/signin" className="hidden md:block px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light">
             Sign In
           </Link>
 
-          <Link href="/add-script" className="hidden md:flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-full transition-colors">
+          <Link href="/add-script" className="hidden md:flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary dark:text-gray-900 rounded-full transition-colors">
             <span>+</span>
             <span>Add Script</span>
           </Link>
@@ -165,7 +170,7 @@ export const Header = () => {
             </Link>
             <Link
               href="/add-script"
-              className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-md"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary dark:text-gray-900 rounded-md"
             >
               Add Script
             </Link>

@@ -1008,5 +1008,42 @@
      }
    }
    
+/* Logo and Claim Text Dark Mode Enhancements */
+
+/* Logo enhancements for dark mode */
+.dark .logo-container img {
+  filter: drop-shadow(0 0 6px rgba(77, 148, 255, 0.3));
+  transition: all 0.3s ease;
+}
+
+/* Add a subtle glow effect on hover in dark mode */
+.dark .logo-container:hover img {
+  filter: drop-shadow(0 0 8px rgba(77, 148, 255, 0.5));
+}
+
+/* Claim text enhancements for dark mode */
+.dark #typed-claim {
+  color: var(--primary-light);
+  text-shadow: 0 0 10px rgba(77, 148, 255, 0.2);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Enhanced cursor visibility in dark mode */
+.dark .cursor {
+  background-color: var(--primary-light);
+  opacity: 0.9;
+  box-shadow: 0 0 8px rgba(77, 148, 255, 0.5);
+}
+
+/* Pulse effect for the cursor in dark mode */
+@keyframes darkModeCursorPulse {
+  0%, 100% { opacity: 0.9; box-shadow: 0 0 8px rgba(77, 148, 255, 0.5); }
+  50% { opacity: 0.5; box-shadow: 0 0 12px rgba(77, 148, 255, 0.3); }
+}
+
+.dark .cursor {
+  animation: blink 1s step-end infinite, darkModeCursorPulse 2s ease-in-out infinite;
+}
+
    /* Import terminal styles */
    @import './terminal.css';
