@@ -54,7 +54,7 @@
   --terminal-glow-intensity: 0.5;
   --terminal-header-text: #64748b;
   --terminal-prompt-char: ">";
-  --matrix-opacity: 0.1;
+  --matrix-opacity: 0.22;
 }
 
 /* Terminal Window Container */

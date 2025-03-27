@@ -7,7 +7,6 @@ import TerminalLogin from '@/components/auth/TerminalLogin';
 import EnhancedMatrixBackground from '@/components/auth/EnhancedMatrixBackground';
 import KeyboardShortcuts from '@/components/auth/KeyboardShortcuts';
 import TerminalThemeProvider from '@/components/auth/TerminalThemeProvider';
-import TerminalThemeSwitcher from '@/components/auth/TerminalThemeSwitcher';
 
 // Define authentication states
 type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'error';
@@ -76,7 +75,6 @@ export default function SignIn() {
         <EnhancedMatrixBackground density={0.8} speed={1.0} glowIntensity={0.7} />
         
         {/* Theme Switcher */}
-        <TerminalThemeSwitcher />
         
         {/* Terminal window container */}
         <div className="w-full max-w-md relative z-10">

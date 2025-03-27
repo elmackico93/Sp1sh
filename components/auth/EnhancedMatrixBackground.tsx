@@ -21,26 +21,27 @@ export const EnhancedMatrixBackground: React.FC<MatrixBackgroundProps> = ({
 
   // Update based on theme and terminal theme
   useEffect(() => {
-    // Base opacity based on light/dark mode
-    const baseOpacity = resolvedTheme === 'dark' ? 0.2 : 0.1;
+    // Optimized opacity settings for perfect balance in both modes
+    const isDark = resolvedTheme === 'dark';
+    const baseOpacity = isDark ? 0.2 : 0.22;
     
-    // Adjust based on terminal theme
+    // Custom theme multipliers for perfect visual balance
     let themeMultiplier = 1.0;
     switch (terminalTheme) {
       case 'tokyo-night':
-        themeMultiplier = 1.1;
+        themeMultiplier = isDark ? 1.1 : 1.2;
         break;
       case 'dracula':
-        themeMultiplier = 1.2;
+        themeMultiplier = isDark ? 1.2 : 1.3;
         break;
       case 'nord':
-        themeMultiplier = 0.9;
+        themeMultiplier = isDark ? 0.9 : 1.0;
         break;
       case 'github':
-        themeMultiplier = 0.8;
+        themeMultiplier = isDark ? 0.8 : 0.9;
         break;
       case 'monokai':
-        themeMultiplier = 1.3;
+        themeMultiplier = isDark ? 1.3 : 1.4;
         break;
     }
     
@@ -64,21 +65,27 @@ export const EnhancedMatrixBackground: React.FC<MatrixBackgroundProps> = ({
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Enhanced matrix characters with special symbols based on theme
-    let chars = '01010101abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ{}[]<>/?;:~#%^*()-=_+|';
+    // Optimized character sets for both modes
+    const isDark = resolvedTheme === 'dark';
+    const standardChars = '01010101abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ{}[]<>/?;:~#%^*()-=_+|';
     
-    // Add theme-specific characters
+    // Theme-specific characters with perfect visual balance
+    let themeChars = '';
     if (terminalTheme === 'tokyo-night') {
-      chars += '日月水火木金土天海空';
+      themeChars = isDark ? '日月水火木金土天海空' : '円円円円円円円円円円';
     } else if (terminalTheme === 'dracula') {
-      chars += '†‡§¶œæ∂ƒ©˙∆˚¬…æ';
+      themeChars = '†‡§¶œæ∂ƒ©˙∆˚¬…æ';
     } else if (terminalTheme === 'github') {
-      chars += 'λπωμσψδφγηξκςβν';
+      themeChars = 'λπωμσψδφγηξκςβν';
     }
     
-    // Font size and column count - adjusted by density
-    const fontSize = Math.floor(14 * (0.8 + density * 0.4)); // 11-17px based on density
-    const columns = Math.floor(canvas.width / (fontSize * (2.0 - density))); // More columns with higher density
+    const chars = standardChars + themeChars;
+    
+    // Optimized font size and column calculations for both modes
+    const baseFontSize = isDark ? 14 : 15; // Slightly larger in light mode for better visibility
+    const fontSize = Math.floor(baseFontSize * (0.8 + density * 0.4));
+    const densityMultiplier = isDark ? (2.0 - density) : (1.7 - density);
+    const columns = Math.floor(canvas.width / (fontSize * densityMultiplier));
     
     // Drop position, brightness and speed for each column
     const drops: number[] = [];
@@ -87,41 +94,43 @@ export const EnhancedMatrixBackground: React.FC<MatrixBackgroundProps> = ({
     
     for (let i = 0; i < columns; i++) {
       drops[i] = Math.floor(Math.random() * -canvas.height);
-      brightness[i] = 0.1 + Math.random() * 0.2;
+      // Higher base brightness in light mode for better contrast
+      brightness[i] = isDark ? (0.1 + Math.random() * 0.2) : (0.15 + Math.random() * 0.25);
       columnSpeed[i] = (0.5 + Math.random() * 1.5) * speed;
     }
 
     // Function to get a random character
     const getChar = () => chars[Math.floor(Math.random() * chars.length)];
 
-    // Get matrix color based on theme
+    // Optimized colors for perfect visibility in both modes
     const getMatrixColor = () => {
       if (resolvedTheme === 'dark') {
         switch (terminalTheme) {
-          case 'tokyo-night': return [158, 206, 106]; // Green
+          case 'tokyo-night': return [158, 206, 106]; // Perfect green
           case 'nord': return [163, 190, 140]; // Softer green
           case 'dracula': return [80, 250, 123]; // Bright green
           case 'github': return [63, 185, 80]; // GitHub green
           case 'monokai': return [166, 226, 46]; // Monokai green
-          default: return [0, 255, 0]; // Default green
+          default: return [0, 255, 0]; // Classic Matrix green
         }
       } else {
+        // Optimized light mode colors with perfect visibility
         switch (terminalTheme) {
-          case 'tokyo-night': return [15, 118, 110]; // Teal
-          case 'nord': return [76, 86, 106]; // Nord blue
-          case 'dracula': return [80, 250, 123]; // Green (still visible in light)
-          case 'github': return [3, 102, 214]; // GitHub blue
-          case 'monokai': return [102, 217, 239]; // Monokai blue
-          default: return [0, 128, 100]; // Default teal for light
+          case 'tokyo-night': return [0, 150, 190]; // Deep teal - optimal for light backgrounds
+          case 'nord': return [43, 108, 196]; // Dark slate - high contrast on light
+          case 'dracula': return [80, 200, 120]; // Softer green for light mode
+          case 'github': return [0, 92, 220]; // Deeper GitHub blue for visibility
+          case 'monokai': return [86, 182, 194]; // Deeper teal for Monokai in light mode
+          default: return [0, 120, 215]; // Default teal for light mode
         }
       }
     };
 
-    // Drawing animation
+    // Drawing animation with optimal settings
     const draw = () => {
-      // Add semi-transparent black rectangle for fade effect
-      // Use a lighter fade for faster speed
-      const fadeOpacity = 0.05 / speed;
+      // Optimal fade effect tailored to each mode
+      const isDark = resolvedTheme === 'dark';
+      const fadeOpacity = isDark ? 0.05 / speed : 0.03 / speed;
       ctx.fillStyle = `rgba(0, 0, 0, ${fadeOpacity})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -132,25 +141,28 @@ export const EnhancedMatrixBackground: React.FC<MatrixBackgroundProps> = ({
       for (let i = 0; i < columns; i++) {
         const y = drops[i] * fontSize;
         if (y > 0 && y < canvas.height) {
-          // Head character (brighter)
-          // Apply glow effect based on glowIntensity
-          if (glowIntensity > 0) {
-            ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${glowIntensity})`;
-            ctx.shadowBlur = 5 * glowIntensity;
-          }
+          // Head character with perfect glow effect for each mode
+          const headGlow = isDark ? glowIntensity : glowIntensity * 1.4; // Enhanced glow in light mode
+          ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${headGlow})`;
+          ctx.shadowBlur = isDark ? 5 * glowIntensity : 9 * glowIntensity;
           
-          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${brightness[i] + 0.4})`;
+          const headBrightness = isDark ? brightness[i] + 0.4 : brightness[i] + 0.6;
+          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${headBrightness})`;
           ctx.font = `${fontSize}px monospace`;
           ctx.fillText(getChar(), i * fontSize, y);
           
           // Reset shadow for trail characters
-          ctx.shadowBlur = 0;
+          ctx.shadowBlur = isDark ? 5 * glowIntensity : 9 * glowIntensity;
           
-          // Trail characters (fading)
-          for (let j = 1; j < 20; j++) {
+          // Trail characters with optimized length for each mode
+          const trailLength = isDark ? 20 : 15; // Shorter, more defined trails in light mode
+          for (let j = 1; j < trailLength; j++) {
             const prevY = y - j * fontSize;
             if (prevY > 0) {
-              const fadingBrightness = brightness[i] * (1 - j/20);
+              // More prominent fade for light mode
+              const fadeRatio = isDark ? (1 - j/trailLength) : (1 - j/(trailLength*0.8));
+              const fadingBrightness = brightness[i] * fadeRatio;
+              
               if (fadingBrightness > 0.02) {
                 ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${fadingBrightness})`;
                 ctx.fillText(getChar(), i * fontSize, prevY);
@@ -162,10 +174,11 @@ export const EnhancedMatrixBackground: React.FC<MatrixBackgroundProps> = ({
         // Move the drop down - speed adjusted by column
         drops[i] += columnSpeed[i];
         
-        // Reset when a column reaches the bottom
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975 / speed) {
+        // Reset when a column reaches the bottom with optimized randomization
+        const resetThreshold = isDark ? 0.975 / speed : 0.96 / speed;
+        if (drops[i] * fontSize > canvas.height && Math.random() > resetThreshold) {
           drops[i] = Math.floor(Math.random() * -50);
-          brightness[i] = 0.1 + Math.random() * 0.2;
+          brightness[i] = isDark ? (0.1 + Math.random() * 0.2) : (0.15 + Math.random() * 0.25);
           columnSpeed[i] = (0.5 + Math.random() * 1.5) * speed;
         }
       }
