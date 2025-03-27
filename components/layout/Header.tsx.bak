@@ -29,19 +29,15 @@ export const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-sm backdrop-blur-lg dark:shadow-gray-800/10 border-b border-gray-100 dark:border-gray-800">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-<Link href="/" passHref className="flex items-center gap-3 mt-2 sm:mt-3 mb-2 sm:mb-3">
-  <div className="flex items-center gap-3">
-    <div className="flex-shrink-0">
-      <img
-        src="/assets/logo.svg"
-        alt="Sp1sh Logo"
-        className="h-12 sm:h-14 w-auto bg-white dark:bg-gray-900 rounded-2xl p-1 ring-2 ring-primary drop-shadow-md transition-transform duration-200 hover:scale-110"
-        loading="eager"
-      />
-    </div>
-    <span className="text-sm sm:text-[13px] font-medium italic text-gray-600 dark:text-gray-300 opacity-90 tracking-normal whitespace-nowrap select-none">
-      Scripts that automate the world
-    </span>
+<Link href="/" passHref className="flex items-center gap-3">
+  <div className="flex flex-col items-start leading-tight">
+    <img
+      src="/assets/logo.svg"
+      alt="Sp1sh Logo"
+      className="h-12 sm:h-14 w-auto mr-1 bg-white dark:bg-gray-900 rounded-2xl p-1 ring-2 ring-primary drop-shadow-md transition-transform duration-200 hover:scale-110"
+      loading="eager"
+    />
+    <span className="text-[11px] font-semibold text-primary dark:text-primary-light uppercase tracking-wide pl-[2px]">Shell Power Inside</span>
   </div>
 </Link>
         
