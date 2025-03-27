@@ -1,1151 +1,1012 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  :root {
-    --header-height: 64px;
-    --navbar-height: 48px;
-    
-    --transition-fast: 0.15s ease;
-    --transition-base: 0.25s ease;
-    --transition-slow: 0.4s ease;
-  }
-  
-  html {
-    @apply scroll-smooth;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  body {
-    @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100;
-    @apply antialiased;
-  }
-  
-  ::selection {
-    @apply bg-primary-light/20 text-primary-dark dark:bg-primary-dark/30 dark:text-primary-light;
-  }
-
-  /* Focus styling */
-  :focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
-  }
-  
-  /* Scrollbar styling */
-  ::-webkit-scrollbar {
-    @apply w-2 h-2;
-  }
-  
-  ::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-gray-700 rounded-full;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400 dark:bg-gray-600;
-  }
-}
-
-@layer components {
-  .container {
-    @apply px-4 mx-auto max-w-7xl;
-  }
-  
-  /* Button styles */
-  .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors rounded-pill;
-    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
-  }
-  
-  .btn-primary {
-    @apply bg-primary text-white hover:bg-primary-dark;
-  }
-  
-  .btn-secondary {
-    @apply bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700;
-  }
-  
-  .btn-danger {
-    @apply bg-emergency-red text-white hover:bg-red-700;
-  }
-  
-  /* Card styles */
-  .card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700;
-    @apply transition-all duration-200;
-  }
-  
-  .card:hover {
-    @apply shadow-md transform -translate-y-1;
-  }
-  
-  /* Badge styles */
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-pill text-xs font-medium;
-  }
-  
-  .badge-linux {
-    @apply bg-linux-green/10 text-linux-green;
-  }
-  
-  .badge-windows {
-    @apply bg-windows-blue/10 text-windows-blue;
-  }
-  
-  .badge-macos {
-    @apply bg-gray-100 text-macos-dark dark:bg-gray-700 dark:text-gray-300;
-  }
-}
-
-/* Skip link for accessibility */
-.skip-link {
-  @apply sr-only;
-}
-
-.skip-link:focus {
-  @apply not-sr-only fixed left-0 top-0 z-50 bg-white text-primary px-4 py-2 font-medium;
-}
-
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  
-  body {
-    @apply bg-white text-black;
-  }
-  
-  .container {
-    max-width: 100% !important;
-    padding: 0 !important;
-  }
-}
-
-/* Terminal styles from t.html */
-:root {
-  --primary: #0070e0;
-  --primary-light: #4d94ff;
-  --primary-dark: #0054a6;
-  --emergency-red: #ff3b30;
-  --emergency-orange: #ff9500;
-  --emergency-yellow: #ffcc00;
-  --linux-green: #26a269;
-  --windows-blue: #0078d7;
-  --terminal-bg: #1e1e1e;
-  --terminal-text: #f8f8f8;
-  --terminal-green: #4af626;
-}
-.terminal-header {
-  background-color: #333;
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
-}
-.terminal-body {
-  background-color: var(--terminal-bg);
-  color: var(--terminal-text);
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
-}
-.tab-active {
-  border-bottom: 2px solid var(--primary);
-  color: var(--primary);
-}
-.version-active {
-  background-color: var(--primary);
-  color: white;
-}
-.code-line {
-  display: flex;
-}
-.line-number {
-  color: rgba(255,255,255,0.3);
-  text-align: right;
-  padding-right: 1rem;
-  user-select: none;
-  min-width: 3rem;
-}
-
-/* Copy feedback animation */
-@keyframes pulse {
-  0% { opacity: 0.2; }
-  50% { opacity: 0.5; }
-  100% { opacity: 0.2; }
-}
-
-.animate-pulse {
-  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Copy button feedback styles */
-.copy-button-success {
-  @apply bg-green-500 text-white;
-  transition: all 0.3s ease;
-}
-
-/* Tooltip styles */
-.tooltip {
-  @apply absolute invisible opacity-0 bg-gray-900 text-white text-xs rounded py-1 px-2 transition-opacity;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-bottom: 5px;
-  white-space: nowrap;
-  z-index: 10;
-}
-
-.tooltip:after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #1f2937 transparent transparent transparent;
-}
-
-.tooltip-trigger:hover .tooltip {
-  @apply visible opacity-100;
-}
-
-/* Enhanced Search Styles */
-.search-input {
-  transition: all 0.2s ease;
-}
-
-.search-input:focus {
-  box-shadow: 0 0 0 2px rgba(0, 112, 224, 0.2);
-}
-
-.search-icon {
-  transition: transform 0.2s ease;
-}
-
-.search-input:focus + .search-icon {
-  transform: scale(1.1);
-}
-
-.clear-search-icon {
-  transition: all 0.15s ease;
-}
-
-.clear-search-icon:hover {
-  transform: scale(1.1);
-}
-
-.search-results-container {
-  animation: searchResults 0.2s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transform-origin: top center;
-}
-
-@keyframes searchResults {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.search-result-highlighted {
-  background-color: var(--primary-light, #4d94ff);
-  color: white;
-}
-
-.dark .search-result-highlighted {
-  background-color: var(--primary-dark, #0054a6);
-}
-
-.search-loading-indicator {
-  width: 24px;
-  height: 24px;
-  margin: 0 auto 8px;
-  border: 2px solid rgba(0, 112, 224, 0.2);
-  border-top-color: var(--primary, #0070e0);
-  border-radius: 50%;
-  animation: loading-spin 0.8s linear infinite;
-}
-
-@keyframes loading-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Recent searches (if implemented) */
-.recent-search-item {
-  transition: background-color 0.15s ease;
-}
-
-.recent-search-item:hover {
-  background-color: rgba(0, 112, 224, 0.05);
-}
-
-.dark .recent-search-item:hover {
-  background-color: rgba(77, 148, 255, 0.1);
-}
-
-/* Search result tags highlight animation */
-@keyframes tagPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.search-match-highlight {
-  background-color: rgba(0, 112, 224, 0.15);
-  border-radius: 2px;
-  padding: 0 2px;
-  margin: 0 -2px;
-  animation: tagPulse 2s infinite;
-}
-
-.dark .search-match-highlight {
-  background-color: rgba(77, 148, 255, 0.25);
-}
-
-/* Script Card Quick View styles */
-.code-preview-container {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) var(--terminal-bg);
-}
-
-.code-preview-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.code-preview-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.code-preview-container::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.code-preview-container::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Slide-down animation */
-@keyframes slideDown {
-  from {
-    max-height: 0;
-    opacity: 0;
-  }
-  to {
-    max-height: 400px;
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    max-height: 400px;
-    opacity: 1;
-  }
-  to {
-    max-height: 0;
-    opacity: 0;
-  }
-}
-
-.quick-view-enter {
-  animation: slideDown 0.3s ease forwards;
-}
-
-.quick-view-exit {
-  animation: slideUp 0.2s ease forwards;
-}
-
-/* Script Card Quick View styles - VS Code inspired terminal */
-.terminal-code-container {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) #1E1E1E;
-}
-
-.terminal-code-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.terminal-code-container::-webkit-scrollbar-track {
-  background: #1E1E1E;
-}
-
-.terminal-code-container::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.terminal-code-container::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-.terminal-code-container pre {
-  tab-size: 2 !important;
-}
-
-/* Ensure proper indentation display */
-.terminal-code-container code {
-  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace !important;
-  font-feature-settings: 'liga' 1, 'calt' 1; /* Enable font ligatures for coding */
-}
-
-/* Syntax highlighting enhancements */
-.terminal-code-container .token.comment {
-  font-style: italic;
-  color: #6A9955 !important;
-}
-
-.terminal-code-container .token.string {
-  color: #CE9178 !important;
-}
-
-.terminal-code-container .token.function {
-  color: #DCDCAA !important;
-}
-
-.terminal-code-container .token.keyword {
-  color: #569CD6 !important;
-  font-weight: bold;
-}
-
-.terminal-code-container .token.operator {
-  color: #D4D4D4 !important;
-}
-
-.terminal-code-container .token.number {
-  color: #B5CEA8 !important;
-}
-
-/* VS Code themed cursor animation */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.terminal-cursor {
-  display: inline-block;
-  width: 2px;
-  height: 1.2em;
-  background: #AEAFAD;
-  margin-left: 2px;
-  vertical-align: middle;
-  animation: blink 1s step-end infinite;
-}
-
-/* Enhanced slide animation with VS Code-like reveal */
-@keyframes terminalReveal {
-  from {
-    max-height: 0;
-    opacity: 0;
-    transform: translateY(-10px);
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-  }
-  to {
-    max-height: 400px;
-    opacity: 1;
-    transform: translateY(0);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  }
-}
-
-@keyframes terminalHide {
-  from {
-    max-height: 400px;
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    max-height: 0;
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-}
-
-/* Terminal header dot pulse effect */
-@keyframes dotPulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-.terminal-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.terminal-dot-red {
-  background-color: #FF5F56;
-  animation: dotPulse 2s infinite 0s;
-}
-
-.terminal-dot-yellow {
-  background-color: #FFBD2E;
-  animation: dotPulse 2s infinite 0.3s;
-}
-
-.terminal-dot-green {
-  background-color: #27C93F;
-  animation: dotPulse 2s infinite 0.6s;
-}
-
-/* In-Place Terminal Preview styles - VS Code inspired */
-.terminal-code-container {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) #1E1E1E;
-}
-
-.terminal-code-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.terminal-code-container::-webkit-scrollbar-track {
-  background: #1E1E1E;
-}
-
-.terminal-code-container::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.terminal-code-container::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-.terminal-code-container pre {
-  tab-size: 2 !important;
-}
-
-/* Ensure proper indentation display */
-.terminal-code-container code {
-  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace !important;
-  font-feature-settings: 'liga' 1, 'calt' 1; /* Enable font ligatures for coding */
-}
-
-/* Syntax highlighting enhancements */
-.terminal-code-container .token.comment {
-  font-style: italic;
-  color: #6A9955 !important;
-}
-
-.terminal-code-container .token.string {
-  color: #CE9178 !important;
-}
-
-.terminal-code-container .token.function {
-  color: #DCDCAA !important;
-}
-
-.terminal-code-container .token.keyword {
-  color: #569CD6 !important;
-  font-weight: bold;
-}
-
-.terminal-code-container .token.operator {
-  color: #D4D4D4 !important;
-}
-
-.terminal-code-container .token.number {
-  color: #B5CEA8 !important;
-}
-
-/* VSCode style scrollbar for the terminal */
-.terminal-scrollbar::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.terminal-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(121, 121, 121, 0.4);
-}
-
-.terminal-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.terminal-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 100, 100, 0.7);
-}
-
-/* Force exact height to prevent page jumping */
-.script-card-content {
-  height: 224px; /* Ensure consistent height */
-  overflow: hidden;
-}
-
-/* Terminal animation blur overlay for more polished transitions */
-@keyframes terminalBlurIn {
-  from {
-    backdrop-filter: blur(0);
-    background-color: rgba(30, 30, 30, 0);
-  }
-  to {
-    backdrop-filter: blur(3px);
-    background-color: rgba(30, 30, 30, 0.98);
-  }
-}
-
-.terminal-container {
-  animation: terminalBlurIn 0.2s ease forwards;
-}
-
-/* Download Modal Styles */
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes modalFadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
-
-.modal-enter {
-  animation: modalFadeIn 0.3s ease forwards;
-}
-
-.modal-exit {
-  animation: modalFadeOut 0.2s ease forwards;
-}
-
-/* Modal backdrop blur effect */
-.modal-backdrop {
-  backdrop-filter: blur(5px);
-  transition: backdrop-filter 0.3s ease;
-}
-
-/* Terminal in modal styling */
-.download-terminal {
-  background-color: var(--terminal-bg);
-  color: var(--terminal-text);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
-}
-
-/* Modal animation dot pulse effect */
-@keyframes modalDotPulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-.modal-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  animation: modalDotPulse 2s infinite;
-}
-
-.modal-dot-red {
-  background-color: #FF5F56;
-  animation-delay: 0s;
-}
-
-.modal-dot-yellow {
-  background-color: #FFBD2E;
-  animation-delay: 0.3s;
-}
-
-.modal-dot-green {
-  background-color: #27C93F;
-  animation-delay: 0.6s;
-}
-/* Add these styles to your globals.css file */
-
-/* Modal backdrop */
-.fixed.inset-0.bg-black.z-50 {
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-/* Animation for the terminal dots */
-@keyframes pulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-.w-3.h-3.rounded-full.bg-red-500,
-.w-3.h-3.rounded-full.bg-yellow-500,
-.w-3.h-3.rounded-full.bg-green-500 {
-  animation: pulse 1.5s infinite;
-}
-
-.w-3.h-3.rounded-full.bg-red-500 {
-  animation-delay: 0s;
-}
-
-.w-3.h-3.rounded-full.bg-yellow-500 {
-  animation-delay: 0.2s;
-}
-
-.w-3.h-3.rounded-full.bg-green-500 {
-  animation-delay: 0.4s;
-}
-
-/* Ensure proper modal positioning */
-.fixed.inset-0.flex.items-center.justify-center.z-50 {
-  pointer-events: none;
-}
-
-.fixed.inset-0.flex.items-center.justify-center.z-50 > div {
-  pointer-events: auto;
-}
-
-/* Terminal Animation Styles */
-.terminal-line {
-  line-height: 1.5;
-  white-space: pre-wrap;
-  margin-bottom: 2px;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-}
-
-@keyframes cursor-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.terminal-cursor {
-  display: inline-block;
-  width: 8px;
-  height: 16px;
-  background-color: var(--terminal-text);
-  margin-left: 2px;
-  animation: cursor-blink 1s step-end infinite;
-  vertical-align: middle;
-}
-
-/* Progress Bar Animation */
-@keyframes progress-glow {
-  0% { text-shadow: 0 0 2px rgba(74, 222, 128, 0.5); }
-  50% { text-shadow: 0 0 8px rgba(74, 222, 128, 0.8); }
-  100% { text-shadow: 0 0 2px rgba(74, 222, 128, 0.5); }
-}
-
-.terminal-line:nth-last-child(-n+16):nth-child(n+12) {
-  animation: progress-glow 1.5s infinite;
-  color: #4ade80;
-}
-
-/* Terminal theme colors */
-.text-green-400 {
-  color: #4ade80;
-}
-
-.text-terminal-green {
-  color: var(--terminal-green);
-}
-
-/* Terminal scrollbar styling */
-.bg-terminal-bg {
-  scrollbar-width: thin;
-  scrollbar-color: #4a5568 #1e1e1e;
-}
-
-.bg-terminal-bg::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.bg-terminal-bg::-webkit-scrollbar-track {
-  background: #1e1e1e;
-}
-
-.bg-terminal-bg::-webkit-scrollbar-thumb {
-  background-color: #4a5568;
-  border-radius: 4px;
-}
-
-.bg-terminal-bg::-webkit-scrollbar-thumb:hover {
-  background-color: #718096;
-}
-
-/* Enhanced Search Styles - Add these to your globals.css file */
-
-/* Input and container styling */
-.search-input {
-  transition: all 0.2s ease;
-}
-
-.search-input:focus {
-  box-shadow: 0 0 0 2px rgba(0, 112, 224, 0.2);
-}
-
-.search-icon {
-  transition: transform 0.2s ease;
-}
-
-.search-input:focus ~ .search-icon {
-  transform: scale(1.1);
-}
-
-.clear-search-icon {
-  transition: all 0.15s ease;
-}
-
-.clear-search-icon:hover {
-  transform: scale(1.1);
-}
-
-/* Search results container */
-.search-results-container {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transform-origin: top center;
-}
-
-/* Loading indicator */
-.search-loading-indicator {
-  width: 24px;
-  height: 24px;
-  margin: 0 auto 8px;
-  border: 2px solid rgba(0, 112, 224, 0.2);
-  border-top-color: var(--primary, #0070e0);
-  border-radius: 50%;
-  animation: search-loading-spin 0.8s linear infinite;
-}
-
-@keyframes search-loading-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Highlighted result styling */
-.search-result-highlighted {
-  background-color: rgba(0, 112, 224, 0.1);
-}
-
-.dark .search-result-highlighted {
-  background-color: rgba(0, 112, 224, 0.2);
-}
-
-/* Highlighted text styling */
-.bg-primary\/20 {
-  background-color: rgba(0, 112, 224, 0.2);
-}
-
-.dark .bg-primary-dark\/30 {
-  background-color: rgba(0, 84, 166, 0.3);
-}
-
-/* Recent search items */
-.recent-search-item {
-  transition: background-color 0.15s ease;
-}
-
-.recent-search-item:hover {
-  background-color: rgba(0, 112, 224, 0.05);
-}
-
-.dark .recent-search-item:hover {
-  background-color: rgba(77, 148, 255, 0.1);
-}
-
-/* "See all results" button hover effect */
-.group:hover .group-hover\:translate-x-0\.5 {
-  transform: translateX(0.125rem);
-}
-
-/* Filter options scrollbar */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Dropdown animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-}
-
-/* Line clamp for truncating text */
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Transition effects */
-.transition-transform {
-  transition-property: transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-.transition-colors {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Import terminal styles */
-@import './terminal.css';
-
-/* FIXED: Typing animation and cursor blink */
-@keyframes typing {
-  from { width: 0 }
-  to { width: 34ch }
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
-.brand-claim {
-  display: inline-flex;
-  position: relative;
-}
-
-#typed-claim {
-  overflow: hidden;
-  white-space: nowrap;
-  display: inline-block;
-  width: 0;
-  animation: typing 2.5s steps(30, end) 1s forwards;
-}
-
-.cursor {
-  display: inline-block;
-  margin-left: 2px;
-  opacity: 1;
-  animation: blink 1s step-end infinite;
-  animation-delay: 1s; /* Synchronize with the typing animation start */
-}
-
-.animate-typing {
-  animation: typing 2s steps(34, end);
-}
-
-@keyframes splash {
-  0% {
-    transform: scale(1);
-    opacity: 0.4;
-  }
-  50% {
-    transform: scale(4);
-    opacity: 0.2;
-  }
-  100% {
-    transform: scale(6);
-    opacity: 0;
-  }
-}
-
-.splash-animation {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 8rem;
-  height: 8rem;
-  background: radial-gradient(circle, #00b4ff33 0%, transparent 80%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: splash 0.6s ease-out forwards;
-  z-index: 10;
-}
-
-/* Terminal-specific styles */
-/* Terminal loading animation */
-@keyframes terminalLoad {
-  0% { width: 0%; }
-  100% { width: 100%; }
-}
-
-.animate-terminal-load {
-  animation: terminalLoad 1.5s ease-in-out;
-}
-
-/* Terminal cursor blink */
-@keyframes cursorBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.animate-cursor-blink {
-  animation: cursorBlink 1s step-end infinite;
-}
-
-/* Scan line effect */
-.terminal-scan-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: rgba(122, 255, 122, 0.1);
-  z-index: 10;
-  animation: scanLine 6s linear infinite;
-}
-
-@keyframes scanLine {
-  0% { top: 0%; }
-  100% { top: 100%; }
-}
-
-/* Terminal line typing effect */
-.terminal-typing {
-  display: inline-block;
-  white-space: nowrap;
-  overflow: hidden;
-  animation: typing 2s steps(40, end);
-}
-
-/* Terminal screen flicker */
-@keyframes flicker {
-  0% { opacity: 0.95; }
-  5% { opacity: 0.85; }
-  10% { opacity: 0.95; }
-  15% { opacity: 0.9; }
-  20% { opacity: 0.95; }
-  55% { opacity: 0.95; }
-  60% { opacity: 0.9; }
-  65% { opacity: 0.95; }
-  100% { opacity: 0.95; }
-}
-
-.terminal-flicker {
-  animation: flicker 5s linear infinite;
-}
-
-/* Terminal glow effect */
-.terminal-window {
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.1), 0 0 30px rgba(0, 0, 0, 0.7);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Password character masking */
-.terminal-password {
-  font-family: monospace;
-  letter-spacing: 0.2em;
-}
-
-/* Matrix-style falling characters (subtle background effect) */
-.matrix-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  background: #0a0a0a;
-  overflow: hidden;
-}
-
-.matrix-column {
-  position: absolute;
-  top: -100%;
-  width: 1px;
-  height: 100%;
-  color: #0f0;
-  font-size: 12px;
-  opacity: 0.05;
-  animation: matrix-fall linear infinite;
-}
-
-@keyframes matrix-fall {
-  0% { top: -100%; }
-  100% { top: 100%; }
-}
-
-/* Terminal line styles */
-.terminal-line {
-  line-height: 1.5;
-  margin-bottom: 2px;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-/* Terminal input styles */
-.terminal-input {
-  caret-color: transparent; /* Hide default cursor */
-  background: transparent;
-  border: none;
-  color: inherit;
-  font-family: inherit;
-  font-size: inherit;
-}
-
-.terminal-input:focus {
-  outline: none;
-}
-
-/* Terminal header bar styles */
-.terminal-header {
-  -webkit-app-region: drag; /* Makes it look draggable like a real window */
-  user-select: none;
-}
-
-/* Terminal error styling */
-.terminal-error {
-  color: #ff5555;
-}
-
-/* Terminal success styling */
-.terminal-success {
-  color: #50fa7b;
-}
-
-/* Terminal warning styling */
-.terminal-warning {
-  color: #ffb86c;
-}
-
-/* Animation for authentication spinner */
-@keyframes authSpin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.auth-spinner {
-  animation: authSpin 1s linear infinite;
-}
+/* ==========================================================================
+   TABLE OF CONTENTS:
+   1. Tailwind Directives
+   2. Root Variables and Base Styles
+   3. Layout and Container Styles
+   4. Component Styles
+   5. Button and Interactive Element Styles
+   6. Form and Input Styles
+   7. Terminal Styles
+   8. Animation Definitions
+   9. Search and Filter Styles
+   10. Accessibility Styles
+   11. Media Queries
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Tailwind Directives
+   ========================================================================== */
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   
+   /* ==========================================================================
+      2. Root Variables and Base Styles
+      ========================================================================== */
+   @layer base {
+     :root {
+       --header-height: 64px;
+       --navbar-height: 48px;
+       
+       --transition-fast: 0.15s ease;
+       --transition-base: 0.25s ease;
+       --transition-slow: 0.4s ease;
+       
+       /* Theme Colors */
+       --primary: #0070e0;
+       --primary-light: #4d94ff;
+       --primary-dark: #0054a6;
+       --emergency-red: #ff3b30;
+       --emergency-orange: #ff9500;
+       --emergency-yellow: #ffcc00;
+       --linux-green: #26a269;
+       --windows-blue: #0078d7;
+       --terminal-bg: #1e1e1e;
+       --terminal-text: #f8f8f8;
+       --terminal-green: #4af626;
+     }
+     
+     html {
+       @apply scroll-smooth;
+       -webkit-tap-highlight-color: transparent;
+     }
+     
+     body {
+       @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100;
+       @apply antialiased;
+     }
+     
+     ::selection {
+       @apply bg-primary-light/20 text-primary-dark dark:bg-primary-dark/30 dark:text-primary-light;
+     }
+   
+     /* Focus styling */
+     :focus-visible {
+       @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+     }
+     
+     /* Scrollbar styling */
+     ::-webkit-scrollbar {
+       @apply w-2 h-2;
+     }
+     
+     ::-webkit-scrollbar-track {
+       @apply bg-transparent;
+     }
+     
+     ::-webkit-scrollbar-thumb {
+       @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+     }
+     
+     ::-webkit-scrollbar-thumb:hover {
+       @apply bg-gray-400 dark:bg-gray-600;
+     }
+   }
+   
+   /* ==========================================================================
+      3. Layout and Container Styles
+      ========================================================================== */
+   @layer components {
+     .container {
+       @apply px-4 mx-auto max-w-7xl;
+     }
+   }
+   
+   /* Line clamp for truncating text */
+   .line-clamp-1 {
+     display: -webkit-box;
+     -webkit-line-clamp: 1;
+     -webkit-box-orient: vertical;
+     overflow: hidden;
+   }
+   
+   /* Force exact height to prevent page jumping */
+   .script-card-content {
+     height: 224px; /* Ensure consistent height */
+     overflow: hidden;
+   }
+   
+   /* ==========================================================================
+      4. Component Styles
+      ========================================================================== */
+   @layer components {
+     /* Card styles */
+     .card {
+       @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700;
+       @apply transition-all duration-200;
+     }
+     
+     .card:hover {
+       @apply shadow-md transform -translate-y-1;
+     }
+     
+     /* Badge styles */
+     .badge {
+       @apply inline-flex items-center px-2.5 py-0.5 rounded-pill text-xs font-medium;
+     }
+     
+     .badge-linux {
+       @apply bg-linux-green/10 text-linux-green;
+     }
+     
+     .badge-windows {
+       @apply bg-windows-blue/10 text-windows-blue;
+     }
+     
+     .badge-macos {
+       @apply bg-gray-100 text-macos-dark dark:bg-gray-700 dark:text-gray-300;
+     }
+   }
+   
+   /* Tab styles */
+   .tab-active {
+     border-bottom: 2px solid var(--primary);
+     color: var(--primary);
+   }
+   
+   .version-active {
+     background-color: var(--primary);
+     color: white;
+   }
+   
+   /* Tooltip styles */
+   .tooltip {
+     @apply absolute invisible opacity-0 bg-gray-900 text-white text-xs rounded py-1 px-2 transition-opacity;
+     bottom: 100%;
+     left: 50%;
+     transform: translateX(-50%);
+     margin-bottom: 5px;
+     white-space: nowrap;
+     z-index: 10;
+   }
+   
+   .tooltip:after {
+     content: '';
+     position: absolute;
+     top: 100%;
+     left: 50%;
+     margin-left: -5px;
+     border-width: 5px;
+     border-style: solid;
+     border-color: #1f2937 transparent transparent transparent;
+   }
+   
+   .tooltip-trigger:hover .tooltip {
+     @apply visible opacity-100;
+   }
+   
+   /* Modal backdrop */
+   .fixed.inset-0.bg-black.z-50 {
+     background-color: rgba(0, 0, 0, 0.5);
+   }
+   
+   /* Ensure proper modal positioning */
+   .fixed.inset-0.flex.items-center.justify-center.z-50 {
+     pointer-events: none;
+   }
+   
+   .fixed.inset-0.flex.items-center.justify-center.z-50 > div {
+     pointer-events: auto;
+   }
+   
+   /* Modal backdrop blur effect */
+   .modal-backdrop {
+     backdrop-filter: blur(5px);
+     transition: backdrop-filter 0.3s ease;
+   }
+   
+   /* ==========================================================================
+      5. Button and Interactive Element Styles
+      ========================================================================== */
+   @layer components {
+     /* Button styles */
+     .btn {
+       @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors rounded-pill;
+       @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+     }
+     
+     .btn-primary {
+       @apply bg-primary text-white hover:bg-primary-dark;
+     }
+     
+     .btn-secondary {
+       @apply bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700;
+     }
+     
+     .btn-danger {
+       @apply bg-emergency-red text-white hover:bg-red-700;
+     }
+   }
+   
+   /* Copy button feedback styles */
+   .copy-button-success {
+     @apply bg-green-500 text-white;
+     transition: all 0.3s ease;
+   }
+   
+   /* "See all results" button hover effect */
+   .group:hover .group-hover\:translate-x-0\.5 {
+     transform: translateX(0.125rem);
+   }
+   
+   /* Transition effects */
+   .transition-transform {
+     transition-property: transform;
+     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+     transition-duration: 150ms;
+   }
+   
+   .transition-colors {
+     transition-property: background-color, border-color, color, fill, stroke;
+     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+     transition-duration: 150ms;
+   }
+   
+   /* ==========================================================================
+      6. Form and Input Styles
+      ========================================================================== */
+   
+   /* Input and container styling */
+   .search-input {
+     transition: all 0.2s ease;
+   }
+   
+   .search-input:focus {
+     box-shadow: 0 0 0 2px rgba(0, 112, 224, 0.2);
+   }
+   
+   .search-icon {
+     transition: transform 0.2s ease;
+   }
+   
+   .search-input:focus + .search-icon,
+   .search-input:focus ~ .search-icon {
+     transform: scale(1.1);
+   }
+   
+   .clear-search-icon {
+     transition: all 0.15s ease;
+   }
+   
+   .clear-search-icon:hover {
+     transform: scale(1.1);
+   }
+   
+   /* Filter options scrollbar */
+   .scrollbar-hide {
+     -ms-overflow-style: none;
+     scrollbar-width: none;
+   }
+   
+   .scrollbar-hide::-webkit-scrollbar {
+     display: none;
+   }
+   
+   /* ==========================================================================
+      7. Terminal Styles
+      ========================================================================== */
+   /* Basic Terminal UI */
+   .terminal-header {
+     background-color: #333;
+     border-top-left-radius: 0.5rem;
+     border-top-right-radius: 0.5rem;
+   }
+   
+   .terminal-body {
+     background-color: var(--terminal-bg);
+     color: var(--terminal-text);
+     border-bottom-left-radius: 0.5rem;
+     border-bottom-right-radius: 0.5rem;
+   }
+   
+   .code-line {
+     display: flex;
+   }
+   
+   .line-number {
+     color: rgba(255,255,255,0.3);
+     text-align: right;
+     padding-right: 1rem;
+     user-select: none;
+     min-width: 3rem;
+   }
+   
+   /* Terminal in modal styling */
+   .download-terminal {
+     background-color: var(--terminal-bg);
+     color: var(--terminal-text);
+     border-radius: 0.5rem;
+     overflow: hidden;
+     font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+   }
+   
+   /* Terminal Animation Styles */
+   .terminal-line {
+     line-height: 1.5;
+     white-space: pre-wrap;
+     margin-bottom: 2px;
+     font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+   }
+   
+   /* Terminal theme colors */
+   .text-green-400 {
+     color: #4ade80;
+   }
+   
+   .text-terminal-green {
+     color: var(--terminal-green);
+   }
+   
+   /* Script Card Quick View styles */
+   .code-preview-container {
+     scrollbar-width: thin;
+     scrollbar-color: rgba(255, 255, 255, 0.2) var(--terminal-bg);
+   }
+   
+   .code-preview-container::-webkit-scrollbar {
+     width: 8px;
+     height: 8px;
+   }
+   
+   .code-preview-container::-webkit-scrollbar-track {
+     background: transparent;
+   }
+   
+   .code-preview-container::-webkit-scrollbar-thumb {
+     background-color: rgba(255, 255, 255, 0.2);
+     border-radius: 4px;
+   }
+   
+   .code-preview-container::-webkit-scrollbar-thumb:hover {
+     background-color: rgba(255, 255, 255, 0.3);
+   }
+   
+   /* Script Card Quick View styles - VS Code inspired terminal */
+   .terminal-code-container {
+     scrollbar-width: thin;
+     scrollbar-color: rgba(255, 255, 255, 0.2) #1E1E1E;
+   }
+   
+   .terminal-code-container::-webkit-scrollbar {
+     width: 8px;
+     height: 8px;
+   }
+   
+   .terminal-code-container::-webkit-scrollbar-track {
+     background: #1E1E1E;
+   }
+   
+   .terminal-code-container::-webkit-scrollbar-thumb {
+     background-color: rgba(255, 255, 255, 0.2);
+     border-radius: 4px;
+   }
+   
+   .terminal-code-container::-webkit-scrollbar-thumb:hover {
+     background-color: rgba(255, 255, 255, 0.3);
+   }
+   
+   .terminal-code-container pre {
+     tab-size: 2 !important;
+   }
+   
+   /* Ensure proper indentation display */
+   .terminal-code-container code {
+     font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace !important;
+     font-feature-settings: 'liga' 1, 'calt' 1; /* Enable font ligatures for coding */
+   }
+   
+   /* Syntax highlighting enhancements */
+   .terminal-code-container .token.comment {
+     font-style: italic;
+     color: #6A9955 !important;
+   }
+   
+   .terminal-code-container .token.string {
+     color: #CE9178 !important;
+   }
+   
+   .terminal-code-container .token.function {
+     color: #DCDCAA !important;
+   }
+   
+   .terminal-code-container .token.keyword {
+     color: #569CD6 !important;
+     font-weight: bold;
+   }
+   
+   .terminal-code-container .token.operator {
+     color: #D4D4D4 !important;
+   }
+   
+   .terminal-code-container .token.number {
+     color: #B5CEA8 !important;
+   }
+   
+   /* VSCode style scrollbar for the terminal */
+   .terminal-scrollbar::-webkit-scrollbar {
+     width: 10px;
+     height: 10px;
+   }
+   
+   .terminal-scrollbar::-webkit-scrollbar-thumb {
+     background: rgba(121, 121, 121, 0.4);
+   }
+   
+   .terminal-scrollbar::-webkit-scrollbar-track {
+     background: transparent;
+   }
+   
+   .terminal-scrollbar::-webkit-scrollbar-thumb:hover {
+     background: rgba(100, 100, 100, 0.7);
+   }
+   
+   /* Terminal scrollbar styling */
+   .bg-terminal-bg {
+     scrollbar-width: thin;
+     scrollbar-color: #4a5568 #1e1e1e;
+   }
+   
+   .bg-terminal-bg::-webkit-scrollbar {
+     width: 8px;
+     height: 8px;
+   }
+   
+   .bg-terminal-bg::-webkit-scrollbar-track {
+     background: #1e1e1e;
+   }
+   
+   .bg-terminal-bg::-webkit-scrollbar-thumb {
+     background-color: #4a5568;
+     border-radius: 4px;
+   }
+   
+   .bg-terminal-bg::-webkit-scrollbar-thumb:hover {
+     background-color: #718096;
+   }
+   
+   /* Terminal glow effect */
+   .terminal-window {
+     backdrop-filter: blur(8px);
+     box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 15px rgba(0,255,0,0.15);
+     transition: all 0.3s ease;
+     position: relative;
+     overflow: hidden;
+   }
+   
+   .terminal-window:hover {
+     box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 20px rgba(0,255,0,0.2);
+   }
+   
+   /* Terminal animation blur overlay for more polished transitions */
+   @keyframes terminalBlurIn {
+     from {
+       backdrop-filter: blur(0);
+       background-color: rgba(30, 30, 30, 0);
+     }
+     to {
+       backdrop-filter: blur(3px);
+       background-color: rgba(30, 30, 30, 0.98);
+     }
+   }
+   
+   .terminal-container {
+     animation: terminalBlurIn 0.2s ease forwards;
+   }
+   
+   /* Terminal screen flicker */
+   @keyframes flicker {
+     0% { opacity: 0.95; }
+     5% { opacity: 0.85; }
+     10% { opacity: 0.95; }
+     15% { opacity: 0.9; }
+     20% { opacity: 0.95; }
+     55% { opacity: 0.95; }
+     60% { opacity: 0.9; }
+     65% { opacity: 0.95; }
+     100% { opacity: 0.95; }
+   }
+   
+   .terminal-flicker {
+     animation: flicker 5s linear infinite;
+   }
+   
+   /* ==========================================================================
+      8. Animation Definitions
+      ========================================================================== */
+   
+   /* Animation for the terminal dots */
+   @keyframes pulse {
+     0%, 100% { opacity: 0.7; }
+     50% { opacity: 1; }
+   }
+   
+   .animate-pulse {
+     animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+   }
+   
+   .w-3.h-3.rounded-full.bg-red-500,
+   .w-3.h-3.rounded-full.bg-yellow-500,
+   .w-3.h-3.rounded-full.bg-green-500 {
+     animation: pulse 1.5s infinite;
+   }
+   
+   .w-3.h-3.rounded-full.bg-red-500 {
+     animation-delay: 0s;
+   }
+   
+   .w-3.h-3.rounded-full.bg-yellow-500 {
+     animation-delay: 0.2s;
+   }
+   
+   .w-3.h-3.rounded-full.bg-green-500 {
+     animation-delay: 0.4s;
+   }
+   
+   /* Terminal loading animation */
+   @keyframes terminalLoad {
+     0% { width: 0%; }
+     100% { width: 100%; }
+   }
+   
+   .animate-terminal-load {
+     animation: terminalLoad 1.5s ease-in-out;
+   }
+   
+   /* FIXED: Brand claim typing and cursor animation */
+   @keyframes blink {
+     50% { opacity: 0; }
+   }
+   
+   .brand-claim {
+     display: inline-flex;
+     position: relative;
+   }
+   
+   #typed-claim {
+     overflow: hidden;
+     white-space: nowrap;
+     display: inline-block;
+     /* Removed width: 0 and animation that conflicts with React's animation */
+   }
+   
+   .cursor {
+     display: inline-block;
+     margin-left: 2px;
+     animation: blink 1s step-end infinite;
+   }
+   
+   /* Terminal cursor blink */
+   @keyframes cursor-blink {
+     0%, 100% { opacity: 1; }
+     50% { opacity: 0; }
+   }
+   
+   .animate-cursor-blink {
+     animation: cursor-blink 1s step-end infinite;
+   }
+   
+   .terminal-cursor {
+     display: inline-block;
+     width: 8px;
+     height: 16px;
+     background-color: var(--terminal-text);
+     margin-left: 2px;
+     animation: cursor-blink 1s step-end infinite;
+     vertical-align: middle;
+   }
+   
+   /* VS Code themed cursor animation */
+   .terminal-cursor {
+     display: inline-block;
+     width: 2px;
+     height: 1.2em;
+     background: #AEAFAD;
+     margin-left: 2px;
+     vertical-align: middle;
+     animation: blink 1s step-end infinite;
+   }
+   
+   /* Scan line effect */
+   .terminal-scan-line {
+     position: absolute;
+     top: 0;
+     left: 0;
+     right: 0;
+     height: 2px;
+     background: rgba(122, 255, 122, 0.1);
+     z-index: 10;
+     animation: scanLine 6s linear infinite;
+   }
+   
+   @keyframes scanLine {
+     0% { top: 0%; }
+     100% { top: 100%; }
+   }
+   
+   /* Terminal header dot pulse effect */
+   @keyframes dotPulse {
+     0%, 100% { opacity: 0.7; }
+     50% { opacity: 1; }
+   }
+   
+   .terminal-dot {
+     width: 12px;
+     height: 12px;
+     border-radius: 50%;
+   }
+   
+   .terminal-dot-red {
+     background-color: #FF5F56;
+     animation: dotPulse 2s infinite 0s;
+   }
+   
+   .terminal-dot-yellow {
+     background-color: #FFBD2E;
+     animation: dotPulse 2s infinite 0.3s;
+   }
+   
+   .terminal-dot-green {
+     background-color: #27C93F;
+     animation: dotPulse 2s infinite 0.6s;
+   }
+   
+   /* Modal dot pulse effect */
+   .modal-dot {
+     width: 12px;
+     height: 12px;
+     border-radius: 50%;
+     animation: modalDotPulse 2s infinite;
+   }
+   
+   .modal-dot-red {
+     background-color: #FF5F56;
+     animation-delay: 0s;
+   }
+   
+   .modal-dot-yellow {
+     background-color: #FFBD2E;
+     animation-delay: 0.3s;
+   }
+   
+   .modal-dot-green {
+     background-color: #27C93F;
+     animation-delay: 0.6s;
+   }
+   
+   @keyframes modalDotPulse {
+     0%, 100% { opacity: 0.7; }
+     50% { opacity: 1; }
+   }
+   
+   /* Progress Bar Animation */
+   @keyframes progress-glow {
+     0% { text-shadow: 0 0 2px rgba(74, 222, 128, 0.5); }
+     50% { text-shadow: 0 0 8px rgba(74, 222, 128, 0.8); }
+     100% { text-shadow: 0 0 2px rgba(74, 222, 128, 0.5); }
+   }
+   
+   .terminal-line:nth-last-child(-n+16):nth-child(n+12) {
+     animation: progress-glow 1.5s infinite;
+     color: #4ade80;
+   }
+   
+   /* Animation for authentication spinner */
+   @keyframes authSpin {
+     0% { transform: rotate(0deg); }
+     100% { transform: rotate(360deg); }
+   }
+   
+   .auth-spinner {
+     animation: authSpin 1s linear infinite;
+   }
+   
+   /* Enhanced slide animation with VS Code-like reveal */
+   @keyframes terminalReveal {
+     from {
+       max-height: 0;
+       opacity: 0;
+       transform: translateY(-10px);
+       box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+     }
+     to {
+       max-height: 400px;
+       opacity: 1;
+       transform: translateY(0);
+       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+     }
+   }
+   
+   @keyframes terminalHide {
+     from {
+       max-height: 400px;
+       opacity: 1;
+       transform: translateY(0);
+     }
+     to {
+       max-height: 0;
+       opacity: 0;
+       transform: translateY(-10px);
+     }
+   }
+   
+   /* Slide-down animation */
+   @keyframes slideDown {
+     from {
+       max-height: 0;
+       opacity: 0;
+     }
+     to {
+       max-height: 400px;
+       opacity: 1;
+     }
+   }
+   
+   @keyframes slideUp {
+     from {
+       max-height: 400px;
+       opacity: 1;
+     }
+     to {
+       max-height: 0;
+       opacity: 0;
+     }
+   }
+   
+   .quick-view-enter {
+     animation: slideDown 0.3s ease forwards;
+   }
+   
+   .quick-view-exit {
+     animation: slideUp 0.2s ease forwards;
+   }
+   
+   /* Download Modal Styles */
+   @keyframes modalFadeIn {
+     from {
+       opacity: 0;
+       transform: translateY(10px);
+     }
+     to {
+       opacity: 1;
+       transform: translateY(0);
+     }
+   }
+   
+   @keyframes modalFadeOut {
+     from {
+       opacity: 1;
+       transform: translateY(0);
+     }
+     to {
+       opacity: 0;
+       transform: translateY(10px);
+     }
+   }
+   
+   .modal-enter {
+     animation: modalFadeIn 0.3s ease forwards;
+   }
+   
+   .modal-exit {
+     animation: modalFadeOut 0.2s ease forwards;
+   }
+   
+   /* Splash effect */
+   @keyframes splash {
+     0% {
+       transform: scale(1);
+       opacity: 0.4;
+     }
+     50% {
+       transform: scale(4);
+       opacity: 0.2;
+     }
+     100% {
+       transform: scale(6);
+       opacity: 0;
+     }
+   }
+   
+   .splash-animation {
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     width: 8rem;
+     height: 8rem;
+     background: radial-gradient(circle, #00b4ff33 0%, transparent 80%);
+     border-radius: 50%;
+     transform: translate(-50%, -50%);
+     animation: splash 0.6s ease-out forwards;
+     z-index: 10;
+   }
+   
+   /* Dropdown animations */
+   @keyframes fadeIn {
+     from {
+       opacity: 0;
+       transform: translateY(-10px) scale(0.95);
+     }
+     to {
+       opacity: 1;
+       transform: translateY(0) scale(1);
+     }
+   }
+   
+   @keyframes fadeOut {
+     from {
+       opacity: 1;
+       transform: translateY(0) scale(1);
+     }
+     to {
+       opacity: 0;
+       transform: translateY(-10px) scale(0.95);
+     }
+   }
+   
+   /* Search results animation */
+   @keyframes searchResults {
+     from {
+       opacity: 0;
+       transform: translateY(-10px) scale(0.98);
+     }
+     to {
+       opacity: 1;
+       transform: translateY(0) scale(1);
+     }
+   }
+   
+   /* ==========================================================================
+      9. Search and Filter Styles
+      ========================================================================== */
+   
+   /* Search results container */
+   .search-results-container {
+     animation: searchResults 0.2s ease;
+     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+     transform-origin: top center;
+   }
+   
+   /* Loading indicator */
+   .search-loading-indicator {
+     width: 24px;
+     height: 24px;
+     margin: 0 auto 8px;
+     border: 2px solid rgba(0, 112, 224, 0.2);
+     border-top-color: var(--primary, #0070e0);
+     border-radius: 50%;
+     animation: loading-spin 0.8s linear infinite;
+   }
+   
+   @keyframes loading-spin {
+     to {
+       transform: rotate(360deg);
+     }
+   }
+   
+   @keyframes search-loading-spin {
+     to {
+       transform: rotate(360deg);
+     }
+   }
+   
+   /* Highlighted result styling */
+   .search-result-highlighted {
+     background-color: var(--primary-light, #4d94ff);
+     color: white;
+   }
+   
+   .dark .search-result-highlighted {
+     background-color: var(--primary-dark, #0054a6);
+   }
+   
+   /* Alternative highlighted result styling */
+   .search-result-highlighted {
+     background-color: rgba(0, 112, 224, 0.1);
+   }
+   
+   .dark .search-result-highlighted {
+     background-color: rgba(0, 112, 224, 0.2);
+   }
+   
+   /* Highlighted text styling */
+   .bg-primary\/20 {
+     background-color: rgba(0, 112, 224, 0.2);
+   }
+   
+   .dark .bg-primary-dark\/30 {
+     background-color: rgba(0, 84, 166, 0.3);
+   }
+   
+   /* Recent search items */
+   .recent-search-item {
+     transition: background-color 0.15s ease;
+   }
+   
+   .recent-search-item:hover {
+     background-color: rgba(0, 112, 224, 0.05);
+   }
+   
+   .dark .recent-search-item:hover {
+     background-color: rgba(77, 148, 255, 0.1);
+   }
+   
+   /* Search result tags highlight animation */
+   @keyframes tagPulse {
+     0% {
+       transform: scale(1);
+     }
+     50% {
+       transform: scale(1.05);
+     }
+     100% {
+       transform: scale(1);
+     }
+   }
+   
+   .search-match-highlight {
+     background-color: rgba(0, 112, 224, 0.15);
+     border-radius: 2px;
+     padding: 0 2px;
+     margin: 0 -2px;
+     animation: tagPulse 2s infinite;
+   }
+   
+   .dark .search-match-highlight {
+     background-color: rgba(77, 148, 255, 0.25);
+   }
+   
+   /* ==========================================================================
+      10. Accessibility Styles
+      ========================================================================== */
+   
+   /* Skip link for accessibility */
+   .skip-link {
+     @apply sr-only;
+   }
+   
+   .skip-link:focus {
+     @apply not-sr-only fixed left-0 top-0 z-50 bg-white text-primary px-4 py-2 font-medium;
+   }
+   
+   /* ==========================================================================
+      11. Media Queries and Print Styles
+      ========================================================================== */
+   
+   /* Print styles */
+   @media print {
+     .no-print {
+       display: none !important;
+     }
+     
+     body {
+       @apply bg-white text-black;
+     }
+     
+     .container {
+       max-width: 100% !important;
+       padding: 0 !important;
+     }
+   }
+   
+   @media(max-width:640px) {
+     .terminal-window {
+       max-height: 85vh;
+     }
+     
+     .terminal-body {
+       padding: 0.75rem;
+       font-size: 14px;
+     }
+     
+     .terminal-line {
+       line-height: 1.4;
+     }
+     
+     .keyboard-shortcuts {
+       padding: 0.5rem;
+       max-width: 95vw;
+     }
+   }
+   
+   /* Import terminal styles */
+   @import './terminal.css';

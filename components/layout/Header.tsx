@@ -28,38 +28,53 @@ export const Header = () => {
 
   const [claimIndex, setClaimIndex] = useState(0);
   const [animatedClaim, setAnimatedClaim] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
 
+  // Initialize text animation when component mounts or claim changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
+    
+    setIsTyping(true);
     const full = claims[claimIndex];
     let current = '';
     let i = 0;
 
-    // mostra subito il cursore
+    // Make cursor visible during typing
     const cursor = document.getElementById('cursor');
     if (cursor) cursor.style.opacity = '1';
 
     const interval = setInterval(() => {
+      if (i >= full.length) {
+        clearInterval(interval);
+        setIsTyping(false);
+        return;
+      }
+      
       current += full[i];
       setAnimatedClaim(current);
       i++;
-      if (i >= full.length) {
-        clearInterval(interval);
-        setTimeout(() => {
-          const cursor = document.getElementById('cursor');
-          if (cursor) cursor.style.opacity = '0';
-        }, 200);
-      }
-    }, 50);
+    }, 60); // Slightly slower for more reliability
 
     return () => clearInterval(interval);
   }, [claimIndex]);
 
-  const rotateClaim = () => {
-    if (typeof window === 'undefined') return;
+  // Handle cursor blinking - should only blink when typing is complete
+  useEffect(() => {
     const cursor = document.getElementById('cursor');
-    if (cursor) cursor.style.opacity = '1';
+    if (!cursor) return;
+    
+    if (isTyping) {
+      // Keep cursor visible and solid during typing
+      cursor.style.opacity = '1';
+      cursor.style.animation = 'none';
+    } else {
+      // Start blinking after typing is complete
+      cursor.style.animation = 'blink 1s step-end infinite';
+    }
+  }, [isTyping]);
+
+  const rotateClaim = () => {
+    if (isTyping) return; // Prevent changing during typing animation
     setClaimIndex((prev) => (prev + 1) % claims.length);
   };
 
@@ -89,14 +104,12 @@ export const Header = () => {
               />
             </div>
             <span
-              className="font-mono text-sm sm:text-[13px] text-blue-500 dark:text-primary-light opacity-100 select-none flex items-center justify-start overflow-hidden"
-              style={{ minWidth: 'calc(34ch + 3px)', maxWidth: 'calc(34ch + 3px)' }}
+              className="font-mono text-sm sm:text-[13px] text-blue-500 dark:text-primary-light opacity-100 select-none flex items-center justify-start"
+              style={{ minWidth: '34ch', maxWidth: '34ch' }}
             >
               <span
                 id="typed-claim"
-                key={claimIndex}
-                className="animate-typing overflow-hidden whitespace-nowrap text-left block"
-                style={{ width: 'calc(34ch + 3px)', textAlign: 'left' }}
+                className="whitespace-nowrap text-left block"
               >
                 {animatedClaim}
               </span>
