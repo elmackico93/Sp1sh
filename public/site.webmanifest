@@ -3,20 +3,36 @@
   "short_name": "Sp1sh",
   "description": "Find and use expert-curated shell scripts for Linux, Windows, and macOS",
   "categories": ["productivity", "utilities", "developer tools"],
-  "icons": [
-    {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/android-chrome-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
   "background_color": "#ffffff",
-  "theme_color": "#0070e0"
+  "theme_color": "#0078D4",
+  "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
