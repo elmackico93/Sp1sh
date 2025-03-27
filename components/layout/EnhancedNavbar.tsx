@@ -540,7 +540,7 @@ export const EnhancedNavbar: React.FC = () => {
 
   return (
     <nav className="sticky top-16 z-40 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
-      <div className="container mx-auto relative">
+      <div className="container mx-auto z-40 relative z-50">
         {/* Mobile Menu Button */}
         {isMobile && (
           <div className="flex items-center justify-between py-3 px-4">

@@ -929,3 +929,30 @@
 
 /* Import terminal styles */
 @import './terminal.css';
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.brand-claim {
+  display: inline-flex;
+  position: relative;
+}
+
+#typed-claim {
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
+  width: 0;
+  animation: typing 2.5s steps(30, end) 1s forwards;
+}
+
+.cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 1s step-end infinite;
+}
