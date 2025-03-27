@@ -929,9 +929,11 @@
 
 /* Import terminal styles */
 @import './terminal.css';
+
+/* FIXED: Typing animation and cursor blink */
 @keyframes typing {
   from { width: 0 }
-  to { width: 100% }
+  to { width: 34ch }
 }
 
 @keyframes blink {
@@ -954,20 +956,196 @@
 .cursor {
   display: inline-block;
   margin-left: 2px;
+  opacity: 1;
   animation: blink 1s step-end infinite;
-}
-
-@keyframes typing {
-  from { width: 0 }
-  to { width: 34ch }
+  animation-delay: 1s; /* Synchronize with the typing animation start */
 }
 
 .animate-typing {
   animation: typing 2s steps(34, end);
 }
 
-.cursor {
+@keyframes splash {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(4);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(6);
+    opacity: 0;
+  }
+}
+
+.splash-animation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8rem;
+  height: 8rem;
+  background: radial-gradient(circle, #00b4ff33 0%, transparent 80%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: splash 0.6s ease-out forwards;
+  z-index: 10;
+}
+
+/* Terminal-specific styles */
+/* Terminal loading animation */
+@keyframes terminalLoad {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+.animate-terminal-load {
+  animation: terminalLoad 1.5s ease-in-out;
+}
+
+/* Terminal cursor blink */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-cursor-blink {
+  animation: cursorBlink 1s step-end infinite;
+}
+
+/* Scan line effect */
+.terminal-scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(122, 255, 122, 0.1);
+  z-index: 10;
+  animation: scanLine 6s linear infinite;
+}
+
+@keyframes scanLine {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+
+/* Terminal line typing effect */
+.terminal-typing {
   display: inline-block;
-  margin-left: 4px;
-  animation: blink 1s step-end infinite;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: typing 2s steps(40, end);
+}
+
+/* Terminal screen flicker */
+@keyframes flicker {
+  0% { opacity: 0.95; }
+  5% { opacity: 0.85; }
+  10% { opacity: 0.95; }
+  15% { opacity: 0.9; }
+  20% { opacity: 0.95; }
+  55% { opacity: 0.95; }
+  60% { opacity: 0.9; }
+  65% { opacity: 0.95; }
+  100% { opacity: 0.95; }
+}
+
+.terminal-flicker {
+  animation: flicker 5s linear infinite;
+}
+
+/* Terminal glow effect */
+.terminal-window {
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.1), 0 0 30px rgba(0, 0, 0, 0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Password character masking */
+.terminal-password {
+  font-family: monospace;
+  letter-spacing: 0.2em;
+}
+
+/* Matrix-style falling characters (subtle background effect) */
+.matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+.matrix-column {
+  position: absolute;
+  top: -100%;
+  width: 1px;
+  height: 100%;
+  color: #0f0;
+  font-size: 12px;
+  opacity: 0.05;
+  animation: matrix-fall linear infinite;
+}
+
+@keyframes matrix-fall {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+
+/* Terminal line styles */
+.terminal-line {
+  line-height: 1.5;
+  margin-bottom: 2px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Terminal input styles */
+.terminal-input {
+  caret-color: transparent; /* Hide default cursor */
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.terminal-input:focus {
+  outline: none;
+}
+
+/* Terminal header bar styles */
+.terminal-header {
+  -webkit-app-region: drag; /* Makes it look draggable like a real window */
+  user-select: none;
+}
+
+/* Terminal error styling */
+.terminal-error {
+  color: #ff5555;
+}
+
+/* Terminal success styling */
+.terminal-success {
+  color: #50fa7b;
+}
+
+/* Terminal warning styling */
+.terminal-warning {
+  color: #ffb86c;
+}
+
+/* Animation for authentication spinner */
+@keyframes authSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.auth-spinner {
+  animation: authSpin 1s linear infinite;
 }
