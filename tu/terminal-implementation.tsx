@@ -1,3 +1,5 @@
+// Modified signin.tsx implementation
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -156,6 +158,39 @@ export default function SignIn() {
         
         {/* Show keyboard shortcuts only when not in boot sequence and not loading */}
         {!bootSequence && !isLoading && <KeyboardShortcuts />}
+      </div>
+    </TerminalThemeProvider>
+  );
+}
+
+// Similarly, update signup.tsx with the same pattern. Here's the key section:
+
+// In signup.tsx:
+// Replace MatrixBackground with EnhancedMatrixBackground
+// Wrap everything with TerminalThemeProvider
+// Add TerminalThemeSwitcher component
+
+// Example:
+export default function SignUp() {
+  // ... existing code ...
+
+  return (
+    <TerminalThemeProvider>
+      <Head>
+        {/* ... */}
+      </Head>
+      
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4 relative overflow-hidden">
+        {/* Enhanced Matrix Background */}
+        <EnhancedMatrixBackground density={0.85} speed={0.9} glowIntensity={0.8} />
+        
+        {/* Theme Switcher */}
+        <TerminalThemeSwitcher />
+        
+        {/* Terminal window container */}
+        <div className="w-full max-w-lg relative z-10">
+          {/* ... rest of the component ... */}
+        </div>
       </div>
     </TerminalThemeProvider>
   );

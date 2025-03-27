@@ -4,10 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { AnimatePresence, motion } from 'framer-motion';
 import TerminalSignup from '@/components/auth/TerminalSignup';
-import EnhancedMatrixBackground from '@/components/auth/EnhancedMatrixBackground';
+import MatrixBackground from '@/components/auth/MatrixBackground';
 import KeyboardShortcuts from '@/components/auth/KeyboardShortcuts';
-import TerminalThemeProvider from '@/components/auth/TerminalThemeProvider';
-import TerminalThemeSwitcher from '@/components/auth/TerminalThemeSwitcher';
 
 // Define authentication states
 type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'error';
@@ -113,8 +111,19 @@ export default function SignUp() {
     }
   };
 
+  // Enhanced boot sequence animations
+  const bootAnimationLines = [
+    { text: "Sp1sh Security Terminal v3.7.2", time: 300 },
+    { text: "Initializing system...", time: 500 },
+    { text: "Checking CPU status... OK", time: 300 },
+    { text: "Checking memory... OK", time: 200 },
+    { text: "Initializing network stack... OK", time: 400 },
+    { text: "Checking security protocols... SECURE", time: 300 },
+    { text: "Loading registration module...", time: 500 }
+  ];
+
   return (
-    <TerminalThemeProvider>
+    <>
       <Head>
         <title>Sign Up | Sp1sh</title>
         <meta name="description" content="Create your Sp1sh shell script repository account" />
@@ -123,11 +132,8 @@ export default function SignUp() {
       </Head>
       
       <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4 relative overflow-hidden">
-        {/* Enhanced Matrix Background with adjusted settings for signup page */}
-        <EnhancedMatrixBackground density={0.85} speed={0.9} glowIntensity={0.8} />
-        
-        {/* Theme Switcher */}
-        <TerminalThemeSwitcher />
+        {/* Matrix-style background with enhanced density */}
+        <MatrixBackground />
         
         {/* Terminal window container */}
         <div className="w-full max-w-lg relative z-10">
@@ -315,6 +321,6 @@ export default function SignUp() {
           <span>256-bit Encrypted Connection</span>
         </motion.div>
       </div>
-    </TerminalThemeProvider>
+    </>
   );
 }

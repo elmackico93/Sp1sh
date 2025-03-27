@@ -4,10 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { AnimatePresence, motion } from 'framer-motion';
 import TerminalLogin from '@/components/auth/TerminalLogin';
-import EnhancedMatrixBackground from '@/components/auth/EnhancedMatrixBackground';
+import MatrixBackground from '@/components/auth/MatrixBackground';
 import KeyboardShortcuts from '@/components/auth/KeyboardShortcuts';
-import TerminalThemeProvider from '@/components/auth/TerminalThemeProvider';
-import TerminalThemeSwitcher from '@/components/auth/TerminalThemeSwitcher';
 
 // Define authentication states
 type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'error';
@@ -63,7 +61,7 @@ export default function SignIn() {
   }, []);
 
   return (
-    <TerminalThemeProvider>
+    <>
       <Head>
         <title>Sign In | Sp1sh</title>
         <meta name="description" content="Access your Sp1sh shell script repository account" />
@@ -72,11 +70,8 @@ export default function SignIn() {
       </Head>
       
       <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4 relative overflow-hidden">
-        {/* Enhanced Matrix Background */}
-        <EnhancedMatrixBackground density={0.8} speed={1.0} glowIntensity={0.7} />
-        
-        {/* Theme Switcher */}
-        <TerminalThemeSwitcher />
+        {/* Matrix-style background */}
+        <MatrixBackground />
         
         {/* Terminal window container */}
         <div className="w-full max-w-md relative z-10">
@@ -146,7 +141,7 @@ export default function SignIn() {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 50 }}
-                className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-600/90 text-white px-4 py-2 rounded shadow-lg text-sm font-mono terminal-error-anim"
+                className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-600/90 text-white px-4 py-2 rounded shadow-lg text-sm font-mono"
               >
                 {authError}
               </motion.div>
@@ -157,6 +152,6 @@ export default function SignIn() {
         {/* Show keyboard shortcuts only when not in boot sequence and not loading */}
         {!bootSequence && !isLoading && <KeyboardShortcuts />}
       </div>
-    </TerminalThemeProvider>
+    </>
   );
 }
