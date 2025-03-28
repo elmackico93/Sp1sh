@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import CommandInput from './CommandInput';
 
 interface TerminalLoginProps {
@@ -9,48 +9,54 @@ interface TerminalLoginProps {
   onLoginError?: (error: string) => void;
 }
 
-type AuthStage = 'init' | 'username' | 'password' | 'authenticating' | 'success' | 'failure';
+type AuthStage = 'init' | 'username' | 'password' | 'authenticating' | 'success';
 
-const TerminalLogin: React.FC<TerminalLoginProps> = ({ 
+const getPlaceholderForStage = (stage: AuthStage, error?: string): string => {
+  if (error) {
+    switch (stage) {
+      case 'username': return 'Please enter a valid username or email';
+      case 'password': return 'Password must not be empty';
+    }
+  }
+  return stage === 'username' ? 'Enter username or email' : 'Enter password';
+};
+
+const TerminalLogin: React.FC<TerminalLoginProps> = ({
   isLoading,
   onLoginSuccess,
   onLoginError
 }) => {
   const [stage, setStage] = useState<AuthStage>('init');
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
   const [isTyping, setIsTyping] = useState(true);
   const [currentTypingLine, setCurrentTypingLine] = useState(0);
   const terminalRef = useRef<HTMLDivElement>(null);
-  
-  // Initial welcome messages
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const welcomeLines = [
-    "Sp1sh Secure Access Terminal",
-    "-------------------------------",
-    "Welcome to the Sp1sh script repository.",
-    "Authentication required to proceed.",
-    "",
+    'Sp1sh Secure Access Terminal',
+    '-------------------------------',
+    'Welcome to the Sp1sh script repository.',
+    'Authentication required to proceed.',
+    '',
     "Type 'help' for assistance or begin authentication.",
-    "",
+    ''
   ];
-  
-  // Auto-scroll to bottom of terminal
+
   useEffect(() => {
     if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+      terminalRef.current.scrollTo({ top: terminalRef.current.scrollHeight, behavior: 'smooth' });
     }
   }, [terminalOutput]);
 
-  // Initial typing effect
   useEffect(() => {
     if (isTyping && currentTypingLine < welcomeLines.length) {
       const timer = setTimeout(() => {
         setTerminalOutput(prev => [...prev, welcomeLines[currentTypingLine]]);
         setCurrentTypingLine(prev => prev + 1);
       }, currentTypingLine === 0 ? 300 : 100);
-
       return () => clearTimeout(timer);
     } else if (currentTypingLine >= welcomeLines.length) {
       setIsTyping(false);
@@ -58,132 +64,69 @@ const TerminalLogin: React.FC<TerminalLoginProps> = ({
     }
   }, [isTyping, currentTypingLine]);
 
-  // Handle command input
   const handleCommand = (command: string) => {
+    setAuthError('');
     setTerminalOutput(prev => [...prev, `> ${command}`]);
-    
-    // Process commands based on current stage
-    if (stage === 'username') {
-      if (command.toLowerCase() === 'help') {
-        setTerminalOutput(prev => [
-          ...prev, 
-          "Available commands:",
-          "  login - Begin authentication",
-          "  clear - Clear terminal",
-          "  help  - Show this help message",
-          ""
-        ]);
-      } else if (command.toLowerCase() === 'clear') {
-        setTerminalOutput([]);
-      } else if (command.toLowerCase() === 'login' || command.toLowerCase().startsWith('user ')) {
-        const extractedUsername = command.toLowerCase().startsWith('user ') 
-          ? command.substring(5).trim() 
-          : '';
-        
-        if (extractedUsername) {
-          setUsername(extractedUsername);
-          setTerminalOutput(prev => [
-            ...prev, 
-            `Username set: ${extractedUsername}`,
-            "Please enter your password:"
-          ]);
-          setStage('password');
-        } else {
-          setTerminalOutput(prev => [
-            ...prev, 
-            "Please enter your username or email:"
-          ]);
-          setStage('username');
+    const lower = command.toLowerCase();
+
+    if (lower === 'help') {
+      setTerminalOutput(prev => [
+        ...prev,
+        'Available commands:',
+        '  login - Begin authentication',
+        '  clear - Clear terminal',
+        '  help  - Show this help message',
+        ''
+      ]);
+      return;
+    }
+
+    if (lower === 'clear') {
+      setTerminalOutput([]);
+      return;
+    }
+
+    switch (stage) {
+      case 'username':
+        if (!command.trim()) {
+          setAuthError('Username or email required');
+          return;
         }
-      } else {
-        // Treat input as username
-        if (command.trim()) {
-          setUsername(command);
-          setTerminalOutput(prev => [
-            ...prev, 
-            "Please enter your password:"
-          ]);
-          setStage('password');
-        } else {
-          setTerminalOutput(prev => [
-            ...prev, 
-            "Error: Username cannot be empty.",
-            "Please enter your username or email:"
-          ]);
+        setUsername(command);
+        setTerminalOutput(prev => [...prev, 'Please enter your password:']);
+        setStage('password');
+        break;
+
+      case 'password':
+        if (!command.trim()) {
+          setAuthError('Password cannot be empty');
+          return;
         }
-      }
-    } else if (stage === 'password') {
-      if (command.toLowerCase() === 'help') {
-        setTerminalOutput(prev => [
-          ...prev, 
-          "Enter your password to continue.",
-          "Or type 'back' to return to username entry.",
-          ""
-        ]);
-      } else if (command.toLowerCase() === 'clear') {
-        setTerminalOutput([]);
-      } else if (command.toLowerCase() === 'back') {
-        setUsername('');
-        setTerminalOutput(prev => [
-          ...prev, 
-          "Returning to username entry.",
-          "Please enter your username or email:"
-        ]);
-        setStage('username');
-      } else {
-        // Treat input as password
-        if (command.trim()) {
-          setPassword(command);
-          setTerminalOutput(prev => [
-            ...prev, 
-            "Authenticating...",
-            ""
-          ]);
-          setStage('authenticating');
-          
-          // Simulate authentication process
-          setTimeout(() => {
-            // Mock validation (in a real app, this would be an API call)
-            if (username === 'admin' && command === 'password') {
-              setTerminalOutput(prev => [
-                ...prev, 
-                "Authentication successful!",
-                "Welcome back, " + username + "!",
-                "Redirecting to dashboard...",
-                ""
-              ]);
-              setStage('success');
-              onLoginSuccess();
-            } else {
-              setTerminalOutput(prev => [
-                ...prev, 
-                "Authentication failed: Invalid credentials.",
-                "Please try again.",
-                "Enter username:"
-              ]);
-              setStage('username');
-              setUsername('');
-              setPassword('');
-              setError('Invalid username or password');
-              if (onLoginError) {
-                onLoginError('Invalid username or password');
-              }
-            }
-          }, 1500);
-        } else {
-          setTerminalOutput(prev => [
-            ...prev, 
-            "Error: Password cannot be empty.",
-            "Please enter your password:"
-          ]);
-        }
-      }
+        setTerminalOutput(prev => [...prev, 'Authenticating...']);
+        setStage('authenticating');
+        setTimeout(() => {
+          if (username === 'admin' && command === 'password') {
+            setTerminalOutput(prev => [
+              ...prev,
+              'Authentication successful!',
+              `Welcome back, ${username}!`,
+              'Redirecting to dashboard...',
+              ''
+            ]);
+            setStage('success');
+            onLoginSuccess();
+          } else {
+            setAuthError('Invalid username or password');
+            setStage('username');
+            setUsername('');
+          }
+        }, 1500);
+        break;
     }
   };
 
   return (
     <div className="terminal-window bg-terminal-bg border border-gray-700 rounded-lg shadow-2xl overflow-hidden">
-      {/* Terminal Header */}
       <div className="terminal-header flex items-center justify-between p-2 bg-gray-800">
         <div className="flex gap-1.5 ml-2">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -196,25 +139,22 @@ const TerminalLogin: React.FC<TerminalLoginProps> = ({
           <span>ENCRYPTED</span>
         </div>
       </div>
-      
-      {/* Terminal Content */}
-      <div 
+
+      <div
         ref={terminalRef}
-        className="terminal-body h-[60vh] min-h-[400px] p-4 md:p-6 font-mono text-sm text-terminal-text overflow-y-auto"
+        className="terminal-body h-[60vh] min-h-[400px] p-4 pb-28 md:p-6 font-mono text-sm text-terminal-text overflow-y-auto"
+        onClick={() => inputRef.current?.focus()}
       >
-        {/* Terminal Output */}
         {terminalOutput.map((line, index) => (
           <div key={index} className="terminal-line">
             {line}
           </div>
         ))}
-        
-        {/* Error Message */}
-        {error && (
-          <div className="text-red-500 my-1">{error}</div>
+
+        {authError && (
+          <div className="mt-2 text-red-500 text-sm font-mono">{authError}</div>
         )}
-        
-        {/* Input Command Line */}
+
         <AnimatePresence mode="wait">
           {!isTyping && stage !== 'authenticating' && stage !== 'success' && (
             <motion.div
@@ -223,18 +163,18 @@ const TerminalLogin: React.FC<TerminalLoginProps> = ({
               exit={{ opacity: 0 }}
               className="mt-1"
             >
-              <CommandInput 
-                prompt={stage === 'username' ? '>' : 'password >'} 
+              <CommandInput
+                prompt={stage === 'username' ? '>' : 'password >'}
                 type={stage === 'password' ? 'password' : 'text'}
                 onSubmit={handleCommand}
-                placeholder={stage === 'username' ? 'Enter username or email' : 'Enter password'}
+                placeholder={getPlaceholderForStage(stage, authError || undefined)}
+                inputRef={inputRef}
                 disabled={isLoading}
               />
             </motion.div>
           )}
         </AnimatePresence>
-        
-        {/* Authenticating Animation */}
+
         {stage === 'authenticating' && (
           <div className="flex items-center mt-2">
             <div className="animate-pulse mr-2">▋</div>
@@ -242,8 +182,7 @@ const TerminalLogin: React.FC<TerminalLoginProps> = ({
           </div>
         )}
       </div>
-      
-      {/* Bottom Bar */}
+
       <div className="terminal-footer py-2 px-4 bg-gray-800 border-t border-gray-700 flex justify-between items-center">
         <div className="text-xs text-gray-400">
           {stage === 'password' ? 'Secure mode: enabled' : 'Type "help" for assistance'}
