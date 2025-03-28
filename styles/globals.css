@@ -1024,16 +1024,17 @@
 
 /* Claim text enhancements for dark mode */
 .dark #typed-claim {
-  color: var(--primary-light);
-  text-shadow: 0 0 10px rgba(77, 148, 255, 0.2);
+  color: var(--terminal-green);
+  text-shadow: 0 0 10px var(--terminal-green);
   transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
 /* Enhanced cursor visibility in dark mode */
 .dark .cursor {
-  background-color: var(--primary-light);
+  background-color: var(--terminal-green);
   opacity: 0.9;
-  box-shadow: 0 0 8px rgba(77, 148, 255, 0.5);
+  box-shadow: 0 0 8px var(--terminal-green);
+  animation: blink 1s step-end infinite, darkModeCursorPulse 2s ease-in-out infinite;
 }
 
 /* Pulse effect for the cursor in dark mode */
