@@ -1152,5 +1152,232 @@ section, .relative {
   overflow: visible !important;
 }
 
+/* Add this to your styles/globals.css file or as a CSS module */
+
+/* Search Results Page - Premium Styling */
+
+/* Security verification indicator - Mitnick-inspired */
+.search-results-verified::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4ade80, #0284c7, #7c3aed);
+  opacity: 0;
+  transform: scaleX(0.96);
+  transform-origin: center;
+  transition: opacity 0.3s ease, transform 0.4s ease;
+  z-index: 1;
+  border-radius: 2px;
+}
+
+.search-results-verified:hover::before {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* Card enhancements - Apple-inspired aesthetics */
+.script-card {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  backface-visibility: hidden;
+}
+
+.script-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07), 0 6px 10px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Microsoft-inspired filter interactions */
+.filter-button {
+  position: relative;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.filter-button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+  opacity: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  transition: all 0.4s ease;
+}
+
+.filter-button:active::after {
+  opacity: 0.2;
+  transform: translate(-50%, -50%) scale(20);
+}
+
+/* IBM-inspired clear messaging */
+.empty-state-container {
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.empty-state-icon {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0) 70%);
+}
+
+/* Torvalds-inspired terminal-like precision */
+.search-results-page pre code {
+  tab-size: 4;
+  font-variant-ligatures: none;
+}
+
+.search-term-highlight {
+  border-radius: 3px;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    background-color: rgba(59, 130, 246, 0.2);
+  }
+}
+
+/* Windows-inspired scrollbars */
+.search-results-container::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.search-results-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.search-results-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+  border: 2px solid #f1f1f1;
+}
+
+.search-results-container::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+.dark .search-results-container::-webkit-scrollbar-track {
+  background: #2d3748;
+}
+
+.dark .search-results-container::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border: 2px solid #2d3748;
+}
+
+.dark .search-results-container::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
+
+/* Security-focused animation - Mitnick touch */
+@keyframes secureVerify {
+  0% {
+    box-shadow: 0 0 0 rgba(56, 189, 248, 0);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(56, 189, 248, 0);
+  }
+}
+
+.search-results-security-verified:hover {
+  animation: secureVerify 2s ease infinite;
+}
+
+/* Subtle loading animation for search filtering */
+.filter-loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary, #0070e0), transparent);
+  animation: loadingBar 1.5s ease infinite;
+}
+
+@keyframes loadingBar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Gates-inspired organized layout transitions */
+.search-results-layout-shift {
+  transition: grid-template-columns 0.25s ease, gap 0.25s ease;
+}
+
+.search-results-card-enter {
+  animation: cardEnter 0.3s ease forwards;
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* High-performance shadow rendering for cards */
+.performance-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  will-change: transform, box-shadow;
+}
+
+/* Privacy-conscious hover states */
+.privacy-indicator {
+  position: relative;
+}
+
+.privacy-indicator::before {
+  content: "🔒";
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  background: #fff;
+  color: #16a34a;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0);
+  transition: transform 0.2s ease;
+}
+
+.privacy-indicator:hover::before {
+  transform: scale(1);
+}
+
+/* Dark mode elegant transitions */
+.dark .search-results-container {
+  transition: background-color 0.7s ease;
+}
+
+.dark .search-card-effect {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
 /* Import terminal styles */
 @import './terminal.css';
