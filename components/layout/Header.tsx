@@ -23,8 +23,29 @@ export const Header = () => {
     '> Shell mastery, simplified',
     '> Secure. Fast. Reliable.',
     '> System wisdom in a click',
-    '> Click, code, conquer.'
+    '> Click, code, conquer.',
+    '> Hack. Automate. Iterate.',
+    '> Systems to rule them all.',
+    '> Dive in. Hack reality now.',
+    '> Bend code. Shape worlds.',
+    '> Reroute. Reboot. Reforge.',
+    '> We hack the unreachable.',
+    '> Your code. Your narrative.',
+    '> Matrix-level automation.',
+    '> Spawn shells. Crack walls.',
+    '> Blink, code, revolutionize.',
+    '> One shell to script them.',
+    '> Infinite loops, finite fear.',
+    '> Neon lines. Zero illusions.',
+    '> Root or bust. No refunds.',
+    '> We script. We never sleep.',
+    '> Dive deep. Emerge hacker.',
+    '> We hack code, not humans.',
+    '> Crack shells. Spark futures.',
+    '> Rewrite reality line by line.',
+    '> One glitch, endless frontier.'
   ];
+  
 
   const [claimIndex, setClaimIndex] = useState(0);
   const [animatedClaim, setAnimatedClaim] = useState('');
@@ -77,7 +98,17 @@ export const Header = () => {
 
   const rotateClaim = () => {
     if (isTyping) return; // Prevent changing during typing animation
-    setClaimIndex((prev) => (prev + 1) % claims.length);
+    
+    // Generate a random index that's different from the current one
+    const getRandomIndex = (currentIndex, arrayLength) => {
+      let newIndex;
+      do {
+        newIndex = Math.floor(Math.random() * arrayLength);
+      } while (newIndex === currentIndex); // Repeat if we got the same index
+      return newIndex;
+    };
+    
+    setClaimIndex((prev) => getRandomIndex(prev, claims.length));
   };
 
   useEffect(() => {
@@ -95,13 +126,13 @@ export const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-sm backdrop-blur-lg dark:shadow-gray-800/10 border-b border-gray-100 dark:border-gray-800">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <button onClick={rotateClaim} className="flex items-center gap-3 mt-2 sm:mt-3 mb-2 sm:mb-3 focus:outline-none logo-container">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
+        <button onClick={rotateClaim} className="flex items-center gap-2 my-2 sm:my-1.5 focus:outline-none logo-container">
+          <div className="flex items-center gap-2">
+            <div className="flex-shrink-0 logo-wrapper py-0.5">
               <img
                 src="/assets/logo.svg"
                 alt="Sp1sh Logo"
-                className="h-12 sm:h-14 w-auto bg-white dark:bg-gray-900 rounded-2xl p-1 ring-2 ring-primary dark:ring-primary-light drop-shadow-md transition-transform duration-200 hover:scale-110"
+                className="h-10 sm:h-12 w-auto bg-white dark:bg-gray-900 rounded-2xl p-1 ring-2 ring-primary dark:ring-primary-light drop-shadow-md transition-transform duration-200 hover:scale-110"
                 loading="eager"
               />
             </div>
