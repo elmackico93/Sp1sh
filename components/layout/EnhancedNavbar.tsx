@@ -436,7 +436,7 @@ export const EnhancedNavbar: React.FC = () => {
       if (!hoveredSubmenu) {
         setHoveredCategory(null);
       }
-    }, 50);
+    }, 200);
   };
 
   // Handle submenu hover events - no delay
@@ -451,7 +451,7 @@ export const EnhancedNavbar: React.FC = () => {
     
     setTimeout(() => {
       setHoveredSubmenu(null);
-    }, 50);
+    }, 200);
   };
 
   // Toggle mobile menu item expansion
