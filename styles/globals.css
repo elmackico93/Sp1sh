@@ -1047,5 +1047,110 @@
   animation: blink 1s step-end infinite, darkModeCursorPulse 2s ease-in-out infinite;
 }
 
-   /* Import terminal styles */
-   @import './terminal.css';
+/* Add this to your styles/globals.css file or as inline styles */
+
+/* Hero search custom styling */
+.hero-search-wrapper {
+  position: relative;
+}
+
+.hero-search {
+  width: 100%;
+}
+
+/* Override EnhancedSearch styling to match original hero design */
+.hero-search input {
+  width: 100% !important;
+  padding: 0.75rem 5rem 0.75rem 1rem !important;
+  border-radius: 9999px !important; /* Full rounded */
+  height: 54px !important;
+  font-size: 1rem !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  background-color: #f8fafc !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+.dark .hero-search input {
+  background-color: #1e293b !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+}
+
+.hero-search input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+  outline: none !important;
+}
+
+/* Hide the internal search icon */
+.hero-search .search-icon {
+  display: none !important;
+}
+
+/* Position the dropdown results properly */
+.hero-search .search-results-container {
+  margin-top: 0.75rem !important;
+  width: 100% !important;
+}
+
+/* Add this to your styles/globals.css file or as inline styles */
+
+/* Hero search custom styling */
+.hero-search-wrapper {
+  position: relative;
+}
+
+.hero-search {
+  width: 100%;
+}
+
+/* Override EnhancedSearch styling to match original hero design */
+.hero-search input {
+  width: 100% !important;
+  padding: 0.75rem 5rem 0.75rem 1rem !important;
+  border-radius: 9999px !important; /* Full rounded */
+  height: 54px !important;
+  font-size: 1rem !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  background-color: #f8fafc !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+.dark .hero-search input {
+  background-color: #1e293b !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+}
+
+.hero-search input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+  outline: none !important;
+}
+
+/* Hide the internal search icon */
+.hero-search .search-icon {
+  display: none !important;
+}
+
+/* Fix dropdown visibility issues */
+.hero-search .search-results-container {
+  margin-top: 0.75rem !important;
+  width: 100% !important;
+  position: absolute !important;
+  z-index: 1000 !important; /* Ensure high z-index to appear above other content */
+  max-height: 80vh !important; /* Limit height to prevent overflow off screen */
+  overflow-y: auto !important; /* Make scrollable if content is too long */
+  left: 0 !important;
+  right: 0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important; /* More visible shadow */
+}
+
+/* Ensure container doesn't have overflow hidden */
+.container {
+  overflow: visible !important;
+}
+
+/* Fix the parent elements that might have overflow:hidden */
+section, .relative {
+  overflow: visible !important;
+}
+
+/* Import terminal styles */
+@import './terminal.css';

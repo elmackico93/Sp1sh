@@ -1,28 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
 import { useScripts } from '../../context/ScriptsContext';
+import { EnhancedSearch } from '../search/EnhancedSearch';
 
 export const Hero = () => {
   const { setSearchTerm } = useScripts();
-  const [searchValue, setSearchValue] = useState('');
   const router = useRouter();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchTerm(searchValue);
-    
-    // Update URL with search query
-    router.push({
-      pathname: '/',
-      query: { search: searchValue }
-    }, undefined, { shallow: true });
-  };
 
   return (
     <section className="py-12 md:py-20 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700 relative overflow-hidden">
       <div className="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none bg-grid-pattern"></div>
       
-      <div className="container mx-auto px-4 text-center relative z-10">
+      <div className="container mx-auto px-4 text-center relative z-10" style={{ overflow: 'visible' }}>
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6">
           Shell Script Solutions <span className="text-primary dark:text-primary-light">Simplified</span>
         </h1>
@@ -31,23 +20,32 @@ export const Hero = () => {
           Find, use, and share expert-vetted shell scripts for Linux, Windows, and macOS. Organized by need, urgency, and use case.
         </p>
         
-        <div className="max-w-2xl mx-auto relative">
-          <form onSubmit={handleSearch}>
-            <input
-              type="text"
+        <div className="max-w-2xl mx-auto relative" style={{ overflow: 'visible' }}>
+          {/* Apply custom styling to the EnhancedSearch component */}
+          <div className="hero-search-wrapper" style={{ position: 'relative', zIndex: 50 }}>
+            <EnhancedSearch 
               placeholder="Search for scripts, system tasks, or troubleshooting..."
-              className="w-full py-3 md:py-4 px-6 md:px-8 text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-light"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              aria-label="Search scripts"
+              maxResults={8}
+              className="hero-search"
             />
+            
+            {/* Add the search button overlay to maintain the original visual style */}
             <button
-              type="submit"
               className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 md:px-6 rounded-full text-sm md:text-base transition-colors"
+              onClick={() => {
+                const inputEl = document.querySelector('.hero-search input') as HTMLInputElement;
+                if (inputEl && inputEl.value) {
+                  setSearchTerm(inputEl.value);
+                  router.push({
+                    pathname: '/',
+                    query: { search: inputEl.value }
+                  }, undefined, { shallow: true });
+                }
+              }}
             >
               Search
             </button>
-          </form>
+          </div>
         </div>
         
         <div className="flex flex-wrap justify-center gap-3 mt-8">
@@ -70,3 +68,5 @@ export const Hero = () => {
     </section>
   );
 };
+
+export default Hero;
