@@ -562,7 +562,7 @@ export const EnhancedNavbar: React.FC = () => {
         
         {/* Desktop Navigation */}
         {!isMobile && (
-          <ul className="flex items-center justify-center overflow-x-auto scrollbar-hide gap-1 py-1">
+          <ul className="flex items-center justify-center  scrollbar-hide gap-1 py-1">
             <li className="relative">
               <Link
                 href="/"
