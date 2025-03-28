@@ -1382,3 +1382,13 @@ section, .relative {
 
 /* Import terminal styles */
 @import './terminal.css';
+.logo-blue-part { fill: #0173DD; }
+.logo-green-part { fill: #43B532; }
+.logo-blue-part, .logo-green-part {
+  transition: fill 0.3s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo-blue-part { fill: #43B532; }
+  .logo-green-part { fill: #0173DD; }
+}
