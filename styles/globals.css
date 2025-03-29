@@ -1093,6 +1093,31 @@
 
 /* Add this to your styles/globals.css file or as inline styles */
 
+/* Fix dropdown visibility issues */
+.hero-search .search-results-container,
+.search-results-container {
+  margin-top: 0.75rem !important;
+  width: 100% !important;
+  position: absolute !important;
+  z-index: 9999 !important; /* Higher z-index to appear above everything */
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Ensure container doesn't have overflow hidden */
+.container, .hero-search-wrapper, .relative {
+  overflow: visible !important;
+}
+
+/* Fix the parent elements that might have overflow:hidden */
+section, body, #__next {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
 /* Hero search custom styling */
 .hero-search-wrapper {
   position: relative;
@@ -1456,4 +1481,29 @@ section, .relative {
 /* Performance optimizations */
 .performance-card {
   will-change: transform, box-shadow;
+}
+
+/* Fix dropdown visibility issues */
+.hero-search .search-results-container,
+.search-results-container {
+  margin-top: 0.75rem !important;
+  width: 100% !important;
+  position: absolute !important;
+  z-index: 9999 !important; /* Higher z-index to appear above everything */
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Ensure container doesn't have overflow hidden */
+.container, .hero-search-wrapper, .relative {
+  overflow: visible !important;
+}
+
+/* Fix the parent elements that might have overflow:hidden */
+section, body, #__next {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
 }
