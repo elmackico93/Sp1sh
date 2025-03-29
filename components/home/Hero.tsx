@@ -3,9 +3,25 @@ import { useRouter } from 'next/router';
 import { useScripts } from '../../context/ScriptsContext';
 import { EnhancedSearch } from '../search/EnhancedSearch';
 
-export const Hero = () => {
+export const Hero = ({ searchInputRef, onSearch }) => {
   const { setSearchTerm } = useScripts();
   const router = useRouter();
+
+  // This custom handler will both update the search term and trigger our animation
+  const handleSearch = (term) => {
+    if (onSearch) {
+      onSearch(term);
+    } else {
+      // Default behavior when onSearch is not provided
+      setSearchTerm(term);
+      
+      // Update URL with search query
+      router.push({
+        pathname: '/',
+        query: { search: term }
+      }, undefined, { shallow: true });
+    }
+  };
 
   return (
     <section className="py-12 md:py-20 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700 relative overflow-hidden">
@@ -21,30 +37,14 @@ export const Hero = () => {
         </p>
         
         <div className="max-w-2xl mx-auto relative" style={{ overflow: 'visible' }}>
-          {/* Apply custom styling to the EnhancedSearch component */}
-          <div className="hero-search-wrapper" style={{ position: 'relative', zIndex: 50 }}>
+          {/* Pass the ref to the search wrapper */}
+          <div ref={searchInputRef} className="hero-search-wrapper" style={{ position: 'relative', zIndex: 50 }}>
             <EnhancedSearch 
               placeholder="Search for scripts, system tasks, or troubleshooting..."
               maxResults={8}
               className="hero-search"
+              onSearch={handleSearch}
             />
-            
-            {/* Add the search button overlay to maintain the original visual style */}
-            <button
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 md:px-6 rounded-full text-sm md:text-base transition-colors"
-              onClick={() => {
-                const inputEl = document.querySelector('.hero-search input') as HTMLInputElement;
-                if (inputEl && inputEl.value) {
-                  setSearchTerm(inputEl.value);
-                  router.push({
-                    pathname: '/',
-                    query: { search: inputEl.value }
-                  }, undefined, { shallow: true });
-                }
-              }}
-            >
-              Search
-            </button>
           </div>
         </div>
         

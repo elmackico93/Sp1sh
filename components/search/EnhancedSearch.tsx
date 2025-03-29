@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,7 +17,7 @@ type EnhancedSearchProps = {
   variant?: 'default' | 'compact' | 'expanded';
 };
 
-export const EnhancedSearch = ({
+export const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
   className = '',
   placeholder = 'Search for scripts, commands, or solutions...',
   maxResults = 10,
@@ -25,7 +25,7 @@ export const EnhancedSearch = ({
   showFilters = false,
   showRecentSearches = false,
   variant = 'default'
-}: EnhancedSearchProps) => {
+}) => {
   const { allScripts, setSearchTerm } = useScripts();
   const [inputValue, setInputValue] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -38,6 +38,23 @@ export const EnhancedSearch = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  
+  // Animation variants for search results
+  const resultsVariants = {
+    hidden: { opacity: 0, y: -10, scaleY: 0.95, transformOrigin: "top center" },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scaleY: 1,
+      transition: { duration: 0.2, ease: "easeOut" }
+    },
+    exit: { 
+      opacity: 0, 
+      y: -10, 
+      scaleY: 0.95,
+      transition: { duration: 0.15, ease: "easeIn" }
+    }
+  };
 
   // Load recent searches from localStorage on mount
   useEffect(() => {
@@ -176,37 +193,43 @@ export const EnhancedSearch = ({
     e.preventDefault();
     
     if (inputValue) {
-      setSearchTerm(inputValue);
-      setShowResults(false);
       saveToRecentSearches(inputValue);
+      setShowResults(false);
       
       if (onSearch) {
+        // Use the custom search handler if provided
         onSearch(inputValue);
+      } else {
+        // Default behavior
+        setSearchTerm(inputValue);
+        
+        // Redirect to homepage with search term
+        router.push({
+          pathname: '/',
+          query: { search: inputValue }
+        }, undefined, { shallow: true });
       }
-      
-      // Redirect to homepage with search term
-      router.push({
-        pathname: '/',
-        query: { search: inputValue }
-      });
     }
   };
 
   // Use recent search
   const handleUseRecentSearch = (term: string) => {
     setInputValue(term);
-    setSearchTerm(term);
-    setShowResults(false);
     
     if (onSearch) {
+      // Use the custom search handler if provided
       onSearch(term);
+    } else {
+      // Default behavior
+      setSearchTerm(term);
+      
+      // Redirect to homepage with search term
+      router.push({
+        pathname: '/',
+        query: { search: term }
+      }, undefined, { shallow: true });
     }
-    
-    // Redirect to homepage with search term
-    router.push({
-      pathname: '/',
-      query: { search: term }
-    });
+    setShowResults(false);
   };
 
   // Clear search input
@@ -297,31 +320,14 @@ export const EnhancedSearch = ({
   };
 
   // Filter options
-  const filterOptions = useMemo(() => [
+  const filterOptions = [
     { id: 'all', label: 'All', icon: '🔍' },
     { id: 'linux', label: 'Linux', icon: '🐧' },
     { id: 'windows', label: 'Windows', icon: '🪟' },
     { id: 'macos', label: 'macOS', icon: '🍎' },
     { id: 'security', label: 'Security', icon: '🔒' },
     { id: 'emergency', label: 'Emergency', icon: '🚨' },
-  ], []);
-
-  // Animation variants
-  const resultsVariants = {
-    hidden: { opacity: 0, y: -10, scaleY: 0.95, transformOrigin: "top center" },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      scaleY: 1,
-      transition: { duration: 0.2, ease: "easeOut" }
-    },
-    exit: { 
-      opacity: 0, 
-      y: -10, 
-      scaleY: 0.95,
-      transition: { duration: 0.15, ease: "easeIn" }
-    }
-  };
+  ];
 
   return (
     <div className={`relative ${className}`} ref={searchRef}>
