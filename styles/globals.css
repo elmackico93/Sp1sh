@@ -1507,3 +1507,7 @@ section, body, #__next {
   overflow-x: hidden !important;
   overflow-y: visible !important;
 }
+
+/* Fix dropdown visibility */
+.hero-search .search-results-container, .search-results-container { z-index: 9999 !important; position: absolute !important; overflow-y: auto !important; }
+.container, .hero-search-wrapper, .relative { overflow: visible !important; }
