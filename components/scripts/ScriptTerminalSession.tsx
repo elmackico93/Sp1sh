@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 
+const generateSessionId = () => {
+  return Math.random().toString(36).substr(2, 8).toUpperCase();
+};
+
 interface ScriptTerminalSessionProps {
   onStartSession?: () => void;
   onEndSession?: () => void;
 }
-
-const generateSessionId = () => {
-  return Math.random().toString(36).substr(2, 8).toUpperCase();
-};
 
 export default function ScriptTerminalSession({ onStartSession, onEndSession }: ScriptTerminalSessionProps) {
   const [sessionId, setSessionId] = useState(generateSessionId());
@@ -18,16 +18,6 @@ export default function ScriptTerminalSession({ onStartSession, onEndSession }: 
   const maxUsers = 4;
   const [copied, setCopied] = useState(false);
 
-  // Call onStartSession when session is initiated
-  useEffect(() => {
-    onStartSession?.();
-    // Cleanup: call onEndSession if session still active on unmount
-    return () => {
-      onEndSession?.();
-    };
-  }, []);
-
-  // Countdown timer for session time left
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
@@ -35,12 +25,10 @@ export default function ScriptTerminalSession({ onStartSession, onEndSession }: 
     return () => clearInterval(timer);
   }, []);
 
-  // Trigger onEndSession when time runs out
   useEffect(() => {
-    if (timeLeft === 0) {
-      onEndSession?.();
-    }
-  }, [timeLeft]);
+    // Notify parent component that a session has started
+    onStartSession?.();
+  }, []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(sessionId).catch(err => console.error("Copy failed", err));
@@ -52,12 +40,12 @@ export default function ScriptTerminalSession({ onStartSession, onEndSession }: 
     setSessionId(generateSessionId());
     setTimeLeft(1800);
     setCopied(false);
-    // (Continue the session – no need to call onEndSession/onStartSession here)
+    onStartSession?.();
   };
 
   const handleEndSession = () => {
     setTimeLeft(0);
-    // onEndSession will be triggered by the effect when timeLeft hits 0
+    onEndSession?.();
   };
 
   const minutes = Math.floor(timeLeft / 60);
@@ -70,7 +58,7 @@ export default function ScriptTerminalSession({ onStartSession, onEndSession }: 
           <span className="font-mono text-sm bg-gray-100 px-3 py-1 rounded border border-gray-300">
             {sessionId}
           </span>
-          <button
+          <button 
             onClick={handleCopy}
             className="ml-2 text-sm text-blue-600 border border-blue-600 px-2 py-1 rounded hover:bg-blue-600 hover:text-white"
           >
@@ -87,13 +75,13 @@ export default function ScriptTerminalSession({ onStartSession, onEndSession }: 
           Time remaining: <span className="font-semibold">{minutes}:{seconds.toString().padStart(2, '0')}</span>
         </p>
         <div className="mt-2 sm:mt-0 flex gap-2">
-          <button
+          <button 
             onClick={handleRefreshSession}
             className="bg-gray-100 text-sm px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-200"
           >
             Refresh Session
           </button>
-          <button
+          <button 
             onClick={handleEndSession}
             className="bg-red-500 text-white text-sm px-3 py-1.5 rounded hover:bg-red-600"
           >
