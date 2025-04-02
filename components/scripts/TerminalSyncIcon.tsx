@@ -1,19 +1,15 @@
 import { useState } from 'react';
-import ScriptTerminalSession from './ScriptTerminalSession';
+import TerminalSync from './TerminalSync';
 
 export default function TerminalSyncIcon() {
-  const [isConnected, setIsConnected] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
-
-  const handleStartSession = () => setIsConnected(true);
-  const handleEndSession = () => setIsConnected(false);
 
   return (
     <div className="relative">
       <button
         onClick={() => setPanelOpen(prev => !prev)}
-        title={isConnected ? 'Terminal Connected' : 'Connect to Your Terminal'}
-        aria-label={isConnected ? 'Terminal Connected' : 'Connect to Your Terminal'}
+        title={panelOpen ? 'Terminal Connected' : 'Connect to Your Terminal'}
+        aria-label={panelOpen ? 'Terminal Connected' : 'Connect to Your Terminal'}
         className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
       >
         <svg
@@ -24,18 +20,13 @@ export default function TerminalSyncIcon() {
         >
           <path
             fillRule="evenodd"
-            d="M3.25 3A2.25 2.25 0 0 0 1 5.25v9.5A2.25 2.25 0 0 0 3.25 
-17h13.5A2.25 2.25 0 0 0 19 14.75v-9.5A2.25 2.25 0 0 0 16.75 3H3.25Zm.943 
-8.752a.75.75 0 0 1 .055-1.06L6.128 9l-1.88-1.693a.75.75 0 1 1 1.004-1.114l2.5 
-2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 0 1-1.06-.055ZM9.75 10.25a.75.75 0 
-0 0 1.5h2.5a.75.75 0 0 0 0-1.5h-2.5Z"
+            d="M3.25 3A2.25 2.25 0 0 0 1 5.25v9.5A2.25 2.25 0 0 0 3.25 17h13.5A2.25 2.25 0 0 0 19 14.75v-9.5A2.25 2.25 0 0 0 16.75 3H3.25Zm.943 8.752a.75.75 0 0 1 .055-1.06L6.128 9l-1.88-1.693a.75.75 0 1 1 1.004-1.114l2.5 2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 0 1-1.06-.055ZM9.75 10.25a.75.75 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5h-2.5Z"
             clipRule="evenodd"
           />
         </svg>
         <span
           className={
-            'absolute top-0 right-0 block h-2 w-2 rounded-full ' +
-            (isConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400')
+            'absolute top-0 right-0 block h-2 w-2 rounded-full bg-green-500 animate-pulse'
           }
         />
       </button>
@@ -50,10 +41,7 @@ export default function TerminalSyncIcon() {
             className="relative z-50 w-full max-w-md h-full bg-white dark:bg-gray-800 border-l border-gray-300 p-4 overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
-            <ScriptTerminalSession
-              onStartSession={handleStartSession}
-              onEndSession={handleEndSession}
-            />
+            <TerminalSync />
           </div>
         </div>
       )}

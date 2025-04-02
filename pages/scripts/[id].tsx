@@ -17,7 +17,7 @@ import { ScriptComments } from '../../components/scripts/ScriptComments';
 import { LoadingPlaceholder } from '../../components/ui/LoadingPlaceholder';
 import { withStaticRendering } from '../../utils/renderStrategy';
 import { getScriptById as getScriptByIdUtil, mockScripts } from '../../mocks/scripts';
-import TerminalSync from '../../components/sp1sh-cli/TerminalSync';
+import TerminalSync from '../../components/scripts/TerminalSync';
 
 // Props interface for the page
 interface ScriptDetailProps {
