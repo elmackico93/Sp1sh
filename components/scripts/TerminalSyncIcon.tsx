@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import TerminalSync from './TerminalSync';
+import { useTerminal } from '../../context/TerminalContext';
 
 export default function TerminalSyncIcon() {
   const [panelOpen, setPanelOpen] = useState(false);
+  const { isTerminalConnected } = useTerminal();
 
   return (
     <div className="relative">
       <button
         onClick={() => setPanelOpen(prev => !prev)}
-        title={panelOpen ? 'Terminal Connected' : 'Connect to Your Terminal'}
-        aria-label={panelOpen ? 'Terminal Connected' : 'Connect to Your Terminal'}
+        title={isTerminalConnected ? 'Terminal Connected' : 'Connect to Your Terminal'}
+        aria-label={isTerminalConnected ? 'Terminal Connected' : 'Connect to Your Terminal'}
         className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400"
       >
         <svg
@@ -26,7 +28,11 @@ export default function TerminalSyncIcon() {
         </svg>
         <span
           className={
-            'absolute top-0 right-0 block h-2 w-2 rounded-full bg-green-500 animate-pulse'
+            `absolute top-0 right-0 block h-2 w-2 rounded-full ${
+              isTerminalConnected 
+                ? 'bg-green-500 terminal-connected-pulse' 
+                : 'bg-gray-400'
+            }`
           }
         />
       </button>

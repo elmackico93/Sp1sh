@@ -1511,3 +1511,29 @@ section, body, #__next {
 /* Fix dropdown visibility */
 .hero-search .search-results-container, .search-results-container { z-index: 9999 !important; position: absolute !important; overflow-y: auto !important; }
 .container, .hero-search-wrapper, .relative { overflow: visible !important; }
+
+/* Add these styles to your globals.css file */
+
+/* Terminal button glow effects */
+.shadow-terminal-glow {
+  box-shadow: 0 0 8px rgba(74, 246, 38, 0.3), 0 0 12px rgba(0, 0, 0, 0.2);
+}
+
+.dark .shadow-terminal-glow-dark {
+  box-shadow: 0 0 10px rgba(74, 246, 38, 0.4), 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Pulse animation for the connection indicator */
+@keyframes terminalPulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.terminal-connected-pulse {
+  animation: terminalPulse 2s ease-in-out infinite;
+}
+
+/* Transition for appearing/disappearing */
+.terminal-action-button {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
