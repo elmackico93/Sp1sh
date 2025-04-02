@@ -17,6 +17,7 @@ import { ScriptComments } from '../../components/scripts/ScriptComments';
 import { LoadingPlaceholder } from '../../components/ui/LoadingPlaceholder';
 import { withStaticRendering } from '../../utils/renderStrategy';
 import { getScriptById as getScriptByIdUtil, mockScripts } from '../../mocks/scripts';
+import TerminalSync from '../../components/sp1sh-cli/TerminalSync';
 
 // Props interface for the page
 interface ScriptDetailProps {
@@ -126,6 +127,10 @@ export default function ScriptDetail({ initialScript, renderedAt }: ScriptDetail
             <ScriptActions script={script} onCopy={handleCopyScript} showCopyFeedback={copyFeedback} />
             <ScriptCode script={script} codeRef={codeRef} onCopy={handleCopyScript} showCopyFeedback={copyFeedback} />
             <ScriptTags tags={script.tags} />
+            <div className="mt-10">
+              <TerminalSync />
+            </div>
+
             <ScriptComments />
           </div>
           

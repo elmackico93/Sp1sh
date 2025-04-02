@@ -11,6 +11,7 @@ import useRouterPatch from '../hooks/useRouterPatch';
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import { PerformanceReport } from '../components/ui/PerformanceReport';
+import TerminalSyncIcon from '../components/scripts/TerminalSyncIcon';
 
 export default function App({ Component, pageProps }: AppProps) {
   // Apply router patch to handle SecurityErrors
