@@ -1,11 +1,14 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { RefObject } from 'react';
 import { Script } from '../../mocks/scripts';
-import RunInTerminalButton from './RunInTerminalButton';
-import { TerminalContext } from '../../context/TerminalContext'; // You would need to create this context
 
-export const ScriptCode = ({ script, codeRef, onCopy, showCopyFeedback = false }) => {
-  const { isTerminalConnected } = useContext(TerminalContext) || { isTerminalConnected: false };
-  
+type ScriptCodeProps = {
+  script: Script;
+  codeRef: RefObject<HTMLPreElement>;
+  onCopy?: () => void;
+  showCopyFeedback?: boolean;
+};
+
+export const ScriptCode = ({ script, codeRef, onCopy, showCopyFeedback = false }: ScriptCodeProps) => {
   const handleCopy = () => {
     if (onCopy) {
       onCopy();
@@ -15,7 +18,7 @@ export const ScriptCode = ({ script, codeRef, onCopy, showCopyFeedback = false }
   };
   
   return (
-    <div className="mb-8 relative">
+    <div className="mb-8">
       <div className="flex border-b border-gray-200 dark:border-gray-700">
         <button className="px-4 py-2 text-sm font-medium tab-active">Script Code</button>
         <button className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Documentation</button>
@@ -23,7 +26,7 @@ export const ScriptCode = ({ script, codeRef, onCopy, showCopyFeedback = false }
         <button className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Versions</button>
       </div>
       
-      <div className="rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 mt-4 relative">
+      <div className="rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 mt-4">
         <div className="terminal-header flex items-center justify-between p-2">
           <div className="flex gap-1.5 ml-2">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -80,19 +83,12 @@ export const ScriptCode = ({ script, codeRef, onCopy, showCopyFeedback = false }
           </div>
         </div>
         
-        <div className="terminal-body relative">
+        <div className="terminal-body">
           <pre ref={codeRef} className="p-4 text-sm overflow-auto">
             <code className="language-bash">
               {script.code}
             </code>
           </pre>
-          
-          {/* Run in Terminal Button */}
-          <RunInTerminalButton 
-            scriptCode={script.code}
-            scriptTitle={script.title}
-            terminalConnected={isTerminalConnected}
-          />
         </div>
       </div>
     </div>

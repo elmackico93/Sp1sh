@@ -5,13 +5,13 @@ import { SWRConfig } from 'swr';
 import { Layout } from '../components/layout/Layout';
 import { ScriptsProvider } from '../context/ScriptsContext';
 import { NavigationProvider } from '../context/NavigationContext';
-import { TerminalProvider } from '../context/TerminalContext';
 import { cachedFetcher, registerServiceWorker } from '../utils/cache';
 import { detectSlowRenders } from '../utils/performanceMonitoring';
 import useRouterPatch from '../hooks/useRouterPatch';
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import { PerformanceReport } from '../components/ui/PerformanceReport';
+import TerminalSyncIcon from '../components/scripts/TerminalSyncIcon';
 
 export default function App({ Component, pageProps }: AppProps) {
   // Apply router patch to handle SecurityErrors
@@ -44,14 +44,12 @@ export default function App({ Component, pageProps }: AppProps) {
       >
         <ScriptsProvider>
           <NavigationProvider>
-            <TerminalProvider>
-              <Layout>
-                <Component {...pageProps} />
-                {process.env.NODE_ENV === 'development' && <PerformanceReport />}
-              </Layout>
-            </TerminalProvider>
-          </NavigationProvider>
-        </ScriptsProvider>
+          <Layout>
+            <Component {...pageProps} />
+            {process.env.NODE_ENV === 'development' && <PerformanceReport />}
+          </Layout>
+        </NavigationProvider>
+          </ScriptsProvider>
       </SWRConfig>
     </ThemeProvider>
   );
