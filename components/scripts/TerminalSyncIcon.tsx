@@ -1,7 +1,11 @@
 import { useState } from 'react';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import TerminalSync from './TerminalSync';
 import { useTerminal } from '../../context/TerminalContext';
+=======
+import ScriptTerminalSession from './ScriptTerminalSession';
+>>>>>>> parent of d03a65f (Minor change)
 =======
 import ScriptTerminalSession from './ScriptTerminalSession';
 >>>>>>> parent of d03a65f (Minor change)
@@ -14,13 +18,21 @@ export default function TerminalSyncIcon() {
   const handleStartSession = () => setIsConnected(true);
   const handleEndSession = () => setIsConnected(false);
 
+  const handleStartSession = () => setIsConnected(true);
+  const handleEndSession = () => setIsConnected(false);
+
   return (
     <div className="relative">
       <button
         onClick={() => setPanelOpen(prev => !prev)}
 <<<<<<< HEAD
+<<<<<<< HEAD
         title={isTerminalConnected ? 'Terminal Connected' : 'Connect to Your Terminal'}
         aria-label={isTerminalConnected ? 'Terminal Connected' : 'Connect to Your Terminal'}
+=======
+        title={isConnected ? 'Terminal Connected' : 'Connect to Your Terminal'}
+        aria-label={isConnected ? 'Terminal Connected' : 'Connect to Your Terminal'}
+>>>>>>> parent of d03a65f (Minor change)
 =======
         title={isConnected ? 'Terminal Connected' : 'Connect to Your Terminal'}
         aria-label={isConnected ? 'Terminal Connected' : 'Connect to Your Terminal'}
@@ -46,11 +58,16 @@ export default function TerminalSyncIcon() {
         <span
           className={
 <<<<<<< HEAD
+<<<<<<< HEAD
             `absolute top-0 right-0 block h-2 w-2 rounded-full ${
               isTerminalConnected 
                 ? 'bg-green-500 terminal-connected-pulse' 
                 : 'bg-gray-400'
             }`
+=======
+            'absolute top-0 right-0 block h-2 w-2 rounded-full ' +
+            (isConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400')
+>>>>>>> parent of d03a65f (Minor change)
 =======
             'absolute top-0 right-0 block h-2 w-2 rounded-full ' +
             (isConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400')
